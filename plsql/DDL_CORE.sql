@@ -1,7 +1,7 @@
 -- ============================================================================
 -- PLATAFORMA SAAS MULTI-APLICACIONES
 -- CORE TRANSVERSAL & MOTOR DE PRUEBAS AUTOMATIZADAS & TELEMETRÍA (JSON IN/OUT)
--- TOTAL: 37 TABLAS MULTI-TENANT CON DICCIONARIO DE DATOS COMPLETO
+-- TOTAL: 38 TABLAS MULTI-TENANT CON DICCIONARIO DE DATOS COMPLETO
 --
 -- Base de Datos: Oracle AI Database 23ai / 26ai
 -- Charset: AL32UTF8 (UTF-8)
@@ -20,6 +20,9 @@
 -- SECCIÓN 0: GLOBAL — TENANTS (1 TABLA)
 -- ============================================================================
 
+-- ----------------------------------------------------------------------------
+-- TABLA 1/38: CORE_TENANT
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_tenant (
     id NUMBER(12) PRIMARY KEY,
     codigo VARCHAR2(50) NOT NULL UNIQUE,
@@ -64,6 +67,9 @@ COMMENT ON COLUMN core_tenant.fecha_modificacion IS 'Fecha y hora de la última 
 -- SECCIÓN 1: USUARIOS, AUTENTICACIÓN & SESIONES ACTIVAS (3 TABLAS)
 -- ============================================================================
 
+-- ----------------------------------------------------------------------------
+-- TABLA 2/38: CORE_PERSONA
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_persona (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -110,6 +116,9 @@ COMMENT ON COLUMN core_persona.estado_registro IS 'Estado del registro en audito
 COMMENT ON COLUMN core_persona.fecha_creacion IS 'Fecha y hora de inserción del registro (hora Bogotá)';
 COMMENT ON COLUMN core_persona.fecha_modificacion IS 'Fecha y hora de última actualización del registro (hora Bogotá)';
 
+-- ----------------------------------------------------------------------------
+-- TABLA 3/38: CORE_USUARIO
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_usuario (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -160,6 +169,87 @@ COMMENT ON COLUMN core_usuario.estado_registro IS 'Estado del registro: 1=Activo
 COMMENT ON COLUMN core_usuario.fecha_creacion IS 'Fecha y hora de alta del usuario en la base de datos (hora Bogotá)';
 COMMENT ON COLUMN core_usuario.fecha_modificacion IS 'Fecha y hora de última actualización del usuario (hora Bogotá)';
 
+-- ----------------------------------------------------------------------------
+-- TABLA 4/38: CORE_APLICACION
+-- ----------------------------------------------------------------------------
+CREATE TABLE core_aplicacion (
+    id NUMBER(12) PRIMARY KEY,
+    codigo VARCHAR2(100) NOT NULL UNIQUE,
+    nombre VARCHAR2(255) NOT NULL,
+    descripcion VARCHAR2(1000),
+    version VARCHAR2(20),
+    estado VARCHAR2(50) DEFAULT 'ACTIVA',
+    icono VARCHAR2(50),
+    url_documentacion VARCHAR2(500),
+    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE)
+);
+CREATE SEQUENCE core_aplicacion_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE OR REPLACE TRIGGER trg_bi_core_aplicacion
+BEFORE INSERT ON core_aplicacion
+FOR EACH ROW
+BEGIN
+    IF :new.id IS NULL THEN
+        :new.id := core_aplicacion_seq.NEXTVAL;
+    END IF;
+END;
+/
+
+COMMENT ON TABLE core_aplicacion IS 'Catálogo global de aplicaciones y subsistemas SaaS soportados por el core';
+COMMENT ON COLUMN core_aplicacion.id IS 'Identificador único global de la aplicación (PK)';
+COMMENT ON COLUMN core_aplicacion.codigo IS 'Código alfanumérico único de la app (CRM, ERP, CLINIC, INVENTORY)';
+COMMENT ON COLUMN core_aplicacion.nombre IS 'Nombre comercial del producto o subsistema SaaS';
+COMMENT ON COLUMN core_aplicacion.descripcion IS 'Alcance y funcionalidades provistas por el subsistema';
+COMMENT ON COLUMN core_aplicacion.version IS 'Versión semántica actual de la aplicación (2.4.0)';
+COMMENT ON COLUMN core_aplicacion.estado IS 'Estado operativo: ACTIVA, MANTENIMIENTO, DEPRECADA';
+COMMENT ON COLUMN core_aplicacion.icono IS 'Clase CSS o recurso gráfico para el dashboard';
+COMMENT ON COLUMN core_aplicacion.url_documentacion IS 'Enlace a la documentación técnica y funcional';
+COMMENT ON COLUMN core_aplicacion.fecha_creacion IS 'Fecha y hora de registro de la aplicación (hora Bogotá)';
+COMMENT ON COLUMN core_aplicacion.fecha_modificacion IS 'Fecha y hora de última actualización de la definición (hora Bogotá)';
+
+-- ----------------------------------------------------------------------------
+-- TABLA 5/38: CORE_CONTEXTO
+-- ----------------------------------------------------------------------------
+CREATE TABLE core_contexto (
+    id NUMBER(12) NOT NULL,
+    id_tenant NUMBER(12) NOT NULL,
+    tipo VARCHAR2(50) NOT NULL,
+    nombre VARCHAR2(255) NOT NULL,
+    descripcion VARCHAR2(1000),
+    habilitado NUMBER(1) DEFAULT 1 CHECK (habilitado IN (0, 1)),
+    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
+    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    CONSTRAINT pk_core_contexto PRIMARY KEY (id),
+    CONSTRAINT fk_core_contexto_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id)
+);
+CREATE SEQUENCE core_contexto_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE OR REPLACE TRIGGER trg_bi_core_contexto
+BEFORE INSERT ON core_contexto
+FOR EACH ROW
+BEGIN
+    IF :new.id IS NULL THEN
+        :new.id := core_contexto_seq.NEXTVAL;
+    END IF;
+END;
+/
+
+COMMENT ON TABLE core_contexto IS 'Unidades organizacionales, sucursales, sedes o centros de costo';
+COMMENT ON COLUMN core_contexto.id_tenant IS 'Identificador del tenant propietario de la unidad (FK a core_tenant)';
+COMMENT ON COLUMN core_contexto.id IS 'Identificador secuencial del contexto dentro del tenant (PK)';
+COMMENT ON COLUMN core_contexto.tipo IS 'Clasificación: SUCURSAL, SEDE, DEPARTAMENTO, CENTRO_COSTOS';
+COMMENT ON COLUMN core_contexto.nombre IS 'Nombre descriptivo de la sede o unidad de trabajo';
+COMMENT ON COLUMN core_contexto.descripcion IS 'Detalles operativos y alcance de la unidad organizacional';
+COMMENT ON COLUMN core_contexto.habilitado IS 'Disponibilidad para selección y operaciones: 1=Habilitado, 0=Deshabilitado';
+COMMENT ON COLUMN core_contexto.estado_registro IS 'Estado de auditoría: 1=Activo, 0=Borrado lógico';
+COMMENT ON COLUMN core_contexto.fecha_creacion IS 'Fecha y hora de registro del contexto (hora Bogotá)';
+COMMENT ON COLUMN core_contexto.fecha_modificacion IS 'Fecha y hora de última modificación del contexto (hora Bogotá)';
+
+-- ----------------------------------------------------------------------------
+-- TABLA 6/38: CORE_SESION_ACTIVA
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_sesion_activa (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -228,42 +318,9 @@ COMMENT ON COLUMN core_sesion_activa.fecha_modificacion IS 'Fecha y hora de últ
 -- SECCIÓN 2: CONTEXTOS (2 TABLAS)
 -- ============================================================================
 
-CREATE TABLE core_contexto (
-    id NUMBER(12) NOT NULL,
-    id_tenant NUMBER(12) NOT NULL,
-    tipo VARCHAR2(50) NOT NULL,
-    nombre VARCHAR2(255) NOT NULL,
-    descripcion VARCHAR2(1000),
-    habilitado NUMBER(1) DEFAULT 1 CHECK (habilitado IN (0, 1)),
-    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
-    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    CONSTRAINT pk_core_contexto PRIMARY KEY (id),
-    CONSTRAINT fk_core_contexto_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id)
-);
-CREATE SEQUENCE core_contexto_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
-
-CREATE OR REPLACE TRIGGER trg_bi_core_contexto
-BEFORE INSERT ON core_contexto
-FOR EACH ROW
-BEGIN
-    IF :new.id IS NULL THEN
-        :new.id := core_contexto_seq.NEXTVAL;
-    END IF;
-END;
-/
-
-COMMENT ON TABLE core_contexto IS 'Unidades organizacionales, sucursales, sedes o centros de costo';
-COMMENT ON COLUMN core_contexto.id_tenant IS 'Identificador del tenant propietario de la unidad (FK a core_tenant)';
-COMMENT ON COLUMN core_contexto.id IS 'Identificador secuencial del contexto dentro del tenant (PK)';
-COMMENT ON COLUMN core_contexto.tipo IS 'Clasificación: SUCURSAL, SEDE, DEPARTAMENTO, CENTRO_COSTOS';
-COMMENT ON COLUMN core_contexto.nombre IS 'Nombre descriptivo de la sede o unidad de trabajo';
-COMMENT ON COLUMN core_contexto.descripcion IS 'Detalles operativos y alcance de la unidad organizacional';
-COMMENT ON COLUMN core_contexto.habilitado IS 'Disponibilidad para selección y operaciones: 1=Habilitado, 0=Deshabilitado';
-COMMENT ON COLUMN core_contexto.estado_registro IS 'Estado de auditoría: 1=Activo, 0=Borrado lógico';
-COMMENT ON COLUMN core_contexto.fecha_creacion IS 'Fecha y hora de registro del contexto (hora Bogotá)';
-COMMENT ON COLUMN core_contexto.fecha_modificacion IS 'Fecha y hora de última modificación del contexto (hora Bogotá)';
-
+-- ----------------------------------------------------------------------------
+-- TABLA 7/38: CORE_USUARIO_CONTEXTO
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_usuario_contexto (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -308,6 +365,9 @@ COMMENT ON COLUMN core_usuario_contexto.fecha_modificacion IS 'Fecha y hora de �
 -- SECCIÓN 3: ROLES & PERMISOS (3 TABLAS)
 -- ============================================================================
 
+-- ----------------------------------------------------------------------------
+-- TABLA 8/38: CORE_ROL
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_rol (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -345,6 +405,9 @@ COMMENT ON COLUMN core_rol.estado_registro IS 'Estado del rol: 1=Activo, 0=Inact
 COMMENT ON COLUMN core_rol.fecha_creacion IS 'Fecha y hora de alta del rol en la plataforma (hora Bogotá)';
 COMMENT ON COLUMN core_rol.fecha_modificacion IS 'Fecha y hora de última modificación del rol (hora Bogotá)';
 
+-- ----------------------------------------------------------------------------
+-- TABLA 9/38: CORE_PERMISO
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_permiso (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -386,6 +449,9 @@ COMMENT ON COLUMN core_permiso.estado_registro IS 'Estado del permiso: 1=Habilit
 COMMENT ON COLUMN core_permiso.fecha_creacion IS 'Fecha y hora de creación de la regla de acceso (hora Bogotá)';
 COMMENT ON COLUMN core_permiso.fecha_modificacion IS 'Fecha y hora de última actualización del privilegio (hora Bogotá)';
 
+-- ----------------------------------------------------------------------------
+-- TABLA 10/38: CORE_USUARIO_ROL
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_usuario_rol (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -434,6 +500,9 @@ COMMENT ON COLUMN core_usuario_rol.fecha_modificacion IS 'Fecha y hora de últim
 -- SECCIÓN 4: AUDITORÍA DE CAMBIOS EN SEGURIDAD (1 TABLA)
 -- ============================================================================
 
+-- ----------------------------------------------------------------------------
+-- TABLA 11/38: CORE_AUDITORIA_USUARIO_ROL
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_auditoria_usuario_rol (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -483,6 +552,9 @@ COMMENT ON COLUMN core_auditoria_usuario_rol.fecha_creacion IS 'Fecha y hora exa
 -- SECCIÓN 5: MENÚ DINÁMICO (1 TABLA)
 -- ============================================================================
 
+-- ----------------------------------------------------------------------------
+-- TABLA 12/38: CORE_MENU_DINAMICO
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_menu_dinamico (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -534,6 +606,9 @@ COMMENT ON COLUMN core_menu_dinamico.fecha_modificacion IS 'Fecha y hora de últ
 -- SECCIÓN 6: NOTIFICACIONES & VARIABLES (4 TABLAS)
 -- ============================================================================
 
+-- ----------------------------------------------------------------------------
+-- TABLA 13/38: CORE_PLANTILLA_NOTIFICACION
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_plantilla_notificacion (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -591,6 +666,9 @@ COMMENT ON COLUMN core_plantilla_notificacion.estado_registro IS 'Estado de audi
 COMMENT ON COLUMN core_plantilla_notificacion.fecha_creacion IS 'Fecha y hora de diseño de la plantilla (hora Bogotá)';
 COMMENT ON COLUMN core_plantilla_notificacion.fecha_modificacion IS 'Fecha y hora de última modificación del diseño (hora Bogotá)';
 
+-- ----------------------------------------------------------------------------
+-- TABLA 14/38: CORE_PLANTILLA_VARIABLE
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_plantilla_variable (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -638,434 +716,9 @@ COMMENT ON COLUMN core_plantilla_variable.estado_registro IS 'Estado de auditor�
 COMMENT ON COLUMN core_plantilla_variable.fecha_creacion IS 'Fecha de configuración de la variable (hora Bogotá)';
 COMMENT ON COLUMN core_plantilla_variable.fecha_modificacion IS 'Fecha de última modificación (hora Bogotá)';
 
-
-CREATE TABLE core_notificacion (
-    id NUMBER(12) NOT NULL,
-    id_tenant NUMBER(12) NOT NULL,
-    id_usuario NUMBER(12),
-    id_plantilla NUMBER(12) NOT NULL,
-    destinatario VARCHAR2(500) NOT NULL,
-    asunto VARCHAR2(500),
-    contenido_final CLOB NOT NULL,
-    variables_json CLOB,
-    canal VARCHAR2(50) NOT NULL,
-    estado VARCHAR2(50) DEFAULT 'PENDIENTE',
-    referencia_externa VARCHAR2(200),
-    tiene_auditoria NUMBER(1) DEFAULT 1 CHECK (tiene_auditoria IN (0, 1)),
-    id_traza_ejecucion NUMBER(12),
-    codigo_traza VARCHAR2(100),
-    fecha_entrega DATE,
-    fecha_lectura DATE,
-    fecha_respuesta DATE,
-    respuesta CLOB,
-    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
-    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    CONSTRAINT pk_core_notificacion PRIMARY KEY (id),
-    CONSTRAINT fk_core_notif_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
-    CONSTRAINT fk_core_notif_usuario FOREIGN KEY (id_usuario) REFERENCES core_usuario(id),
-    CONSTRAINT fk_core_notif_plantilla FOREIGN KEY (id_plantilla) REFERENCES core_plantilla_notificacion(id),
-    CONSTRAINT fk_core_notif_traza FOREIGN KEY (id_traza_ejecucion) REFERENCES core_traza_ejecucion(id)
-);
-CREATE SEQUENCE core_notificacion_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
-CREATE INDEX idx_core_notif_usuario ON core_notificacion(id_tenant, id_usuario, fecha_creacion);
-
-CREATE OR REPLACE TRIGGER trg_bi_core_notificacion
-BEFORE INSERT ON core_notificacion
-FOR EACH ROW
-BEGIN
-    IF :new.id IS NULL THEN
-        :new.id := core_notificacion_seq.NEXTVAL;
-    END IF;
-END;
-/
-
-COMMENT ON TABLE core_notificacion IS 'Bandeja y log transaccional de notificaciones enviadas y pendientes';
-COMMENT ON COLUMN core_notificacion.id IS 'Identificador del mensaje generado (PK)';
-COMMENT ON COLUMN core_notificacion.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
-COMMENT ON COLUMN core_notificacion.id_usuario IS 'Usuario receptor en el sistema (FK a core_usuario, opcional)';
-COMMENT ON COLUMN core_notificacion.id_plantilla IS 'Plantilla base utilizada para la composición (FK a core_plantilla_notificacion)';
-COMMENT ON COLUMN core_notificacion.destinatario IS 'Dirección de destino (correo electrónico, número celular E.164)';
-COMMENT ON COLUMN core_notificacion.asunto IS 'Asunto final compilado con variables resueltas';
-COMMENT ON COLUMN core_notificacion.contenido_final IS 'Texto o HTML exacto entregado al cliente tras sustituir variables e incrustar en plantilla padre';
-COMMENT ON COLUMN core_notificacion.variables_json IS 'Payload JSON con los valores utilizados para sustituir las variables dinámicas';
-COMMENT ON COLUMN core_notificacion.canal IS 'Canal de entrega: EMAIL, SMS, WHATSAPP, PUSH';
-COMMENT ON COLUMN core_notificacion.estado IS 'Ciclo de vida: PENDIENTE, ENVIADO, ENTREGADO, LEIDO, FALLIDO, RESPONDIDO';
-COMMENT ON COLUMN core_notificacion.referencia_externa IS 'Message ID provisto por la pasarela (SendGrid, Twilio, Meta)';
-COMMENT ON COLUMN core_notificacion.tiene_auditoria IS 'Bandera de auditoría: 1=Registrar trazabilidad en core_auditoria, 0=Omitir';
-COMMENT ON COLUMN core_notificacion.id_traza_ejecucion IS 'Identificador de la traza de ejecución en base de datos (FK a core_traza_ejecucion)';
-COMMENT ON COLUMN core_notificacion.codigo_traza IS 'Identificador único de correlación / Trace ID (UUID) para observabilidad distribuida (APM)';
-COMMENT ON COLUMN core_notificacion.fecha_entrega IS 'Fecha y hora en que el gateway confirmó entrega exitosa (hora Bogotá)';
-COMMENT ON COLUMN core_notificacion.fecha_lectura IS 'Fecha y hora en que el destinatario abrió el mensaje (hora Bogotá)';
-COMMENT ON COLUMN core_notificacion.fecha_respuesta IS 'Fecha y hora de la interacción del usuario (hora Bogotá)';
-COMMENT ON COLUMN core_notificacion.respuesta IS 'Texto o payload recibido como contestación del destinatario';
-COMMENT ON COLUMN core_notificacion.estado_registro IS 'Estado del registro: 1=Activo, 0=Eliminado';
-COMMENT ON COLUMN core_notificacion.fecha_creacion IS 'Fecha y hora de generación de la notificación (hora Bogotá)';
-
-CREATE TABLE core_preferencia_notificacion (
-    id NUMBER(12) NOT NULL,
-    id_tenant NUMBER(12) NOT NULL,
-    id_usuario NUMBER(12) NOT NULL,
-    canal VARCHAR2(50) NOT NULL,
-    habilitado NUMBER(1) DEFAULT 1 CHECK (habilitado IN (0, 1)),
-    horario_inicio CHAR(5),
-    horario_fin CHAR(5),
-    consentimiento_gdpr NUMBER(1) DEFAULT 0 CHECK (consentimiento_gdpr IN (0, 1)),
-    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
-    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    CONSTRAINT pk_core_pref_notif PRIMARY KEY (id),
-    CONSTRAINT fk_core_pref_notif_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
-    CONSTRAINT fk_core_pref_notif_usuario FOREIGN KEY (id_usuario) REFERENCES core_usuario(id),
-    CONSTRAINT uk_core_pref_notif UNIQUE (id_tenant, id_usuario, canal)
-);
-CREATE SEQUENCE core_preferencia_notificacion_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
-
-CREATE OR REPLACE TRIGGER trg_bi_core_preferencia_notificacion
-BEFORE INSERT ON core_preferencia_notificacion
-FOR EACH ROW
-BEGIN
-    IF :new.id IS NULL THEN
-        :new.id := core_preferencia_notificacion_seq.NEXTVAL;
-    END IF;
-END;
-/
-
-COMMENT ON TABLE core_preferencia_notificacion IS 'Canales y horarios permitidos por cada usuario para recepción de alertas';
-COMMENT ON COLUMN core_preferencia_notificacion.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
-COMMENT ON COLUMN core_preferencia_notificacion.id IS 'Identificador único de la preferencia (PK)';
-COMMENT ON COLUMN core_preferencia_notificacion.id_usuario IS 'Usuario titular de las preferencias (FK a core_usuario)';
-COMMENT ON COLUMN core_preferencia_notificacion.canal IS 'Canal regulado: EMAIL, SMS, WHATSAPP, PUSH';
-COMMENT ON COLUMN core_preferencia_notificacion.habilitado IS 'Autorización del usuario: 1=Permitido, 0=Bloqueado por usuario';
-COMMENT ON COLUMN core_preferencia_notificacion.horario_inicio IS 'Hora inicial permitida en formato HH:MM (e.g. 08:00)';
-COMMENT ON COLUMN core_preferencia_notificacion.horario_fin IS 'Hora final permitida en formato HH:MM (e.g. 20:00)';
-COMMENT ON COLUMN core_preferencia_notificacion.consentimiento_gdpr IS 'Consentimiento explícito conforme normativas GDPR/Habeas Data: 1=Otorgado, 0=No otorgado';
-COMMENT ON COLUMN core_preferencia_notificacion.estado_registro IS 'Estado del registro: 1=Activo, 0=Eliminado';
-COMMENT ON COLUMN core_preferencia_notificacion.fecha_creacion IS 'Fecha y hora de registro de la preferencia (hora Bogotá)';
-COMMENT ON COLUMN core_preferencia_notificacion.fecha_modificacion IS 'Fecha y hora de última modificación de la preferencia (hora Bogotá)';
-
-
--- ============================================================================
--- SECCIÓN 7: PROCESOS DEL SISTEMA & DESPACHO DINÁMICO (3 TABLAS)
--- ============================================================================
-
-CREATE TABLE core_proceso (
-    id NUMBER(12) NOT NULL,
-    id_tenant NUMBER(12) NOT NULL,
-    id_aplicacion NUMBER(12),
-    codigo VARCHAR2(60) NOT NULL,
-    nombre VARCHAR2(255) NOT NULL,
-    objeto_bd VARCHAR2(120) NOT NULL,
-    descripcion VARCHAR2(1000),
-    activo NUMBER(1) DEFAULT 1 CHECK (activo IN (0, 1)),
-    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
-    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    CONSTRAINT pk_core_proceso PRIMARY KEY (id),
-    CONSTRAINT fk_core_proceso_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
-    CONSTRAINT fk_core_proceso_app FOREIGN KEY (id_aplicacion) REFERENCES core_aplicacion(id),
-    CONSTRAINT uk_core_proceso_cod UNIQUE (id_tenant, codigo)
-);
-CREATE SEQUENCE core_proceso_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
-CREATE INDEX idx_core_proceso_obj ON core_proceso(id_tenant, objeto_bd);
-
-CREATE OR REPLACE TRIGGER trg_bi_core_proceso
-BEFORE INSERT ON core_proceso
-FOR EACH ROW
-BEGIN
-    IF :new.id IS NULL THEN
-        :new.id := core_proceso_seq.NEXTVAL;
-    END IF;
-END;
-/
-
-COMMENT ON TABLE core_proceso IS 'Catálogo de operaciones y procesos funcionales vinculados a subprogramas PL/SQL';
-COMMENT ON COLUMN core_proceso.id IS 'Identificador único del proceso (PK)';
-COMMENT ON COLUMN core_proceso.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
-COMMENT ON COLUMN core_proceso.id_aplicacion IS 'Aplicación a la que pertenece el proceso (FK a core_aplicacion)';
-COMMENT ON COLUMN core_proceso.codigo IS 'Código mnemotécnico único del proceso por tenant (ej. CREACION_CITA)';
-COMMENT ON COLUMN core_proceso.nombre IS 'Nombre representativo funcional del proceso';
-COMMENT ON COLUMN core_proceso.objeto_bd IS 'Paquete y subprograma PL/SQL ejecutor (ej. pkgln_citas.p_crear_cita)';
-COMMENT ON COLUMN core_proceso.descripcion IS 'Explicación del alcance de negocio del proceso';
-COMMENT ON COLUMN core_proceso.activo IS 'Disponibilidad operativa: 1=Activo, 0=Inactivo';
-COMMENT ON COLUMN core_proceso.estado_registro IS 'Estado de auditoría: 1=Activo, 0=Eliminado';
-COMMENT ON COLUMN core_proceso.fecha_creacion IS 'Fecha de alta del proceso (hora Bogotá)';
-COMMENT ON COLUMN core_proceso.fecha_modificacion IS 'Fecha de última modificación del proceso (hora Bogotá)';
-
-CREATE TABLE core_proceso_plantilla (
-    id NUMBER(12) NOT NULL,
-    id_tenant NUMBER(12) NOT NULL,
-    id_proceso NUMBER(12) NOT NULL,
-    id_plantilla NUMBER(12) NOT NULL,
-    es_obligatoria NUMBER(1) DEFAULT 1 CHECK (es_obligatoria IN (0, 1)),
-    orden_despacho NUMBER(3) DEFAULT 1,
-    activo NUMBER(1) DEFAULT 1 CHECK (activo IN (0, 1)),
-    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
-    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    CONSTRAINT pk_core_proceso_plantilla PRIMARY KEY (id),
-    CONSTRAINT fk_core_proc_plnt_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
-    CONSTRAINT fk_core_proc_plnt_proc FOREIGN KEY (id_proceso) REFERENCES core_proceso(id),
-    CONSTRAINT fk_core_proc_plnt_plnt FOREIGN KEY (id_plantilla) REFERENCES core_plantilla_notificacion(id),
-    CONSTRAINT uk_core_proc_plnt UNIQUE (id_tenant, id_proceso, id_plantilla)
-);
-CREATE SEQUENCE core_proceso_plantilla_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
-CREATE INDEX idx_core_proc_plnt_proc ON core_proceso_plantilla(id_tenant, id_proceso);
-
-CREATE OR REPLACE TRIGGER trg_bi_core_proceso_plantilla
-BEFORE INSERT ON core_proceso_plantilla
-FOR EACH ROW
-BEGIN
-    IF :new.id IS NULL THEN
-        :new.id := core_proceso_plantilla_seq.NEXTVAL;
-    END IF;
-END;
-/
-
-COMMENT ON TABLE core_proceso_plantilla IS 'Asociación de plantillas de notificación a disparar por cada proceso';
-COMMENT ON COLUMN core_proceso_plantilla.id IS 'Identificador único de la asignación (PK)';
-COMMENT ON COLUMN core_proceso_plantilla.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
-COMMENT ON COLUMN core_proceso_plantilla.id_proceso IS 'Proceso de negocio que detona la notificación (FK a core_proceso)';
-COMMENT ON COLUMN core_proceso_plantilla.id_plantilla IS 'Plantilla de mensaje a despachar (FK a core_plantilla_notificacion)';
-COMMENT ON COLUMN core_proceso_plantilla.es_obligatoria IS 'Carácter del envío: 1=Transaccional obligatoria, 0=Respeta preferencias de usuario';
-COMMENT ON COLUMN core_proceso_plantilla.orden_despacho IS 'Secuencia de encolamiento de las notificaciones';
-COMMENT ON COLUMN core_proceso_plantilla.activo IS 'Habilitación de la regla de despacho: 1=Activa, 0=Pausada';
-COMMENT ON COLUMN core_proceso_plantilla.estado_registro IS 'Estado de auditoría: 1=Activo, 0=Eliminado';
-COMMENT ON COLUMN core_proceso_plantilla.fecha_creacion IS 'Fecha de asociación (hora Bogotá)';
-COMMENT ON COLUMN core_proceso_plantilla.fecha_modificacion IS 'Fecha de última modificación (hora Bogotá)';
-
-CREATE TABLE core_proceso_destinatario (
-    id NUMBER(12) NOT NULL,
-    id_tenant NUMBER(12) NOT NULL,
-    id_proceso_plantilla NUMBER(12) NOT NULL,
-    tipo_destinatario VARCHAR2(30) NOT NULL,
-    id_rol NUMBER(12),
-    id_usuario NUMBER(12),
-    correo_fijo VARCHAR2(255),
-    activo NUMBER(1) DEFAULT 1 CHECK (activo IN (0, 1)),
-    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
-    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    CONSTRAINT pk_core_proc_destinatario PRIMARY KEY (id),
-    CONSTRAINT fk_core_proc_dest_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
-    CONSTRAINT fk_core_proc_dest_plnt FOREIGN KEY (id_proceso_plantilla) REFERENCES core_proceso_plantilla(id),
-    CONSTRAINT fk_core_proc_dest_rol FOREIGN KEY (id_rol) REFERENCES core_rol(id),
-    CONSTRAINT fk_core_proc_dest_usr FOREIGN KEY (id_usuario) REFERENCES core_usuario(id),
-    CONSTRAINT ck_core_proc_dest_tipo CHECK (tipo_destinatario IN ('ROL', 'USUARIO', 'TITULAR_PROCESO', 'CORREO_FIJO'))
-);
-CREATE SEQUENCE core_proceso_destinatario_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
-CREATE INDEX idx_core_proc_dest_plnt ON core_proceso_destinatario(id_tenant, id_proceso_plantilla);
-
-CREATE OR REPLACE TRIGGER trg_bi_core_proceso_destinatario
-BEFORE INSERT ON core_proceso_destinatario
-FOR EACH ROW
-BEGIN
-    IF :new.id IS NULL THEN
-        :new.id := core_proceso_destinatario_seq.NEXTVAL;
-    END IF;
-END;
-/
-
-COMMENT ON TABLE core_proceso_destinatario IS 'Destinatarios configurados por proceso y plantilla (usuario puntual, todos los de un rol o titular)';
-COMMENT ON COLUMN core_proceso_destinatario.id IS 'Identificador único de la regla de destinatario (PK)';
-COMMENT ON COLUMN core_proceso_destinatario.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
-COMMENT ON COLUMN core_proceso_destinatario.id_proceso_plantilla IS 'Asociación proceso-plantilla vinculada (FK a core_proceso_plantilla)';
-COMMENT ON COLUMN core_proceso_destinatario.tipo_destinatario IS 'Estrategia: ROL (todos con ese rol), USUARIO (usuario específico), TITULAR_PROCESO (el paciente/cliente de la transacción), CORREO_FIJO';
-COMMENT ON COLUMN core_proceso_destinatario.id_rol IS 'Rol cuyos usuarios recibirán la notificación (FK a core_rol, si aplica)';
-COMMENT ON COLUMN core_proceso_destinatario.id_usuario IS 'Usuario puntual destinatario (FK a core_usuario, si aplica)';
-COMMENT ON COLUMN core_proceso_destinatario.correo_fijo IS 'Dirección de correo fija opcional para buzones compartidos';
-COMMENT ON COLUMN core_proceso_destinatario.activo IS 'Estado de la regla: 1=Activa, 0=Pausada';
-COMMENT ON COLUMN core_proceso_destinatario.estado_registro IS 'Estado de auditoría: 1=Activo, 0=Eliminado';
-COMMENT ON COLUMN core_proceso_destinatario.fecha_creacion IS 'Fecha de configuración (hora Bogotá)';
-COMMENT ON COLUMN core_proceso_destinatario.fecha_modificacion IS 'Fecha de última modificación (hora Bogotá)';
-
--- ============================================================================
--- SECCIÓN 8: AUDITORÍA GENERAL DEL SISTEMA (1 TABLA)
--- ============================================================================
-
-CREATE TABLE core_auditoria (
-    id NUMBER(12) NOT NULL,
-    id_tenant NUMBER(12) NOT NULL,
-    id_usuario NUMBER(12),
-    id_aplicacion NUMBER(12),
-    tabla_afectada VARCHAR2(100) NOT NULL,
-    tipo_operacion VARCHAR2(20) NOT NULL,
-    id_registro_modificado NUMBER(12),
-    antes_json CLOB,
-    despues_json CLOB,
-    direccion_ip VARCHAR2(50),
-    agente_usuario VARCHAR2(500),
-    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
-    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    CONSTRAINT pk_core_auditoria PRIMARY KEY (id),
-    CONSTRAINT fk_core_auditoria_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
-    CONSTRAINT fk_core_auditoria_usuario FOREIGN KEY (id_usuario) REFERENCES core_usuario(id),
-    CONSTRAINT fk_core_auditoria_app FOREIGN KEY (id_aplicacion) REFERENCES core_aplicacion(id),
-    CONSTRAINT ck_core_operacion CHECK (tipo_operacion IN ('INSERT', 'UPDATE', 'DELETE')),
-    CONSTRAINT ck_core_audit_antes_json CHECK (antes_json IS NULL OR antes_json IS JSON (LAX)),
-    CONSTRAINT ck_core_audit_despues_json CHECK (despues_json IS NULL OR despues_json IS JSON (LAX))
-);
-CREATE SEQUENCE core_auditoria_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
-CREATE INDEX idx_core_auditoria_usuario ON core_auditoria(id_tenant, id_usuario, fecha_creacion);
-CREATE INDEX idx_core_auditoria_tabla ON core_auditoria(id_tenant, tabla_afectada, fecha_creacion);
-
-CREATE OR REPLACE TRIGGER trg_bi_core_auditoria
-BEFORE INSERT ON core_auditoria
-FOR EACH ROW
-BEGIN
-    IF :new.id IS NULL THEN
-        :new.id := core_auditoria_seq.NEXTVAL;
-    END IF;
-END;
-/
-
-COMMENT ON TABLE core_auditoria IS 'Auditoría integral con estado anterior y posterior en JSON nativo';
-COMMENT ON COLUMN core_auditoria.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
-COMMENT ON COLUMN core_auditoria.id IS 'Identificador secuencial del evento auditado (PK)';
-COMMENT ON COLUMN core_auditoria.id_usuario IS 'Usuario autor de la transacción (FK a core_usuario)';
-COMMENT ON COLUMN core_auditoria.id_aplicacion IS 'Aplicación donde ocurrió la operación (FK a core_aplicacion)';
-COMMENT ON COLUMN core_auditoria.tabla_afectada IS 'Nombre de la tabla física alterada (e.g. CORE_USUARIO)';
-COMMENT ON COLUMN core_auditoria.tipo_operacion IS 'Tipo de sentencia ejecutada: INSERT, UPDATE, DELETE';
-COMMENT ON COLUMN core_auditoria.id_registro_modificado IS 'Valor de la clave primaria del registro afectado';
-COMMENT ON COLUMN core_auditoria.antes_json IS 'Snapshot previo a la modificación en JSON nativo (NULL en INSERT)';
-COMMENT ON COLUMN core_auditoria.despues_json IS 'Snapshot posterior a la modificación en JSON nativo (NULL en DELETE)';
-COMMENT ON COLUMN core_auditoria.direccion_ip IS 'Dirección IP de origen del cliente';
-COMMENT ON COLUMN core_auditoria.agente_usuario IS 'Identificación del navegador o dispositivo que consumió el API';
-COMMENT ON COLUMN core_auditoria.estado_registro IS 'Estado de auditoría: 1=Activo';
-COMMENT ON COLUMN core_auditoria.fecha_creacion IS 'Fecha y hora exacta de la transacción en hora de Bogotá';
-
--- ============================================================================
--- SECCIÓN 9: PARÁMETROS DINÁMICOS (1 TABLA)
--- ============================================================================
-
-CREATE TABLE core_parametro (
-    id NUMBER(12) NOT NULL,
-    id_tenant NUMBER(12) NOT NULL,
-    id_aplicacion NUMBER(12),
-    categoria VARCHAR2(50) NOT NULL,
-    clave VARCHAR2(100) NOT NULL,
-    valor_texto VARCHAR2(4000),
-    valor_numero NUMBER(15,2),
-    valor_fecha DATE,
-    valor_booleano NUMBER(1) CHECK (valor_booleano IS NULL OR valor_booleano IN (0, 1)),
-    tipo_valor VARCHAR2(50) NOT NULL,
-    descripcion VARCHAR2(1000),
-    editable_por_usuario NUMBER(1) DEFAULT 0 CHECK (editable_por_usuario IN (0, 1)),
-    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
-    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    CONSTRAINT pk_core_parametro PRIMARY KEY (id),
-    CONSTRAINT fk_core_parametro_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
-    CONSTRAINT fk_core_parametro_app FOREIGN KEY (id_aplicacion) REFERENCES core_aplicacion(id),
-    CONSTRAINT uk_core_parametro UNIQUE (id_tenant, id_aplicacion, categoria, clave)
-);
-CREATE SEQUENCE core_parametro_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
-CREATE INDEX idx_core_parametro_categoria ON core_parametro(id_tenant, categoria);
-
-CREATE OR REPLACE TRIGGER trg_bi_core_parametro
-BEFORE INSERT ON core_parametro
-FOR EACH ROW
-BEGIN
-    IF :new.id IS NULL THEN
-        :new.id := core_parametro_seq.NEXTVAL;
-    END IF;
-END;
-/
-
-COMMENT ON TABLE core_parametro IS 'Constantes y parámetros funcionales dinámicos tipados';
-COMMENT ON COLUMN core_parametro.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
-COMMENT ON COLUMN core_parametro.id IS 'Identificador único del parámetro (PK)';
-COMMENT ON COLUMN core_parametro.id_aplicacion IS 'Aplicación a la que pertenece el parámetro (FK a core_aplicacion)';
-COMMENT ON COLUMN core_parametro.categoria IS 'Agrupación semántica (SEGURIDAD, FACTURACION, GENERAL)';
-COMMENT ON COLUMN core_parametro.clave IS 'Nombre mnemotécnico o clave única del parámetro';
-COMMENT ON COLUMN core_parametro.valor_texto IS 'Almacén del valor cuando el tipo es STRING o TEXTO';
-COMMENT ON COLUMN core_parametro.valor_numero IS 'Almacén del valor numérico cuando el tipo es NUMBER';
-COMMENT ON COLUMN core_parametro.valor_fecha IS 'Almacén del valor de fecha cuando el tipo es DATE';
-COMMENT ON COLUMN core_parametro.valor_booleano IS 'Almacén del valor booleano: 1=True, 0=False';
-COMMENT ON COLUMN core_parametro.tipo_valor IS 'Tipo formal: STRING, NUMBER, DATE, BOOLEAN, JSON';
-COMMENT ON COLUMN core_parametro.descripcion IS 'Explicación del uso y efectos del parámetro en el negocio';
-COMMENT ON COLUMN core_parametro.editable_por_usuario IS 'Indica si puede editarse desde la interfaz por el administrador: 1=Sí, 0=No';
-COMMENT ON COLUMN core_parametro.estado_registro IS 'Estado del parámetro: 1=Activo, 0=Inactivo';
-COMMENT ON COLUMN core_parametro.fecha_creacion IS 'Fecha y hora de alta del parámetro (hora Bogotá)';
-COMMENT ON COLUMN core_parametro.fecha_modificacion IS 'Fecha y hora de última actualización del valor (hora Bogotá)';
-
--- ============================================================================
--- SECCIÓN 10: GESTIÓN DE APLICACIONES & MÓDULOS (3 TABLAS)
--- ============================================================================
-
-CREATE TABLE core_aplicacion (
-    id NUMBER(12) PRIMARY KEY,
-    codigo VARCHAR2(100) NOT NULL UNIQUE,
-    nombre VARCHAR2(255) NOT NULL,
-    descripcion VARCHAR2(1000),
-    version VARCHAR2(20),
-    estado VARCHAR2(50) DEFAULT 'ACTIVA',
-    icono VARCHAR2(50),
-    url_documentacion VARCHAR2(500),
-    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE)
-);
-CREATE SEQUENCE core_aplicacion_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
-
-CREATE OR REPLACE TRIGGER trg_bi_core_aplicacion
-BEFORE INSERT ON core_aplicacion
-FOR EACH ROW
-BEGIN
-    IF :new.id IS NULL THEN
-        :new.id := core_aplicacion_seq.NEXTVAL;
-    END IF;
-END;
-/
-
-COMMENT ON TABLE core_aplicacion IS 'Catálogo global de aplicaciones y subsistemas SaaS soportados por el core';
-COMMENT ON COLUMN core_aplicacion.id IS 'Identificador único global de la aplicación (PK)';
-COMMENT ON COLUMN core_aplicacion.codigo IS 'Código alfanumérico único de la app (CRM, ERP, CLINIC, INVENTORY)';
-COMMENT ON COLUMN core_aplicacion.nombre IS 'Nombre comercial del producto o subsistema SaaS';
-COMMENT ON COLUMN core_aplicacion.descripcion IS 'Alcance y funcionalidades provistas por el subsistema';
-COMMENT ON COLUMN core_aplicacion.version IS 'Versión semántica actual de la aplicación (2.4.0)';
-COMMENT ON COLUMN core_aplicacion.estado IS 'Estado operativo: ACTIVA, MANTENIMIENTO, DEPRECADA';
-COMMENT ON COLUMN core_aplicacion.icono IS 'Clase CSS o recurso gráfico para el dashboard';
-COMMENT ON COLUMN core_aplicacion.url_documentacion IS 'Enlace a la documentación técnica y funcional';
-COMMENT ON COLUMN core_aplicacion.fecha_creacion IS 'Fecha y hora de registro de la aplicación (hora Bogotá)';
-COMMENT ON COLUMN core_aplicacion.fecha_modificacion IS 'Fecha y hora de última actualización de la definición (hora Bogotá)';
-
-CREATE TABLE core_app_tenant (
-    id NUMBER(12) NOT NULL,
-    id_tenant NUMBER(12) NOT NULL,
-    id_aplicacion NUMBER(12) NOT NULL,
-    habilitada NUMBER(1) DEFAULT 1 CHECK (habilitada IN (0, 1)),
-    fecha_activacion DATE,
-    fecha_desactivacion DATE,
-    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
-    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    CONSTRAINT pk_core_app_tenant PRIMARY KEY (id),
-    CONSTRAINT fk_core_app_tenant_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
-    CONSTRAINT fk_core_app_tenant_app FOREIGN KEY (id_aplicacion) REFERENCES core_aplicacion(id),
-    CONSTRAINT uk_core_app_tenant UNIQUE (id_tenant, id_aplicacion)
-);
-CREATE SEQUENCE core_app_tenant_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
-
-CREATE OR REPLACE TRIGGER trg_bi_core_app_tenant
-BEFORE INSERT ON core_app_tenant
-FOR EACH ROW
-BEGIN
-    IF :new.id IS NULL THEN
-        :new.id := core_app_tenant_seq.NEXTVAL;
-    END IF;
-END;
-/
-
-COMMENT ON TABLE core_app_tenant IS 'Suscripción y habilitación de aplicaciones específicas por tenant';
-COMMENT ON COLUMN core_app_tenant.id_tenant IS 'Identificador del tenant suscriptor (FK a core_tenant)';
-COMMENT ON COLUMN core_app_tenant.id IS 'Identificador único del registro de suscripción (PK)';
-COMMENT ON COLUMN core_app_tenant.id_aplicacion IS 'Aplicación suscrita por el tenant (FK a core_aplicacion)';
-COMMENT ON COLUMN core_app_tenant.habilitada IS 'Bandera de acceso activo: 1=Habilitada, 0=Suspendida';
-COMMENT ON COLUMN core_app_tenant.fecha_activacion IS 'Fecha a partir de la cual el tenant puede utilizar la app (hora Bogotá)';
-COMMENT ON COLUMN core_app_tenant.fecha_desactivacion IS 'Fecha de corte o expiración de la suscripción (hora Bogotá)';
-COMMENT ON COLUMN core_app_tenant.estado_registro IS 'Estado del registro: 1=Activo, 0=Eliminado';
-COMMENT ON COLUMN core_app_tenant.fecha_creacion IS 'Fecha y hora de contratación de la aplicación (hora Bogotá)';
-COMMENT ON COLUMN core_app_tenant.fecha_modificacion IS 'Fecha y hora de última actualización de la suscripción (hora Bogotá)';
-
+-- ----------------------------------------------------------------------------
+-- TABLA 15/38: CORE_MODULO_APP
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_modulo_app (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -1112,6 +765,10 @@ COMMENT ON COLUMN core_modulo_app.fecha_modificacion IS 'Fecha y hora de última
 -- ============================================================================
 
 -- 11.1 Catálogo de Objetos/Endpoints Testeables
+
+-- ----------------------------------------------------------------------------
+-- TABLA 16/38: CORE_TEST_OBJETO
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_test_objeto (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -1179,310 +836,10 @@ COMMENT ON COLUMN core_test_objeto.fecha_creacion IS 'Fecha y hora de registro d
 COMMENT ON COLUMN core_test_objeto.fecha_modificacion IS 'Fecha y hora de última modificación del objeto (hora Bogotá)';
 
 -- 11.2 Baterías y Suites de Pruebas
-CREATE TABLE core_test_suite (
-    id NUMBER(12) NOT NULL,
-    id_tenant NUMBER(12) NOT NULL,
-    id_aplicacion NUMBER(12),
-    codigo VARCHAR2(50) NOT NULL,
-    nombre VARCHAR2(255) NOT NULL,
-    descripcion VARCHAR2(1000),
-    tipo_suite VARCHAR2(50) DEFAULT 'UNITARIA',
-    es_activo NUMBER(1) DEFAULT 1 CHECK (es_activo IN (0, 1)),
-    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
-    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    CONSTRAINT pk_core_test_suite PRIMARY KEY (id),
-    CONSTRAINT fk_core_test_suit_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
-    CONSTRAINT fk_core_test_suit_app FOREIGN KEY (id_aplicacion) REFERENCES core_aplicacion(id),
-    CONSTRAINT uk_core_test_suite_cod UNIQUE (id_tenant, codigo),
-    CONSTRAINT ck_core_test_suite_tipo CHECK (tipo_suite IN ('UNITARIA', 'INTEGRACION', 'REGRESION', 'SMOKE', 'SEGURIDAD'))
-);
-CREATE SEQUENCE core_test_suite_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
 
-CREATE OR REPLACE TRIGGER trg_bi_core_test_suite
-BEFORE INSERT ON core_test_suite
-FOR EACH ROW
-BEGIN
-    IF :new.id IS NULL THEN
-        :new.id := core_test_suite_seq.NEXTVAL;
-    END IF;
-END;
-/
-
-COMMENT ON TABLE core_test_suite IS 'Agrupación lógica de pruebas (Suites de Regresión, Smoke Tests, Módulo de Autenticación)';
-COMMENT ON COLUMN core_test_suite.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
-COMMENT ON COLUMN core_test_suite.id IS 'Identificador único de la suite de pruebas (PK)';
-COMMENT ON COLUMN core_test_suite.id_aplicacion IS 'Aplicación evaluada por la suite (FK a core_aplicacion)';
-COMMENT ON COLUMN core_test_suite.codigo IS 'Código nemotécnico (SUITE_SMOKE_CORE, SUITE_AUTH_TEST)';
-COMMENT ON COLUMN core_test_suite.nombre IS 'Nombre representativo de la suite de pruebas';
-COMMENT ON COLUMN core_test_suite.descripcion IS 'Objetivo y cobertura funcional evaluada';
-COMMENT ON COLUMN core_test_suite.tipo_suite IS 'Categoría: UNITARIA, INTEGRACION, REGRESION, SMOKE, SEGURIDAD';
-COMMENT ON COLUMN core_test_suite.es_activo IS 'Bandera de ejecución activa: 1=Habilitada, 0=Pausada';
-COMMENT ON COLUMN core_test_suite.estado_registro IS 'Estado del registro: 1=Activo, 0=Eliminado';
-COMMENT ON COLUMN core_test_suite.fecha_creacion IS 'Fecha y hora de configuración de la suite (hora Bogotá)';
-COMMENT ON COLUMN core_test_suite.fecha_modificacion IS 'Fecha y hora de última edición de la suite (hora Bogotá)';
-
--- 11.3 Casos de Prueba Parametrizados (Payloads CLOB)
-CREATE TABLE core_test_caso (
-    id NUMBER(12) NOT NULL,
-    id_tenant NUMBER(12) NOT NULL,
-    id_objeto NUMBER(12) NOT NULL,
-    id_suite NUMBER(12),
-    codigo_caso VARCHAR2(50) NOT NULL,
-    nombre VARCHAR2(255) NOT NULL,
-    descripcion VARCHAR2(1000),
-    categoria VARCHAR2(50) DEFAULT 'HAPPY_PATH',
-    orden_ejecucion NUMBER(5) DEFAULT 1,
-    json_entrada CLOB NOT NULL,
-    json_esperado CLOB,
-    codigo_error_esperado NUMBER(6) DEFAULT 0,
-    tiempo_max_ms NUMBER(8) DEFAULT 5000,
-    es_activo NUMBER(1) DEFAULT 1 CHECK (es_activo IN (0, 1)),
-    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
-    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    CONSTRAINT pk_core_test_caso PRIMARY KEY (id),
-    CONSTRAINT fk_core_test_cas_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
-    CONSTRAINT fk_core_test_cas_objeto FOREIGN KEY (id_objeto) REFERENCES core_test_objeto(id),
-    CONSTRAINT fk_core_test_cas_suite FOREIGN KEY (id_suite) REFERENCES core_test_suite(id),
-    CONSTRAINT uk_core_test_caso_cod UNIQUE (id_tenant, id_objeto, codigo_caso),
-    CONSTRAINT ck_core_test_caso_cat CHECK (categoria IN ('HAPPY_PATH', 'ERROR_VALIDACION', 'ERROR_NEGOCIO', 'EDGE_CASE', 'SEGURIDAD', 'STRESS')),
-    CONSTRAINT ck_core_test_caso_in_json CHECK (json_entrada IS JSON (LAX)),
-    CONSTRAINT ck_core_test_caso_exp_json CHECK (json_esperado IS NULL OR json_esperado IS JSON (LAX))
-);
-CREATE SEQUENCE core_test_caso_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
-CREATE INDEX idx_core_test_caso_obj ON core_test_caso(id_tenant, id_objeto, orden_ejecucion);
-
-CREATE OR REPLACE TRIGGER trg_bi_core_test_caso
-BEFORE INSERT ON core_test_caso
-FOR EACH ROW
-BEGIN
-    IF :new.id IS NULL THEN
-        :new.id := core_test_caso_seq.NEXTVAL;
-    END IF;
-END;
-/
-
-COMMENT ON TABLE core_test_caso IS 'Escenarios y casos de prueba individuales con inyección de p_json_entrada y resultado esperado';
-COMMENT ON COLUMN core_test_caso.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
-COMMENT ON COLUMN core_test_caso.id IS 'Identificador único del caso de prueba (PK)';
-COMMENT ON COLUMN core_test_caso.id_objeto IS 'Objeto o procedimiento PL/SQL bajo prueba (FK a core_test_objeto)';
-COMMENT ON COLUMN core_test_caso.id_suite IS 'Suite a la que pertenece el caso (FK a core_test_suite, opcional)';
-COMMENT ON COLUMN core_test_caso.codigo_caso IS 'Código único del caso (TC_AUTH_001, TC_USR_EMAIL)';
-COMMENT ON COLUMN core_test_caso.nombre IS 'Nombre descriptivo del escenario de prueba';
-COMMENT ON COLUMN core_test_caso.descripcion IS 'Premisas, datos inyectados y comportamiento esperado';
-COMMENT ON COLUMN core_test_caso.categoria IS 'Tipo: HAPPY_PATH, ERROR_VALIDACION, ERROR_NEGOCIO, EDGE_CASE, SEGURIDAD, STRESS';
-COMMENT ON COLUMN core_test_caso.orden_ejecucion IS 'Secuencia de invocación dentro de la batería de pruebas';
-COMMENT ON COLUMN core_test_caso.json_entrada IS 'Payload CLOB inyectado directamente en el parámetro p_json_entrada';
-COMMENT ON COLUMN core_test_caso.json_esperado IS 'Payload CLOB modelo de salida esperado para comparación estructural';
-COMMENT ON COLUMN core_test_caso.codigo_error_esperado IS 'Código de negocio esperado en el payload o SQLCODE esperado (0 = Éxito)';
-COMMENT ON COLUMN core_test_caso.tiempo_max_ms IS 'Tiempo de respuesta máximo tolerado en milisegundos (SLA de rendimiento)';
-COMMENT ON COLUMN core_test_caso.es_activo IS 'Indica si el caso se incluye en ejecuciones: 1=Sí, 0=No';
-COMMENT ON COLUMN core_test_caso.estado_registro IS 'Estado del registro: 1=Activo, 0=Eliminado';
-COMMENT ON COLUMN core_test_caso.fecha_creacion IS 'Fecha y hora de alta del caso de prueba (hora Bogotá)';
-COMMENT ON COLUMN core_test_caso.fecha_modificacion IS 'Fecha y hora de última edición del caso (hora Bogotá)';
-
--- 11.4 Reglas de Aserción Granular sobre p_json_salida
-CREATE TABLE core_test_asercion (
-    id NUMBER(12) NOT NULL,
-    id_tenant NUMBER(12) NOT NULL,
-    id_caso NUMBER(12) NOT NULL,
-    ruta_json VARCHAR2(255) NOT NULL,
-    operador VARCHAR2(30) DEFAULT 'EQUALS',
-    valor_esperado VARCHAR2(4000),
-    descripcion VARCHAR2(500),
-    es_critica NUMBER(1) DEFAULT 1 CHECK (es_critica IN (0, 1)),
-    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
-    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    CONSTRAINT pk_core_test_asercion PRIMARY KEY (id),
-    CONSTRAINT fk_core_test_asercion_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
-    CONSTRAINT fk_core_test_asercion_caso FOREIGN KEY (id_caso) REFERENCES core_test_caso(id),
-    CONSTRAINT ck_core_test_aser_op CHECK (operador IN ('EQUALS', 'NOT_EQUALS', 'EXISTS', 'NOT_EXISTS', 'IS_NULL', 'NOT_NULL', 'IS_ARRAY', 'CONTAINS', 'GREATER_THAN', 'LESS_THAN', 'REGEX'))
-);
-CREATE SEQUENCE core_test_asercion_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
-CREATE INDEX idx_core_test_aser_caso ON core_test_asercion(id_tenant, id_caso);
-
-CREATE OR REPLACE TRIGGER trg_bi_core_test_asercion
-BEFORE INSERT ON core_test_asercion
-FOR EACH ROW
-BEGIN
-    IF :new.id IS NULL THEN
-        :new.id := core_test_asercion_seq.NEXTVAL;
-    END IF;
-END;
-/
-
-COMMENT ON TABLE core_test_asercion IS 'Validaciones puntuales sobre nodos específicos del JSON de salida mediante JSON Path';
-COMMENT ON COLUMN core_test_asercion.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
-COMMENT ON COLUMN core_test_asercion.id IS 'Identificador único de la aserción (PK)';
-COMMENT ON COLUMN core_test_asercion.id_caso IS 'Caso de prueba al que aplica la regla de aserción (FK a core_test_caso)';
-COMMENT ON COLUMN core_test_asercion.ruta_json IS 'Ruta JSONPath evaluada en p_json_salida ($.codigo, $.datos.id)';
-COMMENT ON COLUMN core_test_asercion.operador IS 'Operador de aserción: EQUALS, EXISTS, CONTAINS, REGEX, etc.';
-COMMENT ON COLUMN core_test_asercion.valor_esperado IS 'Valor literal esperado en el nodo evaluado';
-COMMENT ON COLUMN core_test_asercion.descripcion IS 'Explicación del criterio de aceptación verificado';
-COMMENT ON COLUMN core_test_asercion.es_critica IS 'Indica si un fallo marca el test como FALLIDO: 1=Sí, 0=Warning';
-COMMENT ON COLUMN core_test_asercion.estado_registro IS 'Estado del registro: 1=Activo, 0=Eliminado';
-COMMENT ON COLUMN core_test_asercion.fecha_creacion IS 'Fecha y hora de definición de la aserción (hora Bogotá)';
-
--- 11.5 Historial de Corridas / Ejecuciones de Pruebas (Test Runs)
-CREATE TABLE core_test_ejecucion (
-    id NUMBER(12) NOT NULL,
-    id_tenant NUMBER(12) NOT NULL,
-    id_suite NUMBER(12),
-    id_objeto NUMBER(12),
-    id_usuario NUMBER(12),
-    entorno VARCHAR2(30) DEFAULT 'DEV',
-    fecha_inicio DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    fecha_fin DATE,
-    duracion_total_ms NUMBER(12,2),
-    total_casos NUMBER(6) DEFAULT 0,
-    casos_exitosos NUMBER(6) DEFAULT 0,
-    casos_fallidos NUMBER(6) DEFAULT 0,
-    casos_con_error NUMBER(6) DEFAULT 0,
-    estado_global VARCHAR2(30) DEFAULT 'EN_PROCESO',
-    disparador VARCHAR2(50) DEFAULT 'MANUAL_FRONT',
-    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
-    CONSTRAINT pk_core_test_ejecucion PRIMARY KEY (id),
-    CONSTRAINT fk_core_test_ejec_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
-    CONSTRAINT fk_core_test_ejec_suite FOREIGN KEY (id_suite) REFERENCES core_test_suite(id),
-    CONSTRAINT fk_core_test_ejec_obj FOREIGN KEY (id_objeto) REFERENCES core_test_objeto(id),
-    CONSTRAINT fk_core_test_ejec_usr FOREIGN KEY (id_usuario) REFERENCES core_usuario(id),
-    CONSTRAINT ck_core_test_ejec_env CHECK (entorno IN ('DEV', 'QA', 'STAGING', 'PROD', 'CI_CD')),
-    CONSTRAINT ck_core_test_ejec_estado CHECK (estado_global IN ('EN_PROCESO', 'EXITOSO', 'FALLIDO', 'CANCELADO', 'TIMEOUT')),
-    CONSTRAINT ck_core_test_ejec_disp CHECK (disparador IN ('MANUAL_FRONT', 'PIPELINE_CI', 'CRON_JOB', 'API_REST', 'UNIT_TEST_RUNNER'))
-);
-CREATE SEQUENCE core_test_ejecucion_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
-CREATE INDEX idx_core_test_ejec_fecha ON core_test_ejecucion(id_tenant, fecha_inicio);
-
-CREATE OR REPLACE TRIGGER trg_bi_core_test_ejecucion
-BEFORE INSERT ON core_test_ejecucion
-FOR EACH ROW
-BEGIN
-    IF :new.id IS NULL THEN
-        :new.id := core_test_ejecucion_seq.NEXTVAL;
-    END IF;
-END;
-/
-
-COMMENT ON TABLE core_test_ejecucion IS 'Cabecera de ejecuciones y trazabilidad de corridas de prueba en el entorno';
-COMMENT ON COLUMN core_test_ejecucion.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
-COMMENT ON COLUMN core_test_ejecucion.id IS 'Identificador de la corrida de pruebas (PK)';
-COMMENT ON COLUMN core_test_ejecucion.id_suite IS 'Suite ejecutada (FK a core_test_suite, NULL si fue corrida ad-hoc)';
-COMMENT ON COLUMN core_test_ejecucion.id_objeto IS 'Objeto específico ejecutado en pruebas aisladas (FK a core_test_objeto)';
-COMMENT ON COLUMN core_test_ejecucion.id_usuario IS 'Usuario o desarrollador que detonó la prueba (FK a core_usuario)';
-COMMENT ON COLUMN core_test_ejecucion.entorno IS 'Ambiente de pruebas: DEV, QA, STAGING, PROD, CI_CD';
-COMMENT ON COLUMN core_test_ejecucion.fecha_inicio IS 'Fecha y hora en que comenzó el test runner (hora Bogotá)';
-COMMENT ON COLUMN core_test_ejecucion.fecha_fin IS 'Fecha y hora en que finalizó la ejecución completa (hora Bogotá)';
-COMMENT ON COLUMN core_test_ejecucion.duracion_total_ms IS 'Tiempo total transcurrido acumulado en milisegundos';
-COMMENT ON COLUMN core_test_ejecucion.total_casos IS 'Número total de casos de prueba incluidos en la corrida';
-COMMENT ON COLUMN core_test_ejecucion.casos_exitosos IS 'Número de casos que cumplieron todas sus aserciones (PASÓ)';
-COMMENT ON COLUMN core_test_ejecucion.casos_fallidos IS 'Número de casos que tuvieron discrepancias en aserciones (FALLÓ)';
-COMMENT ON COLUMN core_test_ejecucion.casos_con_error IS 'Número de casos que arrojaron excepciones inesperadas de Oracle';
-COMMENT ON COLUMN core_test_ejecucion.estado_global IS 'Resultado: EN_PROCESO, EXITOSO, FALLIDO, CANCELADO, TIMEOUT';
-COMMENT ON COLUMN core_test_ejecucion.disparador IS 'Origen: MANUAL_FRONT, PIPELINE_CI, CRON_JOB, API_REST, UNIT_TEST_RUNNER';
-COMMENT ON COLUMN core_test_ejecucion.estado_registro IS 'Estado del registro: 1=Activo';
-
--- 11.6 Detalle y Evidencia de Ejecución por Caso
-CREATE TABLE core_test_detalle_ejecucion (
-    id NUMBER(12) NOT NULL,
-    id_tenant NUMBER(12) NOT NULL,
-    id_ejecucion NUMBER(12) NOT NULL,
-    id_caso NUMBER(12) NOT NULL,
-    id_objeto NUMBER(12) NOT NULL,
-    json_entrada_enviado CLOB NOT NULL,
-    json_salida_obtenido CLOB,
-    estado VARCHAR2(30) NOT NULL,
-    tiempo_ejecucion_ms NUMBER(10,2),
-    codigo_error_oracle NUMBER(10),
-    mensaje_error_oracle VARCHAR2(4000),
-    diferencias_detectadas CLOB,
-    fecha_ejecucion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    CONSTRAINT pk_core_test_det_ejec PRIMARY KEY (id),
-    CONSTRAINT fk_core_test_det_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
-    CONSTRAINT fk_core_test_det_ejec FOREIGN KEY (id_ejecucion) REFERENCES core_test_ejecucion(id),
-    CONSTRAINT fk_core_test_det_caso FOREIGN KEY (id_caso) REFERENCES core_test_caso(id),
-    CONSTRAINT fk_core_test_det_obj FOREIGN KEY (id_objeto) REFERENCES core_test_objeto(id),
-    CONSTRAINT ck_core_test_det_est CHECK (estado IN ('PASO', 'FALLO', 'ERROR_ORACLE', 'TIMEOUT', 'OMITIDO')),
-    CONSTRAINT ck_core_test_det_in_json CHECK (json_entrada_enviado IS JSON (LAX)),
-    CONSTRAINT ck_core_test_det_out_json CHECK (json_salida_obtenido IS NULL OR json_salida_obtenido IS JSON (LAX)),
-    CONSTRAINT ck_core_test_det_diff_json CHECK (diferencias_detectadas IS NULL OR diferencias_detectadas IS JSON (LAX))
-);
-CREATE SEQUENCE core_test_detalle_ejecucion_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
-CREATE INDEX idx_core_test_det_ejec ON core_test_detalle_ejecucion(id_tenant, id_ejecucion, estado);
-
-CREATE OR REPLACE TRIGGER trg_bi_core_test_detalle_ejecucion
-BEFORE INSERT ON core_test_detalle_ejecucion
-FOR EACH ROW
-BEGIN
-    IF :new.id IS NULL THEN
-        :new.id := core_test_detalle_ejecucion_seq.NEXTVAL;
-    END IF;
-END;
-/
-
-COMMENT ON TABLE core_test_detalle_ejecucion IS 'Registro individual de cada caso probado: payload inyectado, CLOB recibido, tiempos y diferencias';
-COMMENT ON COLUMN core_test_detalle_ejecucion.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
-COMMENT ON COLUMN core_test_detalle_ejecucion.id IS 'Identificador único del detalle de ejecución (PK)';
-COMMENT ON COLUMN core_test_detalle_ejecucion.id_ejecucion IS 'Corrida de pruebas a la que pertenece la evidencia (FK a core_test_ejecucion)';
-COMMENT ON COLUMN core_test_detalle_ejecucion.id_caso IS 'Caso de prueba ejecutado (FK a core_test_caso)';
-COMMENT ON COLUMN core_test_detalle_ejecucion.id_objeto IS 'Objeto PL/SQL probado (FK a core_test_objeto)';
-COMMENT ON COLUMN core_test_detalle_ejecucion.json_entrada_enviado IS 'Payload exacto transmitido en el parámetro p_json_entrada en la corrida';
-COMMENT ON COLUMN core_test_detalle_ejecucion.json_salida_obtenido IS 'Respuesta exacta CLOB recibida en el parámetro p_json_salida';
-COMMENT ON COLUMN core_test_detalle_ejecucion.estado IS 'Resultado: PASO, FALLO, ERROR_ORACLE, TIMEOUT, OMITIDO';
-COMMENT ON COLUMN core_test_detalle_ejecucion.tiempo_ejecucion_ms IS 'Tiempo de latencia neta del objeto en milisegundos';
-COMMENT ON COLUMN core_test_detalle_ejecucion.codigo_error_oracle IS 'SQLCODE de Oracle capturado en caso de excepción (-20000, -1, etc.)';
-COMMENT ON COLUMN core_test_detalle_ejecucion.mensaje_error_oracle IS 'SQLERRM detallado o traza de excepción de Oracle';
-COMMENT ON COLUMN core_test_detalle_ejecucion.diferencias_detectadas IS 'Diferencias en JSON (Diff) entre lo esperado y lo obtenido en la prueba';
-COMMENT ON COLUMN core_test_detalle_ejecucion.fecha_ejecucion IS 'Fecha y hora precisa de ejecución del caso (hora Bogotá)';
-
--- 11.7 Mocks y Pre-Condiciones de Prueba
-CREATE TABLE core_test_mock_dato (
-    id NUMBER(12) NOT NULL,
-    id_tenant NUMBER(12) NOT NULL,
-    id_caso NUMBER(12) NOT NULL,
-    tipo_mock VARCHAR2(50) NOT NULL,
-    orden NUMBER(3) DEFAULT 1,
-    script_sql CLOB,
-    payload_contexto CLOB,
-    descripcion VARCHAR2(500),
-    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
-    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
-    CONSTRAINT pk_core_test_mock PRIMARY KEY (id),
-    CONSTRAINT fk_core_test_mock_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
-    CONSTRAINT fk_core_test_mock_caso FOREIGN KEY (id_caso) REFERENCES core_test_caso(id),
-    CONSTRAINT ck_core_test_mock_tipo CHECK (tipo_mock IN ('PRE_SETUP_SQL', 'POST_TEARDOWN_SQL', 'HEADERS_SESION', 'ESTADO_INICIAL')),
-    CONSTRAINT ck_core_test_mock_ctx CHECK (payload_contexto IS NULL OR payload_contexto IS JSON (LAX))
-);
-CREATE SEQUENCE core_test_mock_dato_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
-
-CREATE OR REPLACE TRIGGER trg_bi_core_test_mock_dato
-BEFORE INSERT ON core_test_mock_dato
-FOR EACH ROW
-BEGIN
-    IF :new.id IS NULL THEN
-        :new.id := core_test_mock_dato_seq.NEXTVAL;
-    END IF;
-END;
-/
-
-COMMENT ON TABLE core_test_mock_dato IS 'Semillas de datos SQL y contexto de sesión para preparar y limpiar el entorno de cada prueba';
-COMMENT ON COLUMN core_test_mock_dato.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
-COMMENT ON COLUMN core_test_mock_dato.id IS 'Identificador del mock de datos o precondición (PK)';
-COMMENT ON COLUMN core_test_mock_dato.id_caso IS 'Caso de prueba al que aplica el mock (FK a core_test_caso)';
-COMMENT ON COLUMN core_test_mock_dato.tipo_mock IS 'Tipo de preparación: PRE_SETUP_SQL, POST_TEARDOWN_SQL, HEADERS_SESION, ESTADO_INICIAL';
-COMMENT ON COLUMN core_test_mock_dato.orden IS 'Orden secuencial de aplicación del script';
-COMMENT ON COLUMN core_test_mock_dato.script_sql IS 'Bloque SQL o PL/SQL de semilla o limpieza (INSERT / DELETE de prueba)';
-COMMENT ON COLUMN core_test_mock_dato.payload_contexto IS 'Variables de contexto de sesión inyectadas (Tenant, Roles simulados, Headers)';
-COMMENT ON COLUMN core_test_mock_dato.descripcion IS 'Explicación de la condición requerida para que el test funcione';
-COMMENT ON COLUMN core_test_mock_dato.estado_registro IS 'Estado del registro: 1=Activo, 0=Eliminado';
-COMMENT ON COLUMN core_test_mock_dato.fecha_creacion IS 'Fecha y hora de creación del mock (hora Bogotá)';
-
--- ============================================================================
--- SECCIÓN 12: TELEMETRÍA, SEGUIMIENTO DE OBJETOS & ESTADÍSTICAS (4 TABLAS)
--- Monitoreo dinámico condicional por usuario, tiempo u objeto con call-stack
--- ============================================================================
-
--- 12.1 Parametrización y Reglas de Activación de Seguimiento (Profiling Rules)
+-- ----------------------------------------------------------------------------
+-- TABLA 17/38: CORE_TRAZA_CONFIG
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_traza_config (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -1536,6 +893,10 @@ COMMENT ON COLUMN core_traza_config.fecha_creacion IS 'Fecha y hora de creación
 COMMENT ON COLUMN core_traza_config.fecha_modificacion IS 'Fecha y hora de última modificación de la regla (hora Bogotá)';
 
 -- 12.2 Cabecera de Ejecución de Trazas (Trace Header & Root Invocations)
+
+-- ----------------------------------------------------------------------------
+-- TABLA 18/38: CORE_TRAZA_EJECUCION
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_traza_ejecucion (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -1606,6 +967,753 @@ COMMENT ON COLUMN core_traza_ejecucion.estado_registro IS 'Estado del registro: 
 COMMENT ON COLUMN core_traza_ejecucion.fecha_creacion IS 'Fecha y hora de inserción del registro en la base de datos (hora Bogotá)';
 
 -- 12.3 Detalle Secuencial y Pila de Sub-Llamados (Trace Spans / Call Stack)
+
+-- ----------------------------------------------------------------------------
+-- TABLA 19/38: CORE_NOTIFICACION
+-- ----------------------------------------------------------------------------
+CREATE TABLE core_notificacion (
+    id NUMBER(12) NOT NULL,
+    id_tenant NUMBER(12) NOT NULL,
+    id_usuario NUMBER(12),
+    id_plantilla NUMBER(12) NOT NULL,
+    destinatario VARCHAR2(500) NOT NULL,
+    asunto VARCHAR2(500),
+    contenido_final CLOB NOT NULL,
+    variables_json CLOB,
+    canal VARCHAR2(50) NOT NULL,
+    estado VARCHAR2(50) DEFAULT 'PENDIENTE',
+    referencia_externa VARCHAR2(200),
+    tiene_auditoria NUMBER(1) DEFAULT 1 CHECK (tiene_auditoria IN (0, 1)),
+    id_traza_ejecucion NUMBER(12),
+    codigo_traza VARCHAR2(100),
+    fecha_entrega DATE,
+    fecha_lectura DATE,
+    fecha_respuesta DATE,
+    respuesta CLOB,
+    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
+    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    CONSTRAINT pk_core_notificacion PRIMARY KEY (id),
+    CONSTRAINT fk_core_notif_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
+    CONSTRAINT fk_core_notif_usuario FOREIGN KEY (id_usuario) REFERENCES core_usuario(id),
+    CONSTRAINT fk_core_notif_plantilla FOREIGN KEY (id_plantilla) REFERENCES core_plantilla_notificacion(id),
+    CONSTRAINT fk_core_notif_traza FOREIGN KEY (id_traza_ejecucion) REFERENCES core_traza_ejecucion(id)
+);
+CREATE SEQUENCE core_notificacion_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE INDEX idx_core_notif_usuario ON core_notificacion(id_tenant, id_usuario, fecha_creacion);
+
+CREATE OR REPLACE TRIGGER trg_bi_core_notificacion
+BEFORE INSERT ON core_notificacion
+FOR EACH ROW
+BEGIN
+    IF :new.id IS NULL THEN
+        :new.id := core_notificacion_seq.NEXTVAL;
+    END IF;
+END;
+/
+
+COMMENT ON TABLE core_notificacion IS 'Bandeja y log transaccional de notificaciones enviadas y pendientes';
+COMMENT ON COLUMN core_notificacion.id IS 'Identificador del mensaje generado (PK)';
+COMMENT ON COLUMN core_notificacion.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
+COMMENT ON COLUMN core_notificacion.id_usuario IS 'Usuario receptor en el sistema (FK a core_usuario, opcional)';
+COMMENT ON COLUMN core_notificacion.id_plantilla IS 'Plantilla base utilizada para la composición (FK a core_plantilla_notificacion)';
+COMMENT ON COLUMN core_notificacion.destinatario IS 'Dirección de destino (correo electrónico, número celular E.164)';
+COMMENT ON COLUMN core_notificacion.asunto IS 'Asunto final compilado con variables resueltas';
+COMMENT ON COLUMN core_notificacion.contenido_final IS 'Texto o HTML exacto entregado al cliente tras sustituir variables e incrustar en plantilla padre';
+COMMENT ON COLUMN core_notificacion.variables_json IS 'Payload JSON con los valores utilizados para sustituir las variables dinámicas';
+COMMENT ON COLUMN core_notificacion.canal IS 'Canal de entrega: EMAIL, SMS, WHATSAPP, PUSH';
+COMMENT ON COLUMN core_notificacion.estado IS 'Ciclo de vida: PENDIENTE, ENVIADO, ENTREGADO, LEIDO, FALLIDO, RESPONDIDO';
+COMMENT ON COLUMN core_notificacion.referencia_externa IS 'Message ID provisto por la pasarela (SendGrid, Twilio, Meta)';
+COMMENT ON COLUMN core_notificacion.tiene_auditoria IS 'Bandera de auditoría: 1=Registrar trazabilidad en core_auditoria, 0=Omitir';
+COMMENT ON COLUMN core_notificacion.id_traza_ejecucion IS 'Identificador de la traza de ejecución en base de datos (FK a core_traza_ejecucion)';
+COMMENT ON COLUMN core_notificacion.codigo_traza IS 'Identificador único de correlación / Trace ID (UUID) para observabilidad distribuida (APM)';
+COMMENT ON COLUMN core_notificacion.fecha_entrega IS 'Fecha y hora en que el gateway confirmó entrega exitosa (hora Bogotá)';
+COMMENT ON COLUMN core_notificacion.fecha_lectura IS 'Fecha y hora en que el destinatario abrió el mensaje (hora Bogotá)';
+COMMENT ON COLUMN core_notificacion.fecha_respuesta IS 'Fecha y hora de la interacción del usuario (hora Bogotá)';
+COMMENT ON COLUMN core_notificacion.respuesta IS 'Texto o payload recibido como contestación del destinatario';
+COMMENT ON COLUMN core_notificacion.estado_registro IS 'Estado del registro: 1=Activo, 0=Eliminado';
+COMMENT ON COLUMN core_notificacion.fecha_creacion IS 'Fecha y hora de generación de la notificación (hora Bogotá)';
+
+-- ----------------------------------------------------------------------------
+-- TABLA 20/38: CORE_PREFERENCIA_NOTIFICACION
+-- ----------------------------------------------------------------------------
+CREATE TABLE core_preferencia_notificacion (
+    id NUMBER(12) NOT NULL,
+    id_tenant NUMBER(12) NOT NULL,
+    id_usuario NUMBER(12) NOT NULL,
+    canal VARCHAR2(50) NOT NULL,
+    habilitado NUMBER(1) DEFAULT 1 CHECK (habilitado IN (0, 1)),
+    horario_inicio CHAR(5),
+    horario_fin CHAR(5),
+    consentimiento_gdpr NUMBER(1) DEFAULT 0 CHECK (consentimiento_gdpr IN (0, 1)),
+    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
+    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    CONSTRAINT pk_core_pref_notif PRIMARY KEY (id),
+    CONSTRAINT fk_core_pref_notif_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
+    CONSTRAINT fk_core_pref_notif_usuario FOREIGN KEY (id_usuario) REFERENCES core_usuario(id),
+    CONSTRAINT uk_core_pref_notif UNIQUE (id_tenant, id_usuario, canal)
+);
+CREATE SEQUENCE core_preferencia_notificacion_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE OR REPLACE TRIGGER trg_bi_core_preferencia_notificacion
+BEFORE INSERT ON core_preferencia_notificacion
+FOR EACH ROW
+BEGIN
+    IF :new.id IS NULL THEN
+        :new.id := core_preferencia_notificacion_seq.NEXTVAL;
+    END IF;
+END;
+/
+
+COMMENT ON TABLE core_preferencia_notificacion IS 'Canales y horarios permitidos por cada usuario para recepción de alertas';
+COMMENT ON COLUMN core_preferencia_notificacion.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
+COMMENT ON COLUMN core_preferencia_notificacion.id IS 'Identificador único de la preferencia (PK)';
+COMMENT ON COLUMN core_preferencia_notificacion.id_usuario IS 'Usuario titular de las preferencias (FK a core_usuario)';
+COMMENT ON COLUMN core_preferencia_notificacion.canal IS 'Canal regulado: EMAIL, SMS, WHATSAPP, PUSH';
+COMMENT ON COLUMN core_preferencia_notificacion.habilitado IS 'Autorización del usuario: 1=Permitido, 0=Bloqueado por usuario';
+COMMENT ON COLUMN core_preferencia_notificacion.horario_inicio IS 'Hora inicial permitida en formato HH:MM (e.g. 08:00)';
+COMMENT ON COLUMN core_preferencia_notificacion.horario_fin IS 'Hora final permitida en formato HH:MM (e.g. 20:00)';
+COMMENT ON COLUMN core_preferencia_notificacion.consentimiento_gdpr IS 'Consentimiento explícito conforme normativas GDPR/Habeas Data: 1=Otorgado, 0=No otorgado';
+COMMENT ON COLUMN core_preferencia_notificacion.estado_registro IS 'Estado del registro: 1=Activo, 0=Eliminado';
+COMMENT ON COLUMN core_preferencia_notificacion.fecha_creacion IS 'Fecha y hora de registro de la preferencia (hora Bogotá)';
+COMMENT ON COLUMN core_preferencia_notificacion.fecha_modificacion IS 'Fecha y hora de última modificación de la preferencia (hora Bogotá)';
+
+
+-- ============================================================================
+-- SECCIÓN 7: PROCESOS DEL SISTEMA & DESPACHO DINÁMICO (3 TABLAS)
+-- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- TABLA 21/38: CORE_PROCESO
+-- ----------------------------------------------------------------------------
+CREATE TABLE core_proceso (
+    id NUMBER(12) NOT NULL,
+    id_tenant NUMBER(12) NOT NULL,
+    id_aplicacion NUMBER(12),
+    codigo VARCHAR2(60) NOT NULL,
+    nombre VARCHAR2(255) NOT NULL,
+    objeto_bd VARCHAR2(120) NOT NULL,
+    descripcion VARCHAR2(1000),
+    activo NUMBER(1) DEFAULT 1 CHECK (activo IN (0, 1)),
+    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
+    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    CONSTRAINT pk_core_proceso PRIMARY KEY (id),
+    CONSTRAINT fk_core_proceso_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
+    CONSTRAINT fk_core_proceso_app FOREIGN KEY (id_aplicacion) REFERENCES core_aplicacion(id),
+    CONSTRAINT uk_core_proceso_cod UNIQUE (id_tenant, codigo)
+);
+CREATE SEQUENCE core_proceso_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE INDEX idx_core_proceso_obj ON core_proceso(id_tenant, objeto_bd);
+
+CREATE OR REPLACE TRIGGER trg_bi_core_proceso
+BEFORE INSERT ON core_proceso
+FOR EACH ROW
+BEGIN
+    IF :new.id IS NULL THEN
+        :new.id := core_proceso_seq.NEXTVAL;
+    END IF;
+END;
+/
+
+COMMENT ON TABLE core_proceso IS 'Catálogo de operaciones y procesos funcionales vinculados a subprogramas PL/SQL';
+COMMENT ON COLUMN core_proceso.id IS 'Identificador único del proceso (PK)';
+COMMENT ON COLUMN core_proceso.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
+COMMENT ON COLUMN core_proceso.id_aplicacion IS 'Aplicación a la que pertenece el proceso (FK a core_aplicacion)';
+COMMENT ON COLUMN core_proceso.codigo IS 'Código mnemotécnico único del proceso por tenant (ej. CREACION_CITA)';
+COMMENT ON COLUMN core_proceso.nombre IS 'Nombre representativo funcional del proceso';
+COMMENT ON COLUMN core_proceso.objeto_bd IS 'Paquete y subprograma PL/SQL ejecutor (ej. pkgln_citas.p_crear_cita)';
+COMMENT ON COLUMN core_proceso.descripcion IS 'Explicación del alcance de negocio del proceso';
+COMMENT ON COLUMN core_proceso.activo IS 'Disponibilidad operativa: 1=Activo, 0=Inactivo';
+COMMENT ON COLUMN core_proceso.estado_registro IS 'Estado de auditoría: 1=Activo, 0=Eliminado';
+COMMENT ON COLUMN core_proceso.fecha_creacion IS 'Fecha de alta del proceso (hora Bogotá)';
+COMMENT ON COLUMN core_proceso.fecha_modificacion IS 'Fecha de última modificación del proceso (hora Bogotá)';
+
+-- ----------------------------------------------------------------------------
+-- TABLA 22/38: CORE_PROCESO_PLANTILLA
+-- ----------------------------------------------------------------------------
+CREATE TABLE core_proceso_plantilla (
+    id NUMBER(12) NOT NULL,
+    id_tenant NUMBER(12) NOT NULL,
+    id_proceso NUMBER(12) NOT NULL,
+    id_plantilla NUMBER(12) NOT NULL,
+    es_obligatoria NUMBER(1) DEFAULT 1 CHECK (es_obligatoria IN (0, 1)),
+    orden_despacho NUMBER(3) DEFAULT 1,
+    activo NUMBER(1) DEFAULT 1 CHECK (activo IN (0, 1)),
+    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
+    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    CONSTRAINT pk_core_proceso_plantilla PRIMARY KEY (id),
+    CONSTRAINT fk_core_proc_plnt_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
+    CONSTRAINT fk_core_proc_plnt_proc FOREIGN KEY (id_proceso) REFERENCES core_proceso(id),
+    CONSTRAINT fk_core_proc_plnt_plnt FOREIGN KEY (id_plantilla) REFERENCES core_plantilla_notificacion(id),
+    CONSTRAINT uk_core_proc_plnt UNIQUE (id_tenant, id_proceso, id_plantilla)
+);
+CREATE SEQUENCE core_proceso_plantilla_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE INDEX idx_core_proc_plnt_proc ON core_proceso_plantilla(id_tenant, id_proceso);
+
+CREATE OR REPLACE TRIGGER trg_bi_core_proceso_plantilla
+BEFORE INSERT ON core_proceso_plantilla
+FOR EACH ROW
+BEGIN
+    IF :new.id IS NULL THEN
+        :new.id := core_proceso_plantilla_seq.NEXTVAL;
+    END IF;
+END;
+/
+
+COMMENT ON TABLE core_proceso_plantilla IS 'Asociación de plantillas de notificación a disparar por cada proceso';
+COMMENT ON COLUMN core_proceso_plantilla.id IS 'Identificador único de la asignación (PK)';
+COMMENT ON COLUMN core_proceso_plantilla.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
+COMMENT ON COLUMN core_proceso_plantilla.id_proceso IS 'Proceso de negocio que detona la notificación (FK a core_proceso)';
+COMMENT ON COLUMN core_proceso_plantilla.id_plantilla IS 'Plantilla de mensaje a despachar (FK a core_plantilla_notificacion)';
+COMMENT ON COLUMN core_proceso_plantilla.es_obligatoria IS 'Carácter del envío: 1=Transaccional obligatoria, 0=Respeta preferencias de usuario';
+COMMENT ON COLUMN core_proceso_plantilla.orden_despacho IS 'Secuencia de encolamiento de las notificaciones';
+COMMENT ON COLUMN core_proceso_plantilla.activo IS 'Habilitación de la regla de despacho: 1=Activa, 0=Pausada';
+COMMENT ON COLUMN core_proceso_plantilla.estado_registro IS 'Estado de auditoría: 1=Activo, 0=Eliminado';
+COMMENT ON COLUMN core_proceso_plantilla.fecha_creacion IS 'Fecha de asociación (hora Bogotá)';
+COMMENT ON COLUMN core_proceso_plantilla.fecha_modificacion IS 'Fecha de última modificación (hora Bogotá)';
+
+-- ----------------------------------------------------------------------------
+-- TABLA 23/38: CORE_PROCESO_DESTINATARIO
+-- ----------------------------------------------------------------------------
+CREATE TABLE core_proceso_destinatario (
+    id NUMBER(12) NOT NULL,
+    id_tenant NUMBER(12) NOT NULL,
+    id_proceso_plantilla NUMBER(12) NOT NULL,
+    tipo_destinatario VARCHAR2(30) NOT NULL,
+    id_rol NUMBER(12),
+    id_usuario NUMBER(12),
+    correo_fijo VARCHAR2(255),
+    activo NUMBER(1) DEFAULT 1 CHECK (activo IN (0, 1)),
+    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
+    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    CONSTRAINT pk_core_proc_destinatario PRIMARY KEY (id),
+    CONSTRAINT fk_core_proc_dest_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
+    CONSTRAINT fk_core_proc_dest_plnt FOREIGN KEY (id_proceso_plantilla) REFERENCES core_proceso_plantilla(id),
+    CONSTRAINT fk_core_proc_dest_rol FOREIGN KEY (id_rol) REFERENCES core_rol(id),
+    CONSTRAINT fk_core_proc_dest_usr FOREIGN KEY (id_usuario) REFERENCES core_usuario(id),
+    CONSTRAINT ck_core_proc_dest_tipo CHECK (tipo_destinatario IN ('ROL', 'USUARIO', 'TITULAR_PROCESO', 'CORREO_FIJO'))
+);
+CREATE SEQUENCE core_proceso_destinatario_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE INDEX idx_core_proc_dest_plnt ON core_proceso_destinatario(id_tenant, id_proceso_plantilla);
+
+CREATE OR REPLACE TRIGGER trg_bi_core_proceso_destinatario
+BEFORE INSERT ON core_proceso_destinatario
+FOR EACH ROW
+BEGIN
+    IF :new.id IS NULL THEN
+        :new.id := core_proceso_destinatario_seq.NEXTVAL;
+    END IF;
+END;
+/
+
+COMMENT ON TABLE core_proceso_destinatario IS 'Destinatarios configurados por proceso y plantilla (usuario puntual, todos los de un rol o titular)';
+COMMENT ON COLUMN core_proceso_destinatario.id IS 'Identificador único de la regla de destinatario (PK)';
+COMMENT ON COLUMN core_proceso_destinatario.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
+COMMENT ON COLUMN core_proceso_destinatario.id_proceso_plantilla IS 'Asociación proceso-plantilla vinculada (FK a core_proceso_plantilla)';
+COMMENT ON COLUMN core_proceso_destinatario.tipo_destinatario IS 'Estrategia: ROL (todos con ese rol), USUARIO (usuario específico), TITULAR_PROCESO (el paciente/cliente de la transacción), CORREO_FIJO';
+COMMENT ON COLUMN core_proceso_destinatario.id_rol IS 'Rol cuyos usuarios recibirán la notificación (FK a core_rol, si aplica)';
+COMMENT ON COLUMN core_proceso_destinatario.id_usuario IS 'Usuario puntual destinatario (FK a core_usuario, si aplica)';
+COMMENT ON COLUMN core_proceso_destinatario.correo_fijo IS 'Dirección de correo fija opcional para buzones compartidos';
+COMMENT ON COLUMN core_proceso_destinatario.activo IS 'Estado de la regla: 1=Activa, 0=Pausada';
+COMMENT ON COLUMN core_proceso_destinatario.estado_registro IS 'Estado de auditoría: 1=Activo, 0=Eliminado';
+COMMENT ON COLUMN core_proceso_destinatario.fecha_creacion IS 'Fecha de configuración (hora Bogotá)';
+COMMENT ON COLUMN core_proceso_destinatario.fecha_modificacion IS 'Fecha de última modificación (hora Bogotá)';
+
+-- ============================================================================
+-- SECCIÓN 8: AUDITORÍA GENERAL DEL SISTEMA (1 TABLA)
+-- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- TABLA 24/38: CORE_AUDITORIA
+-- ----------------------------------------------------------------------------
+CREATE TABLE core_auditoria (
+    id NUMBER(12) NOT NULL,
+    id_tenant NUMBER(12) NOT NULL,
+    id_usuario NUMBER(12),
+    id_aplicacion NUMBER(12),
+    tabla_afectada VARCHAR2(100) NOT NULL,
+    tipo_operacion VARCHAR2(20) NOT NULL,
+    id_registro_modificado NUMBER(12),
+    antes_json CLOB,
+    despues_json CLOB,
+    direccion_ip VARCHAR2(50),
+    agente_usuario VARCHAR2(500),
+    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
+    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    CONSTRAINT pk_core_auditoria PRIMARY KEY (id),
+    CONSTRAINT fk_core_auditoria_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
+    CONSTRAINT fk_core_auditoria_usuario FOREIGN KEY (id_usuario) REFERENCES core_usuario(id),
+    CONSTRAINT fk_core_auditoria_app FOREIGN KEY (id_aplicacion) REFERENCES core_aplicacion(id),
+    CONSTRAINT ck_core_operacion CHECK (tipo_operacion IN ('INSERT', 'UPDATE', 'DELETE')),
+    CONSTRAINT ck_core_audit_antes_json CHECK (antes_json IS NULL OR antes_json IS JSON (LAX)),
+    CONSTRAINT ck_core_audit_despues_json CHECK (despues_json IS NULL OR despues_json IS JSON (LAX))
+);
+CREATE SEQUENCE core_auditoria_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE INDEX idx_core_auditoria_usuario ON core_auditoria(id_tenant, id_usuario, fecha_creacion);
+CREATE INDEX idx_core_auditoria_tabla ON core_auditoria(id_tenant, tabla_afectada, fecha_creacion);
+
+CREATE OR REPLACE TRIGGER trg_bi_core_auditoria
+BEFORE INSERT ON core_auditoria
+FOR EACH ROW
+BEGIN
+    IF :new.id IS NULL THEN
+        :new.id := core_auditoria_seq.NEXTVAL;
+    END IF;
+END;
+/
+
+COMMENT ON TABLE core_auditoria IS 'Auditoría integral con estado anterior y posterior en JSON nativo';
+COMMENT ON COLUMN core_auditoria.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
+COMMENT ON COLUMN core_auditoria.id IS 'Identificador secuencial del evento auditado (PK)';
+COMMENT ON COLUMN core_auditoria.id_usuario IS 'Usuario autor de la transacción (FK a core_usuario)';
+COMMENT ON COLUMN core_auditoria.id_aplicacion IS 'Aplicación donde ocurrió la operación (FK a core_aplicacion)';
+COMMENT ON COLUMN core_auditoria.tabla_afectada IS 'Nombre de la tabla física alterada (e.g. CORE_USUARIO)';
+COMMENT ON COLUMN core_auditoria.tipo_operacion IS 'Tipo de sentencia ejecutada: INSERT, UPDATE, DELETE';
+COMMENT ON COLUMN core_auditoria.id_registro_modificado IS 'Valor de la clave primaria del registro afectado';
+COMMENT ON COLUMN core_auditoria.antes_json IS 'Snapshot previo a la modificación en JSON nativo (NULL en INSERT)';
+COMMENT ON COLUMN core_auditoria.despues_json IS 'Snapshot posterior a la modificación en JSON nativo (NULL en DELETE)';
+COMMENT ON COLUMN core_auditoria.direccion_ip IS 'Dirección IP de origen del cliente';
+COMMENT ON COLUMN core_auditoria.agente_usuario IS 'Identificación del navegador o dispositivo que consumió el API';
+COMMENT ON COLUMN core_auditoria.estado_registro IS 'Estado de auditoría: 1=Activo';
+COMMENT ON COLUMN core_auditoria.fecha_creacion IS 'Fecha y hora exacta de la transacción en hora de Bogotá';
+
+-- ============================================================================
+-- SECCIÓN 9: PARÁMETROS DINÁMICOS (1 TABLA)
+-- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- TABLA 25/38: CORE_PARAMETRO
+-- ----------------------------------------------------------------------------
+CREATE TABLE core_parametro (
+    id NUMBER(12) NOT NULL,
+    id_tenant NUMBER(12) NOT NULL,
+    id_aplicacion NUMBER(12),
+    categoria VARCHAR2(50) NOT NULL,
+    clave VARCHAR2(100) NOT NULL,
+    valor_texto VARCHAR2(4000),
+    valor_numero NUMBER(15,2),
+    valor_fecha DATE,
+    valor_booleano NUMBER(1) CHECK (valor_booleano IS NULL OR valor_booleano IN (0, 1)),
+    tipo_valor VARCHAR2(50) NOT NULL,
+    descripcion VARCHAR2(1000),
+    editable_por_usuario NUMBER(1) DEFAULT 0 CHECK (editable_por_usuario IN (0, 1)),
+    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
+    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    CONSTRAINT pk_core_parametro PRIMARY KEY (id),
+    CONSTRAINT fk_core_parametro_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
+    CONSTRAINT fk_core_parametro_app FOREIGN KEY (id_aplicacion) REFERENCES core_aplicacion(id),
+    CONSTRAINT uk_core_parametro UNIQUE (id_tenant, id_aplicacion, categoria, clave)
+);
+CREATE SEQUENCE core_parametro_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE INDEX idx_core_parametro_categoria ON core_parametro(id_tenant, categoria);
+
+CREATE OR REPLACE TRIGGER trg_bi_core_parametro
+BEFORE INSERT ON core_parametro
+FOR EACH ROW
+BEGIN
+    IF :new.id IS NULL THEN
+        :new.id := core_parametro_seq.NEXTVAL;
+    END IF;
+END;
+/
+
+COMMENT ON TABLE core_parametro IS 'Constantes y parámetros funcionales dinámicos tipados';
+COMMENT ON COLUMN core_parametro.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
+COMMENT ON COLUMN core_parametro.id IS 'Identificador único del parámetro (PK)';
+COMMENT ON COLUMN core_parametro.id_aplicacion IS 'Aplicación a la que pertenece el parámetro (FK a core_aplicacion)';
+COMMENT ON COLUMN core_parametro.categoria IS 'Agrupación semántica (SEGURIDAD, FACTURACION, GENERAL)';
+COMMENT ON COLUMN core_parametro.clave IS 'Nombre mnemotécnico o clave única del parámetro';
+COMMENT ON COLUMN core_parametro.valor_texto IS 'Almacén del valor cuando el tipo es STRING o TEXTO';
+COMMENT ON COLUMN core_parametro.valor_numero IS 'Almacén del valor numérico cuando el tipo es NUMBER';
+COMMENT ON COLUMN core_parametro.valor_fecha IS 'Almacén del valor de fecha cuando el tipo es DATE';
+COMMENT ON COLUMN core_parametro.valor_booleano IS 'Almacén del valor booleano: 1=True, 0=False';
+COMMENT ON COLUMN core_parametro.tipo_valor IS 'Tipo formal: STRING, NUMBER, DATE, BOOLEAN, JSON';
+COMMENT ON COLUMN core_parametro.descripcion IS 'Explicación del uso y efectos del parámetro en el negocio';
+COMMENT ON COLUMN core_parametro.editable_por_usuario IS 'Indica si puede editarse desde la interfaz por el administrador: 1=Sí, 0=No';
+COMMENT ON COLUMN core_parametro.estado_registro IS 'Estado del parámetro: 1=Activo, 0=Inactivo';
+COMMENT ON COLUMN core_parametro.fecha_creacion IS 'Fecha y hora de alta del parámetro (hora Bogotá)';
+COMMENT ON COLUMN core_parametro.fecha_modificacion IS 'Fecha y hora de última actualización del valor (hora Bogotá)';
+
+-- ============================================================================
+-- SECCIÓN 10: GESTIÓN DE APLICACIONES & MÓDULOS (3 TABLAS)
+-- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- TABLA 26/38: CORE_APP_TENANT
+-- ----------------------------------------------------------------------------
+CREATE TABLE core_app_tenant (
+    id NUMBER(12) NOT NULL,
+    id_tenant NUMBER(12) NOT NULL,
+    id_aplicacion NUMBER(12) NOT NULL,
+    habilitada NUMBER(1) DEFAULT 1 CHECK (habilitada IN (0, 1)),
+    fecha_activacion DATE,
+    fecha_desactivacion DATE,
+    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
+    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    CONSTRAINT pk_core_app_tenant PRIMARY KEY (id),
+    CONSTRAINT fk_core_app_tenant_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
+    CONSTRAINT fk_core_app_tenant_app FOREIGN KEY (id_aplicacion) REFERENCES core_aplicacion(id),
+    CONSTRAINT uk_core_app_tenant UNIQUE (id_tenant, id_aplicacion)
+);
+CREATE SEQUENCE core_app_tenant_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE OR REPLACE TRIGGER trg_bi_core_app_tenant
+BEFORE INSERT ON core_app_tenant
+FOR EACH ROW
+BEGIN
+    IF :new.id IS NULL THEN
+        :new.id := core_app_tenant_seq.NEXTVAL;
+    END IF;
+END;
+/
+
+COMMENT ON TABLE core_app_tenant IS 'Suscripción y habilitación de aplicaciones específicas por tenant';
+COMMENT ON COLUMN core_app_tenant.id_tenant IS 'Identificador del tenant suscriptor (FK a core_tenant)';
+COMMENT ON COLUMN core_app_tenant.id IS 'Identificador único del registro de suscripción (PK)';
+COMMENT ON COLUMN core_app_tenant.id_aplicacion IS 'Aplicación suscrita por el tenant (FK a core_aplicacion)';
+COMMENT ON COLUMN core_app_tenant.habilitada IS 'Bandera de acceso activo: 1=Habilitada, 0=Suspendida';
+COMMENT ON COLUMN core_app_tenant.fecha_activacion IS 'Fecha a partir de la cual el tenant puede utilizar la app (hora Bogotá)';
+COMMENT ON COLUMN core_app_tenant.fecha_desactivacion IS 'Fecha de corte o expiración de la suscripción (hora Bogotá)';
+COMMENT ON COLUMN core_app_tenant.estado_registro IS 'Estado del registro: 1=Activo, 0=Eliminado';
+COMMENT ON COLUMN core_app_tenant.fecha_creacion IS 'Fecha y hora de contratación de la aplicación (hora Bogotá)';
+COMMENT ON COLUMN core_app_tenant.fecha_modificacion IS 'Fecha y hora de última actualización de la suscripción (hora Bogotá)';
+
+-- ----------------------------------------------------------------------------
+-- TABLA 27/38: CORE_TEST_SUITE
+-- ----------------------------------------------------------------------------
+CREATE TABLE core_test_suite (
+    id NUMBER(12) NOT NULL,
+    id_tenant NUMBER(12) NOT NULL,
+    id_aplicacion NUMBER(12),
+    codigo VARCHAR2(50) NOT NULL,
+    nombre VARCHAR2(255) NOT NULL,
+    descripcion VARCHAR2(1000),
+    tipo_suite VARCHAR2(50) DEFAULT 'UNITARIA',
+    es_activo NUMBER(1) DEFAULT 1 CHECK (es_activo IN (0, 1)),
+    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
+    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    CONSTRAINT pk_core_test_suite PRIMARY KEY (id),
+    CONSTRAINT fk_core_test_suit_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
+    CONSTRAINT fk_core_test_suit_app FOREIGN KEY (id_aplicacion) REFERENCES core_aplicacion(id),
+    CONSTRAINT uk_core_test_suite_cod UNIQUE (id_tenant, codigo),
+    CONSTRAINT ck_core_test_suite_tipo CHECK (tipo_suite IN ('UNITARIA', 'INTEGRACION', 'REGRESION', 'SMOKE', 'SEGURIDAD'))
+);
+CREATE SEQUENCE core_test_suite_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE OR REPLACE TRIGGER trg_bi_core_test_suite
+BEFORE INSERT ON core_test_suite
+FOR EACH ROW
+BEGIN
+    IF :new.id IS NULL THEN
+        :new.id := core_test_suite_seq.NEXTVAL;
+    END IF;
+END;
+/
+
+COMMENT ON TABLE core_test_suite IS 'Agrupación lógica de pruebas (Suites de Regresión, Smoke Tests, Módulo de Autenticación)';
+COMMENT ON COLUMN core_test_suite.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
+COMMENT ON COLUMN core_test_suite.id IS 'Identificador único de la suite de pruebas (PK)';
+COMMENT ON COLUMN core_test_suite.id_aplicacion IS 'Aplicación evaluada por la suite (FK a core_aplicacion)';
+COMMENT ON COLUMN core_test_suite.codigo IS 'Código nemotécnico (SUITE_SMOKE_CORE, SUITE_AUTH_TEST)';
+COMMENT ON COLUMN core_test_suite.nombre IS 'Nombre representativo de la suite de pruebas';
+COMMENT ON COLUMN core_test_suite.descripcion IS 'Objetivo y cobertura funcional evaluada';
+COMMENT ON COLUMN core_test_suite.tipo_suite IS 'Categoría: UNITARIA, INTEGRACION, REGRESION, SMOKE, SEGURIDAD';
+COMMENT ON COLUMN core_test_suite.es_activo IS 'Bandera de ejecución activa: 1=Habilitada, 0=Pausada';
+COMMENT ON COLUMN core_test_suite.estado_registro IS 'Estado del registro: 1=Activo, 0=Eliminado';
+COMMENT ON COLUMN core_test_suite.fecha_creacion IS 'Fecha y hora de configuración de la suite (hora Bogotá)';
+COMMENT ON COLUMN core_test_suite.fecha_modificacion IS 'Fecha y hora de última edición de la suite (hora Bogotá)';
+
+-- 11.3 Casos de Prueba Parametrizados (Payloads CLOB)
+
+-- ----------------------------------------------------------------------------
+-- TABLA 28/38: CORE_TEST_CASO
+-- ----------------------------------------------------------------------------
+CREATE TABLE core_test_caso (
+    id NUMBER(12) NOT NULL,
+    id_tenant NUMBER(12) NOT NULL,
+    id_objeto NUMBER(12) NOT NULL,
+    id_suite NUMBER(12),
+    codigo_caso VARCHAR2(50) NOT NULL,
+    nombre VARCHAR2(255) NOT NULL,
+    descripcion VARCHAR2(1000),
+    categoria VARCHAR2(50) DEFAULT 'HAPPY_PATH',
+    orden_ejecucion NUMBER(5) DEFAULT 1,
+    json_entrada CLOB NOT NULL,
+    json_esperado CLOB,
+    codigo_error_esperado NUMBER(6) DEFAULT 0,
+    tiempo_max_ms NUMBER(8) DEFAULT 5000,
+    es_activo NUMBER(1) DEFAULT 1 CHECK (es_activo IN (0, 1)),
+    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
+    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    fecha_modificacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    CONSTRAINT pk_core_test_caso PRIMARY KEY (id),
+    CONSTRAINT fk_core_test_cas_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
+    CONSTRAINT fk_core_test_cas_objeto FOREIGN KEY (id_objeto) REFERENCES core_test_objeto(id),
+    CONSTRAINT fk_core_test_cas_suite FOREIGN KEY (id_suite) REFERENCES core_test_suite(id),
+    CONSTRAINT uk_core_test_caso_cod UNIQUE (id_tenant, id_objeto, codigo_caso),
+    CONSTRAINT ck_core_test_caso_cat CHECK (categoria IN ('HAPPY_PATH', 'ERROR_VALIDACION', 'ERROR_NEGOCIO', 'EDGE_CASE', 'SEGURIDAD', 'STRESS')),
+    CONSTRAINT ck_core_test_caso_in_json CHECK (json_entrada IS JSON (LAX)),
+    CONSTRAINT ck_core_test_caso_exp_json CHECK (json_esperado IS NULL OR json_esperado IS JSON (LAX))
+);
+CREATE SEQUENCE core_test_caso_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE INDEX idx_core_test_caso_obj ON core_test_caso(id_tenant, id_objeto, orden_ejecucion);
+
+CREATE OR REPLACE TRIGGER trg_bi_core_test_caso
+BEFORE INSERT ON core_test_caso
+FOR EACH ROW
+BEGIN
+    IF :new.id IS NULL THEN
+        :new.id := core_test_caso_seq.NEXTVAL;
+    END IF;
+END;
+/
+
+COMMENT ON TABLE core_test_caso IS 'Escenarios y casos de prueba individuales con inyección de p_json_entrada y resultado esperado';
+COMMENT ON COLUMN core_test_caso.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
+COMMENT ON COLUMN core_test_caso.id IS 'Identificador único del caso de prueba (PK)';
+COMMENT ON COLUMN core_test_caso.id_objeto IS 'Objeto o procedimiento PL/SQL bajo prueba (FK a core_test_objeto)';
+COMMENT ON COLUMN core_test_caso.id_suite IS 'Suite a la que pertenece el caso (FK a core_test_suite, opcional)';
+COMMENT ON COLUMN core_test_caso.codigo_caso IS 'Código único del caso (TC_AUTH_001, TC_USR_EMAIL)';
+COMMENT ON COLUMN core_test_caso.nombre IS 'Nombre descriptivo del escenario de prueba';
+COMMENT ON COLUMN core_test_caso.descripcion IS 'Premisas, datos inyectados y comportamiento esperado';
+COMMENT ON COLUMN core_test_caso.categoria IS 'Tipo: HAPPY_PATH, ERROR_VALIDACION, ERROR_NEGOCIO, EDGE_CASE, SEGURIDAD, STRESS';
+COMMENT ON COLUMN core_test_caso.orden_ejecucion IS 'Secuencia de invocación dentro de la batería de pruebas';
+COMMENT ON COLUMN core_test_caso.json_entrada IS 'Payload CLOB inyectado directamente en el parámetro p_json_entrada';
+COMMENT ON COLUMN core_test_caso.json_esperado IS 'Payload CLOB modelo de salida esperado para comparación estructural';
+COMMENT ON COLUMN core_test_caso.codigo_error_esperado IS 'Código de negocio esperado en el payload o SQLCODE esperado (0 = Éxito)';
+COMMENT ON COLUMN core_test_caso.tiempo_max_ms IS 'Tiempo de respuesta máximo tolerado en milisegundos (SLA de rendimiento)';
+COMMENT ON COLUMN core_test_caso.es_activo IS 'Indica si el caso se incluye en ejecuciones: 1=Sí, 0=No';
+COMMENT ON COLUMN core_test_caso.estado_registro IS 'Estado del registro: 1=Activo, 0=Eliminado';
+COMMENT ON COLUMN core_test_caso.fecha_creacion IS 'Fecha y hora de alta del caso de prueba (hora Bogotá)';
+COMMENT ON COLUMN core_test_caso.fecha_modificacion IS 'Fecha y hora de última edición del caso (hora Bogotá)';
+
+-- 11.4 Reglas de Aserción Granular sobre p_json_salida
+
+-- ----------------------------------------------------------------------------
+-- TABLA 29/38: CORE_TEST_ASERCION
+-- ----------------------------------------------------------------------------
+CREATE TABLE core_test_asercion (
+    id NUMBER(12) NOT NULL,
+    id_tenant NUMBER(12) NOT NULL,
+    id_caso NUMBER(12) NOT NULL,
+    ruta_json VARCHAR2(255) NOT NULL,
+    operador VARCHAR2(30) DEFAULT 'EQUALS',
+    valor_esperado VARCHAR2(4000),
+    descripcion VARCHAR2(500),
+    es_critica NUMBER(1) DEFAULT 1 CHECK (es_critica IN (0, 1)),
+    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
+    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    CONSTRAINT pk_core_test_asercion PRIMARY KEY (id),
+    CONSTRAINT fk_core_test_asercion_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
+    CONSTRAINT fk_core_test_asercion_caso FOREIGN KEY (id_caso) REFERENCES core_test_caso(id),
+    CONSTRAINT ck_core_test_aser_op CHECK (operador IN ('EQUALS', 'NOT_EQUALS', 'EXISTS', 'NOT_EXISTS', 'IS_NULL', 'NOT_NULL', 'IS_ARRAY', 'CONTAINS', 'GREATER_THAN', 'LESS_THAN', 'REGEX'))
+);
+CREATE SEQUENCE core_test_asercion_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE INDEX idx_core_test_aser_caso ON core_test_asercion(id_tenant, id_caso);
+
+CREATE OR REPLACE TRIGGER trg_bi_core_test_asercion
+BEFORE INSERT ON core_test_asercion
+FOR EACH ROW
+BEGIN
+    IF :new.id IS NULL THEN
+        :new.id := core_test_asercion_seq.NEXTVAL;
+    END IF;
+END;
+/
+
+COMMENT ON TABLE core_test_asercion IS 'Validaciones puntuales sobre nodos específicos del JSON de salida mediante JSON Path';
+COMMENT ON COLUMN core_test_asercion.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
+COMMENT ON COLUMN core_test_asercion.id IS 'Identificador único de la aserción (PK)';
+COMMENT ON COLUMN core_test_asercion.id_caso IS 'Caso de prueba al que aplica la regla de aserción (FK a core_test_caso)';
+COMMENT ON COLUMN core_test_asercion.ruta_json IS 'Ruta JSONPath evaluada en p_json_salida ($.codigo, $.datos.id)';
+COMMENT ON COLUMN core_test_asercion.operador IS 'Operador de aserción: EQUALS, EXISTS, CONTAINS, REGEX, etc.';
+COMMENT ON COLUMN core_test_asercion.valor_esperado IS 'Valor literal esperado en el nodo evaluado';
+COMMENT ON COLUMN core_test_asercion.descripcion IS 'Explicación del criterio de aceptación verificado';
+COMMENT ON COLUMN core_test_asercion.es_critica IS 'Indica si un fallo marca el test como FALLIDO: 1=Sí, 0=Warning';
+COMMENT ON COLUMN core_test_asercion.estado_registro IS 'Estado del registro: 1=Activo, 0=Eliminado';
+COMMENT ON COLUMN core_test_asercion.fecha_creacion IS 'Fecha y hora de definición de la aserción (hora Bogotá)';
+
+-- 11.5 Historial de Corridas / Ejecuciones de Pruebas (Test Runs)
+
+-- ----------------------------------------------------------------------------
+-- TABLA 30/38: CORE_TEST_EJECUCION
+-- ----------------------------------------------------------------------------
+CREATE TABLE core_test_ejecucion (
+    id NUMBER(12) NOT NULL,
+    id_tenant NUMBER(12) NOT NULL,
+    id_suite NUMBER(12),
+    id_objeto NUMBER(12),
+    id_usuario NUMBER(12),
+    entorno VARCHAR2(30) DEFAULT 'DEV',
+    fecha_inicio DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    fecha_fin DATE,
+    duracion_total_ms NUMBER(12,2),
+    total_casos NUMBER(6) DEFAULT 0,
+    casos_exitosos NUMBER(6) DEFAULT 0,
+    casos_fallidos NUMBER(6) DEFAULT 0,
+    casos_con_error NUMBER(6) DEFAULT 0,
+    estado_global VARCHAR2(30) DEFAULT 'EN_PROCESO',
+    disparador VARCHAR2(50) DEFAULT 'MANUAL_FRONT',
+    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
+    CONSTRAINT pk_core_test_ejecucion PRIMARY KEY (id),
+    CONSTRAINT fk_core_test_ejec_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
+    CONSTRAINT fk_core_test_ejec_suite FOREIGN KEY (id_suite) REFERENCES core_test_suite(id),
+    CONSTRAINT fk_core_test_ejec_obj FOREIGN KEY (id_objeto) REFERENCES core_test_objeto(id),
+    CONSTRAINT fk_core_test_ejec_usr FOREIGN KEY (id_usuario) REFERENCES core_usuario(id),
+    CONSTRAINT ck_core_test_ejec_env CHECK (entorno IN ('DEV', 'QA', 'STAGING', 'PROD', 'CI_CD')),
+    CONSTRAINT ck_core_test_ejec_estado CHECK (estado_global IN ('EN_PROCESO', 'EXITOSO', 'FALLIDO', 'CANCELADO', 'TIMEOUT')),
+    CONSTRAINT ck_core_test_ejec_disp CHECK (disparador IN ('MANUAL_FRONT', 'PIPELINE_CI', 'CRON_JOB', 'API_REST', 'UNIT_TEST_RUNNER'))
+);
+CREATE SEQUENCE core_test_ejecucion_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE INDEX idx_core_test_ejec_fecha ON core_test_ejecucion(id_tenant, fecha_inicio);
+
+CREATE OR REPLACE TRIGGER trg_bi_core_test_ejecucion
+BEFORE INSERT ON core_test_ejecucion
+FOR EACH ROW
+BEGIN
+    IF :new.id IS NULL THEN
+        :new.id := core_test_ejecucion_seq.NEXTVAL;
+    END IF;
+END;
+/
+
+COMMENT ON TABLE core_test_ejecucion IS 'Cabecera de ejecuciones y trazabilidad de corridas de prueba en el entorno';
+COMMENT ON COLUMN core_test_ejecucion.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
+COMMENT ON COLUMN core_test_ejecucion.id IS 'Identificador de la corrida de pruebas (PK)';
+COMMENT ON COLUMN core_test_ejecucion.id_suite IS 'Suite ejecutada (FK a core_test_suite, NULL si fue corrida ad-hoc)';
+COMMENT ON COLUMN core_test_ejecucion.id_objeto IS 'Objeto específico ejecutado en pruebas aisladas (FK a core_test_objeto)';
+COMMENT ON COLUMN core_test_ejecucion.id_usuario IS 'Usuario o desarrollador que detonó la prueba (FK a core_usuario)';
+COMMENT ON COLUMN core_test_ejecucion.entorno IS 'Ambiente de pruebas: DEV, QA, STAGING, PROD, CI_CD';
+COMMENT ON COLUMN core_test_ejecucion.fecha_inicio IS 'Fecha y hora en que comenzó el test runner (hora Bogotá)';
+COMMENT ON COLUMN core_test_ejecucion.fecha_fin IS 'Fecha y hora en que finalizó la ejecución completa (hora Bogotá)';
+COMMENT ON COLUMN core_test_ejecucion.duracion_total_ms IS 'Tiempo total transcurrido acumulado en milisegundos';
+COMMENT ON COLUMN core_test_ejecucion.total_casos IS 'Número total de casos de prueba incluidos en la corrida';
+COMMENT ON COLUMN core_test_ejecucion.casos_exitosos IS 'Número de casos que cumplieron todas sus aserciones (PASÓ)';
+COMMENT ON COLUMN core_test_ejecucion.casos_fallidos IS 'Número de casos que tuvieron discrepancias en aserciones (FALLÓ)';
+COMMENT ON COLUMN core_test_ejecucion.casos_con_error IS 'Número de casos que arrojaron excepciones inesperadas de Oracle';
+COMMENT ON COLUMN core_test_ejecucion.estado_global IS 'Resultado: EN_PROCESO, EXITOSO, FALLIDO, CANCELADO, TIMEOUT';
+COMMENT ON COLUMN core_test_ejecucion.disparador IS 'Origen: MANUAL_FRONT, PIPELINE_CI, CRON_JOB, API_REST, UNIT_TEST_RUNNER';
+COMMENT ON COLUMN core_test_ejecucion.estado_registro IS 'Estado del registro: 1=Activo';
+
+-- 11.6 Detalle y Evidencia de Ejecución por Caso
+
+-- ----------------------------------------------------------------------------
+-- TABLA 31/38: CORE_TEST_DETALLE_EJECUCION
+-- ----------------------------------------------------------------------------
+CREATE TABLE core_test_detalle_ejecucion (
+    id NUMBER(12) NOT NULL,
+    id_tenant NUMBER(12) NOT NULL,
+    id_ejecucion NUMBER(12) NOT NULL,
+    id_caso NUMBER(12) NOT NULL,
+    id_objeto NUMBER(12) NOT NULL,
+    json_entrada_enviado CLOB NOT NULL,
+    json_salida_obtenido CLOB,
+    estado VARCHAR2(30) NOT NULL,
+    tiempo_ejecucion_ms NUMBER(10,2),
+    codigo_error_oracle NUMBER(10),
+    mensaje_error_oracle VARCHAR2(4000),
+    diferencias_detectadas CLOB,
+    fecha_ejecucion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    CONSTRAINT pk_core_test_det_ejec PRIMARY KEY (id),
+    CONSTRAINT fk_core_test_det_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
+    CONSTRAINT fk_core_test_det_ejec FOREIGN KEY (id_ejecucion) REFERENCES core_test_ejecucion(id),
+    CONSTRAINT fk_core_test_det_caso FOREIGN KEY (id_caso) REFERENCES core_test_caso(id),
+    CONSTRAINT fk_core_test_det_obj FOREIGN KEY (id_objeto) REFERENCES core_test_objeto(id),
+    CONSTRAINT ck_core_test_det_est CHECK (estado IN ('PASO', 'FALLO', 'ERROR_ORACLE', 'TIMEOUT', 'OMITIDO')),
+    CONSTRAINT ck_core_test_det_in_json CHECK (json_entrada_enviado IS JSON (LAX)),
+    CONSTRAINT ck_core_test_det_out_json CHECK (json_salida_obtenido IS NULL OR json_salida_obtenido IS JSON (LAX)),
+    CONSTRAINT ck_core_test_det_diff_json CHECK (diferencias_detectadas IS NULL OR diferencias_detectadas IS JSON (LAX))
+);
+CREATE SEQUENCE core_test_detalle_ejecucion_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE INDEX idx_core_test_det_ejec ON core_test_detalle_ejecucion(id_tenant, id_ejecucion, estado);
+
+CREATE OR REPLACE TRIGGER trg_bi_core_test_detalle_ejecucion
+BEFORE INSERT ON core_test_detalle_ejecucion
+FOR EACH ROW
+BEGIN
+    IF :new.id IS NULL THEN
+        :new.id := core_test_detalle_ejecucion_seq.NEXTVAL;
+    END IF;
+END;
+/
+
+COMMENT ON TABLE core_test_detalle_ejecucion IS 'Registro individual de cada caso probado: payload inyectado, CLOB recibido, tiempos y diferencias';
+COMMENT ON COLUMN core_test_detalle_ejecucion.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
+COMMENT ON COLUMN core_test_detalle_ejecucion.id IS 'Identificador único del detalle de ejecución (PK)';
+COMMENT ON COLUMN core_test_detalle_ejecucion.id_ejecucion IS 'Corrida de pruebas a la que pertenece la evidencia (FK a core_test_ejecucion)';
+COMMENT ON COLUMN core_test_detalle_ejecucion.id_caso IS 'Caso de prueba ejecutado (FK a core_test_caso)';
+COMMENT ON COLUMN core_test_detalle_ejecucion.id_objeto IS 'Objeto PL/SQL probado (FK a core_test_objeto)';
+COMMENT ON COLUMN core_test_detalle_ejecucion.json_entrada_enviado IS 'Payload exacto transmitido en el parámetro p_json_entrada en la corrida';
+COMMENT ON COLUMN core_test_detalle_ejecucion.json_salida_obtenido IS 'Respuesta exacta CLOB recibida en el parámetro p_json_salida';
+COMMENT ON COLUMN core_test_detalle_ejecucion.estado IS 'Resultado: PASO, FALLO, ERROR_ORACLE, TIMEOUT, OMITIDO';
+COMMENT ON COLUMN core_test_detalle_ejecucion.tiempo_ejecucion_ms IS 'Tiempo de latencia neta del objeto en milisegundos';
+COMMENT ON COLUMN core_test_detalle_ejecucion.codigo_error_oracle IS 'SQLCODE de Oracle capturado en caso de excepción (-20000, -1, etc.)';
+COMMENT ON COLUMN core_test_detalle_ejecucion.mensaje_error_oracle IS 'SQLERRM detallado o traza de excepción de Oracle';
+COMMENT ON COLUMN core_test_detalle_ejecucion.diferencias_detectadas IS 'Diferencias en JSON (Diff) entre lo esperado y lo obtenido en la prueba';
+COMMENT ON COLUMN core_test_detalle_ejecucion.fecha_ejecucion IS 'Fecha y hora precisa de ejecución del caso (hora Bogotá)';
+
+-- 11.7 Mocks y Pre-Condiciones de Prueba
+
+-- ----------------------------------------------------------------------------
+-- TABLA 32/38: CORE_TEST_MOCK_DATO
+-- ----------------------------------------------------------------------------
+CREATE TABLE core_test_mock_dato (
+    id NUMBER(12) NOT NULL,
+    id_tenant NUMBER(12) NOT NULL,
+    id_caso NUMBER(12) NOT NULL,
+    tipo_mock VARCHAR2(50) NOT NULL,
+    orden NUMBER(3) DEFAULT 1,
+    script_sql CLOB,
+    payload_contexto CLOB,
+    descripcion VARCHAR2(500),
+    estado_registro NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
+    fecha_creacion DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    CONSTRAINT pk_core_test_mock PRIMARY KEY (id),
+    CONSTRAINT fk_core_test_mock_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
+    CONSTRAINT fk_core_test_mock_caso FOREIGN KEY (id_caso) REFERENCES core_test_caso(id),
+    CONSTRAINT ck_core_test_mock_tipo CHECK (tipo_mock IN ('PRE_SETUP_SQL', 'POST_TEARDOWN_SQL', 'HEADERS_SESION', 'ESTADO_INICIAL')),
+    CONSTRAINT ck_core_test_mock_ctx CHECK (payload_contexto IS NULL OR payload_contexto IS JSON (LAX))
+);
+CREATE SEQUENCE core_test_mock_dato_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE OR REPLACE TRIGGER trg_bi_core_test_mock_dato
+BEFORE INSERT ON core_test_mock_dato
+FOR EACH ROW
+BEGIN
+    IF :new.id IS NULL THEN
+        :new.id := core_test_mock_dato_seq.NEXTVAL;
+    END IF;
+END;
+/
+
+COMMENT ON TABLE core_test_mock_dato IS 'Semillas de datos SQL y contexto de sesión para preparar y limpiar el entorno de cada prueba';
+COMMENT ON COLUMN core_test_mock_dato.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
+COMMENT ON COLUMN core_test_mock_dato.id IS 'Identificador del mock de datos o precondición (PK)';
+COMMENT ON COLUMN core_test_mock_dato.id_caso IS 'Caso de prueba al que aplica el mock (FK a core_test_caso)';
+COMMENT ON COLUMN core_test_mock_dato.tipo_mock IS 'Tipo de preparación: PRE_SETUP_SQL, POST_TEARDOWN_SQL, HEADERS_SESION, ESTADO_INICIAL';
+COMMENT ON COLUMN core_test_mock_dato.orden IS 'Orden secuencial de aplicación del script';
+COMMENT ON COLUMN core_test_mock_dato.script_sql IS 'Bloque SQL o PL/SQL de semilla o limpieza (INSERT / DELETE de prueba)';
+COMMENT ON COLUMN core_test_mock_dato.payload_contexto IS 'Variables de contexto de sesión inyectadas (Tenant, Roles simulados, Headers)';
+COMMENT ON COLUMN core_test_mock_dato.descripcion IS 'Explicación de la condición requerida para que el test funcione';
+COMMENT ON COLUMN core_test_mock_dato.estado_registro IS 'Estado del registro: 1=Activo, 0=Eliminado';
+COMMENT ON COLUMN core_test_mock_dato.fecha_creacion IS 'Fecha y hora de creación del mock (hora Bogotá)';
+
+-- ============================================================================
+-- SECCIÓN 12: TELEMETRÍA, SEGUIMIENTO DE OBJETOS & ESTADÍSTICAS (4 TABLAS)
+-- Monitoreo dinámico condicional por usuario, tiempo u objeto con call-stack
+-- ============================================================================
+
+-- 12.1 Parametrización y Reglas de Activación de Seguimiento (Profiling Rules)
+
+-- ----------------------------------------------------------------------------
+-- TABLA 33/38: CORE_TRAZA_LLAMADO
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_traza_llamado (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -1670,6 +1778,10 @@ COMMENT ON COLUMN core_traza_llamado.estado_registro IS 'Estado del registro: 1=
 COMMENT ON COLUMN core_traza_llamado.fecha_creacion IS 'Fecha y hora de grabación de la traza (hora Bogotá)';
 
 -- 12.4 Estadísticas y Agregaciones de Rendimiento (Performance Metrics / APM Summary)
+
+-- ----------------------------------------------------------------------------
+-- TABLA 34/38: CORE_TRAZA_ESTADISTICA
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_traza_estadistica (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -1694,7 +1806,7 @@ CREATE TABLE core_traza_estadistica (
     CONSTRAINT uk_core_trazas_stat UNIQUE (id_tenant, nombre_paquete, nombre_metodo, fecha_periodo)
 );
 CREATE SEQUENCE core_traza_estadistica_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
-CREATE INDEX idx_core_trazas_stat_obj ON core_traza_estadistica(id_tenant, nombre_paquete, nombre_metodo, fecha_periodo);
+CREATE INDEX idx_core_trazas_stat_obj ON core_traza_estadistica(id_tenant, id_objeto, fecha_periodo);
 
 CREATE OR REPLACE TRIGGER trg_bi_core_traza_estadistica
 BEFORE INSERT ON core_traza_estadistica
@@ -1730,6 +1842,9 @@ COMMENT ON COLUMN core_traza_estadistica.fecha_modificacion IS 'Fecha y hora de 
 -- Autenticación programática, API Keys con hashing, alcances y límite de peticiones
 -- ============================================================================
 
+-- ----------------------------------------------------------------------------
+-- TABLA 35/38: CORE_API_TOKEN
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_api_token (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -1800,6 +1915,9 @@ COMMENT ON COLUMN core_api_token.fecha_modificacion IS 'Fecha y hora de última 
 -- Repositorio de metadatos, almacenamiento en S3/OCI Object Storage y adjuntos
 -- ============================================================================
 
+-- ----------------------------------------------------------------------------
+-- TABLA 36/38: CORE_ARCHIVO
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_archivo (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -1871,6 +1989,9 @@ COMMENT ON COLUMN core_archivo.fecha_modificacion IS 'Fecha y hora de última mo
 -- Repositorio persistente autónomo para uti_ge_excepciones_pkg (reemplazo oficial de TKR_ERRORES)
 -- ============================================================================
 
+-- ----------------------------------------------------------------------------
+-- TABLA 37/38: CORE_ERROR
+-- ----------------------------------------------------------------------------
 CREATE TABLE core_error (
     id NUMBER(12) NOT NULL,
     id_tenant NUMBER(12) NOT NULL,
@@ -1951,6 +2072,95 @@ COMMENT ON COLUMN core_error.estado_registro IS 'Estado del registro: 1=Activo';
 COMMENT ON COLUMN core_error.fecha_creacion IS 'Fecha y hora de ocurrencia y captura del fallo (hora Bogotá)';
 
 -- ============================================================================
--- FIN DDL CORE (37 TABLAS, 37 SECUENCIAS, TRIGGERS E ÍNDICES)
--- NOTA: Los paquetes, procedimientos y funciones se gestionan por separado en /plsql
+-- SECCIÓN 16: CATÁLOGO Y DOCUMENTACIÓN DE ORQUESTADORES EN LENGUAJE NATURAL (1 TABLA)
+-- Metadatos descriptivos paso a paso para visualizadores gráficos e integradores
+-- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- TABLA 38/38: CORE_DOCUMENTACION_METODO
+-- ----------------------------------------------------------------------------
+CREATE TABLE core_documentacion_metodo (
+    id                             NUMBER(12) NOT NULL,
+    id_tenant                      NUMBER(12) NOT NULL,
+    id_aplicacion                  NUMBER(12),
+    id_modulo                      NUMBER(12),
+    nombre_paquete                 VARCHAR2(60) NOT NULL,
+    nombre_metodo                  VARCHAR2(60) NOT NULL,
+    titulo_funcional               VARCHAR2(255) NOT NULL,
+    resumen_ejecutivo              VARCHAR2(500) NOT NULL,
+    descripcion_negocio            CLOB NOT NULL,
+    actor_principal                VARCHAR2(100),
+    flujo_funcional_pasos          CLOB,
+    reglas_validacion              CLOB,
+    descripcion_entrada_natural    CLOB NOT NULL,
+    ejemplo_json_entrada           CLOB NOT NULL,
+    descripcion_salida_natural     CLOB NOT NULL,
+    ejemplo_json_salida            CLOB NOT NULL,
+    excepciones_negocio            CLOB,
+    requiere_autenticacion         NUMBER(1) DEFAULT 1 CHECK (requiere_autenticacion IN (0, 1)),
+    permiso_requerido              VARCHAR2(100),
+    version_metodo                 VARCHAR2(20) DEFAULT '1.0.0',
+    estado_publicacion             VARCHAR2(30) DEFAULT 'PUBLICADO' CHECK (estado_publicacion IN ('BORRADOR', 'PUBLICADO', 'DEPRECADO')),
+    categoria_visual               VARCHAR2(50) DEFAULT 'OPERATIVO',
+    icono_interfaz                 VARCHAR2(50) DEFAULT 'lucide-cpu',
+    color_distintivo               VARCHAR2(30) DEFAULT '#3b82f6',
+    etiquetas_busqueda             VARCHAR2(500),
+    estado_registro                NUMBER(1) DEFAULT 1 CHECK (estado_registro IN (0, 1)),
+    fecha_creacion                 DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    fecha_modificacion             DATE DEFAULT CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE),
+    CONSTRAINT pk_core_doc_metodo PRIMARY KEY (id),
+    CONSTRAINT fk_core_doc_metodo_tenant FOREIGN KEY (id_tenant) REFERENCES core_tenant(id),
+    CONSTRAINT fk_core_doc_metodo_app FOREIGN KEY (id_aplicacion) REFERENCES core_aplicacion(id),
+    CONSTRAINT fk_core_doc_metodo_mod FOREIGN KEY (id_modulo) REFERENCES core_modulo_app(id),
+    CONSTRAINT uk_core_doc_metodo UNIQUE (id_tenant, nombre_paquete, nombre_metodo),
+    CONSTRAINT ck_core_doc_in_json CHECK (ejemplo_json_entrada IS JSON (LAX)),
+    CONSTRAINT ck_core_doc_out_json CHECK (ejemplo_json_salida IS JSON (LAX))
+);
+
+CREATE SEQUENCE core_documentacion_metodo_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+CREATE INDEX idx_core_doc_metodo_cat ON core_documentacion_metodo(id_tenant, categoria_visual, estado_publicacion);
+
+CREATE OR REPLACE TRIGGER trg_bi_core_documentacion_metodo
+BEFORE INSERT ON core_documentacion_metodo
+FOR EACH ROW
+BEGIN
+    IF :new.id IS NULL THEN
+        :new.id := core_documentacion_metodo_seq.NEXTVAL;
+    END IF;
+END;
+/
+
+COMMENT ON TABLE core_documentacion_metodo IS 'Catálogo explicativo en lenguaje natural de los métodos orquestadores pkgln_ para visualización gráfica e integración frontal';
+COMMENT ON COLUMN core_documentacion_metodo.id IS 'Identificador único del registro de documentación (PK)';
+COMMENT ON COLUMN core_documentacion_metodo.id_tenant IS 'Identificador del tenant (FK a core_tenant)';
+COMMENT ON COLUMN core_documentacion_metodo.id_aplicacion IS 'Aplicación a la que pertenece el orquestador (FK a core_aplicacion)';
+COMMENT ON COLUMN core_documentacion_metodo.id_modulo IS 'Módulo funcional de la aplicación (FK a core_modulo_app)';
+COMMENT ON COLUMN core_documentacion_metodo.nombre_paquete IS 'Nombre físico del paquete orquestador (ej. pkgln_usuarios)';
+COMMENT ON COLUMN core_documentacion_metodo.nombre_metodo IS 'Nombre del procedimiento expuesto (ej. p_crear_usuario)';
+COMMENT ON COLUMN core_documentacion_metodo.titulo_funcional IS 'Título amigable para el usuario en la interfaz (ej. Creación y Alta de Nuevo Usuario)';
+COMMENT ON COLUMN core_documentacion_metodo.resumen_ejecutivo IS 'Breve descripción en una sola frase para listas y tarjetas del catálogo';
+COMMENT ON COLUMN core_documentacion_metodo.descripcion_negocio IS 'Explicación detallada en lenguaje natural del propósito, impacto y reglas de negocio del servicio';
+COMMENT ON COLUMN core_documentacion_metodo.actor_principal IS 'Rol o usuario que típicamente dispara este flujo (ej. Administrador de Recursos Humanos, Paciente)';
+COMMENT ON COLUMN core_documentacion_metodo.flujo_funcional_pasos IS 'Secuencia de pasos explicada en lenguaje natural (ej. 1. Valida datos, 2. Inserta persona, 3. Dispara notificación)';
+COMMENT ON COLUMN core_documentacion_metodo.reglas_validacion IS 'Condiciones de validación que se exigen antes de procesar el servicio explicadas textualmente';
+COMMENT ON COLUMN core_documentacion_metodo.descripcion_entrada_natural IS 'Explicación de qué significa cada campo del payload de entrada p_json_entrada para un usuario de negocio';
+COMMENT ON COLUMN core_documentacion_metodo.ejemplo_json_entrada IS 'Ejemplo funcional listo para copiar del parámetro p_json_entrada';
+COMMENT ON COLUMN core_documentacion_metodo.descripcion_salida_natural IS 'Explicación de los datos que retorna el servicio en p_json_salida y cómo interpretarlos';
+COMMENT ON COLUMN core_documentacion_metodo.ejemplo_json_salida IS 'Ejemplo real en JSON de la respuesta devuelta por el servicio';
+COMMENT ON COLUMN core_documentacion_metodo.excepciones_negocio IS 'Listado de posibles errores controlados y qué debe hacer el usuario en caso de ocurrir';
+COMMENT ON COLUMN core_documentacion_metodo.requiere_autenticacion IS 'Indica si se necesita sesión activa o token M2M: 1=Sí, 0=Público';
+COMMENT ON COLUMN core_documentacion_metodo.permiso_requerido IS 'Código del permiso de acceso exigido para ejecutar el método';
+COMMENT ON COLUMN core_documentacion_metodo.version_metodo IS 'Versión funcional del endpoint (ej. 1.0.0, 2.1.0)';
+COMMENT ON COLUMN core_documentacion_metodo.estado_publicacion IS 'Visibilidad en el visor gráfico: BORRADOR, PUBLICADO, DEPRECADO';
+COMMENT ON COLUMN core_documentacion_metodo.categoria_visual IS 'Agrupador gráfico: SEGURIDAD, CONFIGURACION, OPERATIVO, FACTURACION, TELEMETRIA';
+COMMENT ON COLUMN core_documentacion_metodo.icono_interfaz IS 'Nombre del icono (Lucide / FontAwesome) para renderizar en la UI gráfica';
+COMMENT ON COLUMN core_documentacion_metodo.color_distintivo IS 'Color hexadecimal o token de diseño para resaltar el método en tarjetas del visor';
+COMMENT ON COLUMN core_documentacion_metodo.etiquetas_busqueda IS 'Palabras clave separadas por comas para búsqueda rápida en el buscador de la interfaz';
+COMMENT ON COLUMN core_documentacion_metodo.estado_registro IS 'Estado de auditoría: 1=Activo, 0=Eliminado';
+COMMENT ON COLUMN core_documentacion_metodo.fecha_creacion IS 'Fecha de registro de la documentación (hora Bogotá)';
+COMMENT ON COLUMN core_documentacion_metodo.fecha_modificacion IS 'Fecha de última modificación de la documentación (hora Bogotá)';
+
+-- ============================================================================
+-- FIN DDL CORE (38 TABLAS, 38 SECUENCIAS, TRIGGERS E ÍNDICES)
+-- ORDEN TOPOLÓGICO ESTRICTO SIN DEPENDENCIAS PREVIAS NO CREADAS
 -- ============================================================================

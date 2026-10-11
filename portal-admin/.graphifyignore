@@ -1,0 +1,24 @@
+# ==============================================================================
+# GRAPHIFY IGNORE - PORTAL ADMIN
+# ==============================================================================
+
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+dist/
+build/
+.next/
+out/
+coverage/
+
+.cache/
+.wallet_cache/
+*.log
+*.zip
+
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

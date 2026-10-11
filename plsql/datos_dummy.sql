@@ -577,6 +577,164 @@ INSERT INTO core_api_token (
 );
 
 -- ----------------------------------------------------------------------------
+-- 14. DOCUMENTACIÓN EN LENGUAJE NATURAL DE ORQUESTADORES (CATÁLOGO VISUAL)
+-- ----------------------------------------------------------------------------
+PROMPT 14. Registrando Documentación en Lenguaje Natural de Métodos Orquestadores...
+
+INSERT INTO core_documentacion_metodo (
+    id, id_tenant, id_aplicacion, id_modulo, nombre_paquete, nombre_metodo,
+    titulo_funcional, resumen_ejecutivo, descripcion_negocio, actor_principal,
+    flujo_funcional_pasos, reglas_validacion,
+    descripcion_entrada_natural,
+    ejemplo_json_entrada,
+    descripcion_salida_natural,
+    ejemplo_json_salida,
+    excepciones_negocio,
+    requiere_autenticacion, permiso_requerido, version_metodo,
+    estado_publicacion, categoria_visual, icono_interfaz, color_distintivo, etiquetas_busqueda
+) VALUES (
+    1, 1, 1, NULL, 'pkgln_usuarios', 'p_crear_usuario',
+    'Creación y Alta Integral de Nuevo Usuario',
+    'Registra a una persona, genera su cuenta de usuario y asigna sus credenciales y roles iniciales en el tenant.',
+    'Este servicio orquestador coordina todo el proceso de onboarding de un colaborador o usuario final en la plataforma. Verifica primero que no existan duplicados de identificación o correo electrónico, crea el registro físico en la entidad de personas, genera el perfil de usuario con sus banderas de seguridad, y deja listo el envío de la notificación de bienvenida.',
+    'Administrador de Seguridad o Gestor de Talento Humano',
+    '1. Valida el formato y obligatoriedad de los datos recibidos en el payload.' || CHR(10) ||
+    '2. Consulta si la persona ya existe mediante su documento de identidad.' || CHR(10) ||
+    '3. Si no existe, invoca el DAO de persona para registrar sus datos biográficos.' || CHR(10) ||
+    '4. Invoca el DAO de usuario para crear la cuenta vinculada al tenant activo.' || CHR(10) ||
+    '5. Asigna los roles especificados y dispara el evento de auditoría.',
+    '- El correo electrónico debe tener formato válido y no estar registrado previamente en el tenant.' || CHR(10) ||
+    '- El tipo de documento y número de identificación son estrictamente obligatorios.' || CHR(10) ||
+    '- Debe suministrarse al menos un rol activo para el usuario.',
+    'Se debe enviar un objeto JSON con el tenant objetivo, el usuario que ejecuta la acción y el bloque "datos" con nombre, apellido, correo, documento de identidad y código del rol.',
+    '{
+  "id_tenant": 1,
+  "id_usuario_ejecutor": 1,
+  "datos": {
+    "primer_nombre": "Carlos",
+    "primer_apellido": "Gómez",
+    "correo_electronico": "carlos.gomez@acme.com",
+    "tipo_documento": "CC",
+    "numero_documento": "1020304050",
+    "nombre_usuario": "cgomez",
+    "codigo_rol": "ROL_OPERADOR"
+  }
+}',
+    'Retorna un JSON estándar con el código de respuesta (0 para éxito), mensaje descriptivo y un objeto "datos" con el ID del usuario generado y su estado.',
+    '{
+  "codigo": 0,
+  "mensaje": "Usuario creado exitosamente en el sistema",
+  "datos": {
+    "id_persona": 105,
+    "id_usuario": 25,
+    "nombre_usuario": "cgomez",
+    "estado": "ACTIVO"
+  }
+}',
+    '- Código -20001: El correo electrónico ya se encuentra registrado por otro usuario activo.' || CHR(10) ||
+    '- Código -20002: El rol solicitado no existe o no se encuentra habilitado para este inquilino.',
+    1, 'USUARIOS_CREAR', '1.0.0',
+    'PUBLICADO', 'SEGURIDAD', 'lucide-user-plus', '#2563eb', 'usuario, alta, onboarding, personas, seguridad, crear'
+);
+
+INSERT INTO core_documentacion_metodo (
+    id, id_tenant, id_aplicacion, id_modulo, nombre_paquete, nombre_metodo,
+    titulo_funcional, resumen_ejecutivo, descripcion_negocio, actor_principal,
+    flujo_funcional_pasos, reglas_validacion,
+    descripcion_entrada_natural,
+    ejemplo_json_entrada,
+    descripcion_salida_natural,
+    ejemplo_json_salida,
+    excepciones_negocio,
+    requiere_autenticacion, permiso_requerido, version_metodo,
+    estado_publicacion, categoria_visual, icono_interfaz, color_distintivo, etiquetas_busqueda
+) VALUES (
+    2, 1, 1, NULL, 'uti_manejo_trazas_pkg', 'p_iniciar_traza',
+    'Inicio de Telemetría y Rastreo de Ejecución (APM)',
+    'Verifica si el subprograma tiene activo el seguimiento y registra la cabecera en core_traza_ejecucion.',
+    'Servicio transversal de observabilidad que inicia una transacción de rastreo jerárquico. Evalúa las reglas dinámicas en caliente configuradas en core_traza_config para el paquete y subprograma en cuestión. Si está habilitado, genera un UUID de traza y registra el timestamp de inicio.',
+    'Orquestador PL/SQL (pkgln_) o API Gateway',
+    '1. Lee la configuración activa para el tenant y nombre del paquete.' || CHR(10) ||
+    '2. Si la regla exige seguimiento, genera o asocia el código de traza (trace ID).' || CHR(10) ||
+    '3. Inserta el registro inicial en core_traza_ejecucion con estado EN_PROCESO.',
+    '- Debe suministrarse el nombre del paquete y método que inician la ejecución.' || CHR(10) ||
+    '- Si se suministra payload, debe ser un JSON válido.',
+    'Requiere el nombre del paquete, nombre del método, el payload JSON recibido por el endpoint y opcionalmente el usuario ejecutor.',
+    '{
+  "id_tenant": 1,
+  "nombre_paquete": "pkgln_usuarios",
+  "nombre_metodo": "p_crear_usuario",
+  "codigo_traza": "tr-7f9a2b1c-9921",
+  "payload_entrada": {
+    "nombre_usuario": "cgomez"
+  }
+}',
+    'Devuelve el identificador único de la traza iniciada y la bandera de si la traza debe continuar grabando los llamados hijos.',
+    '{
+  "codigo": 0,
+  "mensaje": "Traza inicializada correctamente",
+  "datos": {
+    "id_traza": 4501,
+    "debe_trazar_detalle": 1,
+    "codigo_traza": "tr-7f9a2b1c-9921"
+  }
+}',
+    '- Código -20050: Error al persistir cabecera de traza en almacenamiento autónomo.',
+    0, NULL, '1.0.0',
+    'PUBLICADO', 'TELEMETRIA', 'lucide-activity', '#10b981', 'telemetria, trazas, apm, observabilidad, profiling'
+);
+
+INSERT INTO core_documentacion_metodo (
+    id, id_tenant, id_aplicacion, id_modulo, nombre_paquete, nombre_metodo,
+    titulo_funcional, resumen_ejecutivo, descripcion_negocio, actor_principal,
+    flujo_funcional_pasos, reglas_validacion,
+    descripcion_entrada_natural,
+    ejemplo_json_entrada,
+    descripcion_salida_natural,
+    ejemplo_json_salida,
+    excepciones_negocio,
+    requiere_autenticacion, permiso_requerido, version_metodo,
+    estado_publicacion, categoria_visual, icono_interfaz, color_distintivo, etiquetas_busqueda
+) VALUES (
+    3, 1, 1, NULL, 'pkgln_seguridad', 'p_iniciar_sesion',
+    'Autenticación y Apertura de Sesión Activa',
+    'Valida credenciales de usuario, verifica restricciones de acceso y emite los datos de contexto de la sesión.',
+    'Flujo principal de inicio de sesión en el sistema. Realiza la comprobación de contraseña contra el hash almacenado, verifica que la cuenta no esté bloqueada ni expirada, registra la sesión en core_sesion_activa y recopila los roles y permisos concedidos.',
+    'Usuario Final / Frontend de Login',
+    '1. Busca al usuario por nombre de usuario o correo dentro del tenant.' || CHR(10) ||
+    '2. Valida intentos fallidos previos; si supera el límite, bloquea la cuenta.' || CHR(10) ||
+    '3. Compara el hash de la contraseña.' || CHR(10) ||
+    '4. Genera la sesión en core_sesion_activa y actualiza el timestamp de último ingreso.' || CHR(10) ||
+    '5. Compila los permisos y perfiles para devolverlos a la interfaz.',
+    '- El nombre de usuario y la contraseña no pueden estar vacíos.' || CHR(10) ||
+    '- El tenant debe encontrarse activo y en estado regular.',
+    'Recibe las credenciales del usuario junto con metadatos del cliente (IP y user-agent).',
+    '{
+  "id_tenant": 1,
+  "nombre_usuario": "admin.acme",
+  "clave": "Secreta123*",
+  "ip_origen": "190.145.20.10",
+  "agente_usuario": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+}',
+    'Devuelve el token de sesión generado, datos básicos del perfil autenticado y la lista de aplicaciones y permisos autorizados.',
+    '{
+  "codigo": 0,
+  "mensaje": "Autenticación exitosa",
+  "datos": {
+    "id_usuario": 1,
+    "id_sesion": 890,
+    "token_sesion": "eyJhbGciOiJIUzI1NiIsIn...",
+    "expira_en_minutos": 480,
+    "roles": ["ROL_ADMIN"]
+  }
+}',
+    '- Código -20010: Credenciales inválidas (usuario o contraseña incorrectos).' || CHR(10) ||
+    '- Código -20011: Cuenta bloqueada por exceso de intentos fallidos.',
+    0, NULL, '1.0.0',
+    'PUBLICADO', 'SEGURIDAD', 'lucide-key-round', '#f59e0b', 'login, autenticacion, seguridad, sesion, token'
+);
+
+-- ----------------------------------------------------------------------------
 -- CONFIRMACIÓN DE LA TRANSACCIÓN
 -- ----------------------------------------------------------------------------
 COMMIT;
@@ -586,5 +744,6 @@ PROMPT CARGA DE DATOS DUMMY COMPLETADA EXITOSAMENTE.
 PROMPT Tenants creados: 2
 PROMPT Roles creados: 6 (3 por tenant)
 PROMPT Usuarios creados: 24 (4 por cada rol)
+PROMPT Métodos orquestadores documentados: 3 (pkgln_usuarios, uti_manejo_trazas_pkg, pkgln_seguridad)
 PROMPT Tipos de notificación probados: EMAIL, SMS, WHATSAPP, PUSH_NOTIFICATION
 PROMPT ============================================================================

@@ -2,11 +2,11 @@
 -- PLATAFORMA SAAS MULTI-APLICACIONES — SCRIPT MAESTRO DE INSTALACIÓN
 -- ARCHIVO: instalar_todo.sql
 -- SECUENCIA DE EJECUCIÓN:
---   1. DDL_CORE.sql (37 tablas, 37 secuencias, triggers autonuméricos, índices y comentarios)
---   2. Procedimientos utilitarios (/plsql/procedures/p_do_commit.sql)
---   3. Especificaciones de paquetes (/plsql/packages/*.pks)
---   4. Cuerpos de paquetes (/plsql/packages/*.pkb)
---   5. Carga de datos dummy (/datos_dummy.sql)
+--   1. DDL_CORE.sql (38 tablas, 38 secuencias, triggers autonuméricos, índices y comentarios)
+--   2. Procedimiento utilitario (p_do_commit.sql)
+--   3. Especificaciones de paquetes (*.pks)
+--   4. Cuerpos de paquetes (*.pkb)
+--   5. Carga de datos dummy (datos_dummy.sql)
 -- ============================================================================
 
 SET SERVEROUTPUT ON SIZE UNLIMITED;
@@ -29,7 +29,7 @@ SELECT TO_CHAR(CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE), 'YYYY-M
 -- PASO 1: CREACIÓN DE ESTRUCTURAS DE DATOS (TABLAS, SECUENCIAS, TRIGGERS)
 -- ----------------------------------------------------------------------------
 PROMPT 
-PROMPT >>> PASO 1/5: Ejecutando DDL_CORE.sql (37 Tablas, Secuencias, Triggers)...
+PROMPT >>> PASO 1/5: Ejecutando DDL_CORE.sql (38 Tablas, Secuencias, Triggers)...
 @DDL_CORE.sql
 
 -- ----------------------------------------------------------------------------
@@ -53,6 +53,9 @@ PROMPT   - Compilando uti_ge_excepciones_pkg.pks...
 PROMPT   - Compilando uti_manejo_trazas_pkg.pks...
 @uti_manejo_trazas_pkg.pks
 
+PROMPT   - Compilando uti_paquetes_pkg.pks...
+@uti_paquetes_pkg.pks
+
 -- ----------------------------------------------------------------------------
 -- PASO 4: CUERPOS DE PAQUETES (.pkb)
 -- ----------------------------------------------------------------------------
@@ -66,6 +69,9 @@ PROMPT   - Compilando uti_ge_excepciones_pkg.pkb...
 
 PROMPT   - Compilando uti_manejo_trazas_pkg.pkb...
 @uti_manejo_trazas_pkg.pkb
+
+PROMPT   - Compilando uti_paquetes_pkg.pkb...
+@uti_paquetes_pkg.pkb
 
 -- ----------------------------------------------------------------------------
 -- PASO 5: CARGA DE DATOS DUMMY DE PRUEBA

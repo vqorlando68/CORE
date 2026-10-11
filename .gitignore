@@ -19,3 +19,12 @@ npm-debug.log*
 node_modules/
 dist/
 build/
+
+# Entornos y credenciales
+.env
+.env.*
+*.zip
+.wallet_cache/
+
+# Graphify
+graphify-out/

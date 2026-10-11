@@ -1,0 +1,35 @@
+# ==============================================================================
+# GRAPHIFY IGNORE - REPOSITORIO CORE
+# Exclusiones de dependencias, artefactos de compilación y datos temporales
+# ==============================================================================
+
+# Dependencias externas y gestores de paquetes
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Compilación y builds
+dist/
+build/
+.next/
+out/
+coverage/
+
+# Entornos virtuales y cachés
+.cache/
+.wallet_cache/
+*.pyc
+__pycache__/
+
+# Logs y binarios
+*.log
+*.zip
+*.tar.gz
+
+# Archivos de sistema y configuraciones de editor redundantes
+.git/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -281,10 +281,12 @@ AS
     END p_eliminar;
 
     -- 6. Eliminar todos los registros (Enfoque B: acotado al tenant activo)
-    PROCEDURE p_eliminar_registros IS
+    PROCEDURE p_eliminar_registros (
+        p_id_tenant IN core_<tabla>.id_tenant%TYPE DEFAULT NULL
+    ) IS
     BEGIN
         DELETE FROM core_<tabla>
-         WHERE id_tenant = TO_NUMBER(SYS_CONTEXT('CORE_CTX', 'ID_TENANT'));
+         WHERE id_tenant = NVL(p_id_tenant, TO_NUMBER(SYS_CONTEXT('CORE_CTX', 'ID_TENANT')));
     END p_eliminar_registros;
 
     -- 7. Verificar existencia por PK
@@ -329,10 +331,16 @@ AS
         p_rowid          OUT VARCHAR2
     ) RETURN BOOLEAN IS
     BEGIN
-        SELECT t.*, t.ROWID
-          INTO pro_core_<tabla>, p_rowid
-          FROM core_<tabla> t
-         WHERE t.id = pty_id AND t.id_tenant = NVL(pty_id_tenant, TO_NUMBER(SYS_CONTEXT('CORE_CTX', 'ID_TENANT')));
+        SELECT ROWID
+          INTO p_rowid
+          FROM core_<tabla>
+         WHERE id = pty_id AND id_tenant = NVL(pty_id_tenant, TO_NUMBER(SYS_CONTEXT('CORE_CTX', 'ID_TENANT')));
+
+        SELECT *
+          INTO pro_core_<tabla>
+          FROM core_<tabla>
+         WHERE ROWID = p_rowid;
+
         RETURN TRUE;
     EXCEPTION
         WHEN NO_DATA_FOUND THEN
@@ -409,12 +417,13 @@ AS
 
     -- 15. Actualizar todos los registros (Enfoque B: acotado al tenant activo)
     PROCEDURE p_actualizar_registros (
-        pro_core_<tabla> IN core_<tabla>%ROWTYPE
+        pro_core_<tabla> IN core_<tabla>%ROWTYPE,
+        p_id_tenant      IN core_<tabla>.id_tenant%TYPE DEFAULT NULL
     ) IS
     BEGIN
         UPDATE core_<tabla>
            SET ROW = pro_core_<tabla>
-         WHERE id_tenant = TO_NUMBER(SYS_CONTEXT('CORE_CTX', 'ID_TENANT'));
+         WHERE id_tenant = NVL(p_id_tenant, TO_NUMBER(SYS_CONTEXT('CORE_CTX', 'ID_TENANT')));
     END p_actualizar_registros;
 
     -- 16. Obtener valores por defecto
@@ -1096,19 +1105,36 @@ Es requisito obligatorio **documentar en detalle la estructura (schema) y un eje
 
 ---
 
+### 12.1 Catálogo y Documentación en Lenguaje Natural (`core_documentacion_metodo`)
+Para alimentar visualizadores gráficos interactivos, portales de documentación funcional y catálogos de APIs para analistas e integradores, todo método orquestador de `pkgln_` debe contar con su correspondiente registro en la tabla **`core_documentacion_metodo`**:
+* **Enfoque de Lenguaje Natural:** La documentación almacenada no es meramente técnica, sino redactada para ser entendida por analistas de negocio, usuarios operativos y líderes de producto.
+* **Metadatos Registrados:**
+  - `nombre_paquete` y `nombre_metodo` (Identificadores del servicio).
+  - `titulo_funcional` y `resumen_ejecutivo` (Para tarjetas e índices del catálogo).
+  - `descripcion_negocio` y `actor_principal` (Propósito de negocio y rol que lo invoca).
+  - `flujo_funcional_pasos` (Secuencia paso a paso explicada didácticamente).
+  - `reglas_validacion` (Reglas y condiciones requeridas para la ejecución).
+  - `descripcion_entrada_natural` y `ejemplo_json_entrada` (Explicación y JSON real de `p_json_entrada`).
+  - `descripcion_salida_natural` y `ejemplo_json_salida` (Explicación y JSON real de `p_json_salida`).
+  - `excepciones_negocio` (Códigos de error de negocio y acciones de resolución).
+  - `categoria_visual`, `icono_interfaz` y `color_distintivo` (Tokens de renderizado para UI gráfica).
+
+---
+
 ## 13. Lista de Chequeo Arquitectónica Obligatoria (Pre-entrega)
 
 Antes de entregar cualquier código, el agente debe auto-verificar:
 - [ ] **Clasificación**: ¿El código está en el paquete correcto (`_DAO`, `pkgca_`, `pkgcn_`, `pkgln_`) según su responsabilidad?
 - [ ] **Nombre DAO**: ¿Cumple con la sintaxis exacta `PKG<TABLA>_DAO`?
-- [ ] **Plantilla DAO**: ¿Mantiene los nombres y firmas de los 18 métodos oficiales sin inventar variaciones?
+- [ ] **Plantilla DAO**: ¿Mantiene los nombres y firmas de los 20 métodos oficiales sin inventar variaciones?
 - [ ] **Prefijos de Subprogramas**: ¿Todo procedimiento empieza por `p_` y toda función empieza por `f_` (prohibido `pr_`, `fn_`)?
 - [ ] **Nomenclatura Variables Locales**: ¿Toda variable local escalar empieza por `v_`?
 - [ ] **Nomenclatura Parámetros**: ¿Todo parámetro formal escalar empieza por `p_`?
 - [ ] **Registros Locales y Parámetros**: ¿Los registros usan `vro_` (locales) y `pro_` (parámetros)?
 - [ ] **Tablas PL Locales y Parámetros**: ¿Las tablas PL usan `vta_` (locales) y `pta_` (parámetros)?
 - [ ] **Procesos Frontend CLOB**: ¿Los endpoints del frontend residen en `pkgln_` con `p_json_entrada` (IN) y `p_json_salida` (OUT)?
-- [ ] **Validación de Trazabilidad**: ¿El objeto `pkgln_` valida si tiene seguimiento habilitado en `core_trazas_config` y realiza su registro en `core_trazas_ejecucion`?
+- [ ] **Validación de Trazabilidad**: ¿El objeto `pkgln_` valida si tiene seguimiento habilitado en `core_traza_config` e interactúa con `uti_manejo_trazas_pkg`?
+- [ ] **Documentación en Lenguaje Natural (`core_documentacion_metodo`)**: ¿Está documentado el orquestador con su narrativa de negocio, pasos funcionales, validaciones y ejemplos para el catálogo visual?
 - [ ] **Documentación de Esquemas y Ejemplos JSON en `.pks`**: ¿El bloque en `.pks` documenta el schema y ejemplos reales tanto del JSON de entrada como del JSON de salida?
 - [ ] **Documentación y Control de Cambios**: ¿Existe el bloque de documentación antes de cada objeto con fecha, autor y descripción de cambios?
 - [ ] **Transaccionalidad en Orquestador**: ¿Se invocó `p_do_commit('<paquete>.<subprograma>')` únicamente en `pkgln_` y nunca en `pkgcn_` ni DAO?

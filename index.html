@@ -134,7 +134,7 @@
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
           </svg>
-          Exportar DDL (37 Tablas)
+          Exportar DDL (38 Tablas)
         </button>
       </div>
     </header>
@@ -346,14 +346,14 @@
           <!-- Toolbar del Grafo -->
           <div class="graph-toolbar">
             <div class="graph-stats-pills">
-              <span class="badge badge-tenant">37 Tablas</span>
-              <span class="badge badge-global">42 Relaciones FK</span>
+              <span class="badge badge-tenant">38 Tablas</span>
+              <span class="badge badge-global">45 Relaciones FK</span>
               <span style="color:var(--text-dim); font-size:12px;">Arrastra nodos para organizar • Rueda para Zoom • Clic en nodo para aislar</span>
             </div>
 
             <div style="display:flex; align-items:center; gap:10px;">
               <select id="graphModuleFilter" style="background:var(--bg-input); border:1px solid var(--border-subtle); color:var(--text-main); border-radius:var(--radius-sm); padding:6px 10px; font-size:12px; outline:none;">
-                <option value="all">Ver Todas las Familias (37)</option>
+                <option value="all">Ver Todas las Familias (38)</option>
                 <option value="identidad">Identidad & RBAC (10)</option>
                 <option value="notificaciones">Notificaciones & Procesos (7)</option>
                 <option value="apps">Multi-Aplicación (3)</option>
@@ -461,7 +461,7 @@
                 core_&lt;tabla&gt; & core_&lt;tabla&gt;_seq (START WITH 1 INCREMENT BY 1 NOCACHE)
               </div>
               <div class="rule-card-footer">
-                <span style="color:var(--text-dim);">Total: 37 tablas / 37 secuencias</span>
+                <span style="color:var(--text-dim);">Total: 38 tablas / 38 secuencias</span>
                 <span style="color:var(--color-primary); font-weight:600;">Estandarizado</span>
               </div>
             </div>
@@ -1928,6 +1928,51 @@
           { name: "traza_error", type: "CLOB", nullable: "SI", def: "-", desc: "DBMS_UTILITY.FORMAT_ERROR_BACKTRACE forense." },
           { name: "pila_llamadas", type: "CLOB", nullable: "SI", def: "-", desc: "DBMS_UTILITY.FORMAT_CALL_STACK completo." },
           { name: "payload_entrada", type: "CLOB", nullable: "SI", def: "-", isJson: true, desc: "Payload exacto inyectado al subprograma." }
+        ]
+      },
+      {
+        id: "core_documentacion_metodo",
+        name: "core_documentacion_metodo",
+        module: "10. Catálogo y Documentación Gráfica",
+        desc: "Catálogo explicativo en lenguaje natural de los métodos orquestadores pkgln_ para visualización gráfica e integración frontal.",
+        seq: "core_documentacion_metodo_seq",
+        trigger: "trg_bi_core_documentacion_metodo",
+        isTenant: true,
+        isTest: false,
+        isTraza: false,
+        pk: "id",
+        dao: "pkgcore_documentacion_metodo_dao",
+        fks: [
+          { col: "id_tenant", refTable: "core_tenant", refCol: "id" },
+          { col: "id_aplicacion", refTable: "core_aplicacion", refCol: "id" },
+          { col: "id_modulo", refTable: "core_modulo_app", refCol: "id" }
+        ],
+        columns: [
+          { name: "id", type: "NUMBER(12)", nullable: "NO", def: "SEQ", pk: true, desc: "Identificador único de la documentación (PK)." },
+          { name: "id_tenant", type: "NUMBER(12)", nullable: "NO", def: "-", pk: false, fk: true, desc: "Identificador del inquilino (FK a core_tenant)." },
+          { name: "id_aplicacion", type: "NUMBER(12)", nullable: "SI", def: "-", fk: true, desc: "Aplicación a la que pertenece el servicio (FK a core_aplicacion)." },
+          { name: "id_modulo", type: "NUMBER(12)", nullable: "SI", def: "-", fk: true, desc: "Módulo funcional (FK a core_modulo_app)." },
+          { name: "nombre_paquete", type: "VARCHAR2(60)", nullable: "NO", def: "-", desc: "Nombre del paquete orquestador (ej. pkgln_usuarios)." },
+          { name: "nombre_metodo", type: "VARCHAR2(60)", nullable: "NO", def: "-", desc: "Nombre del procedimiento expuesto (ej. p_crear_usuario)." },
+          { name: "titulo_funcional", type: "VARCHAR2(255)", nullable: "NO", def: "-", desc: "Título funcional amigable para la interfaz de usuario." },
+          { name: "resumen_ejecutivo", type: "VARCHAR2(500)", nullable: "NO", def: "-", desc: "Resumen conciso en una frase para listados y tarjetas." },
+          { name: "descripcion_negocio", type: "CLOB", nullable: "NO", def: "-", desc: "Explicación detallada en lenguaje natural del flujo de negocio." },
+          { name: "actor_principal", type: "VARCHAR2(100)", nullable: "SI", def: "-", desc: "Rol o actor que ejecuta la operación." },
+          { name: "flujo_funcional_pasos", type: "CLOB", nullable: "SI", def: "-", desc: "Secuencia ordenada de pasos funcionales en lenguaje natural." },
+          { name: "reglas_validacion", type: "CLOB", nullable: "SI", def: "-", desc: "Condiciones de validación requeridas explicadas textualmente." },
+          { name: "descripcion_entrada_natural", type: "CLOB", nullable: "NO", def: "-", desc: "Descripción didáctica del payload de entrada p_json_entrada." },
+          { name: "ejemplo_json_entrada", type: "CLOB", nullable: "NO", def: "-", isJson: true, desc: "Ejemplo funcional listo para pruebas de p_json_entrada." },
+          { name: "descripcion_salida_natural", type: "CLOB", nullable: "NO", def: "-", desc: "Descripción didáctica de los datos retornados en p_json_salida." },
+          { name: "ejemplo_json_salida", type: "CLOB", nullable: "NO", def: "-", isJson: true, desc: "Ejemplo real en JSON de la respuesta p_json_salida." },
+          { name: "excepciones_negocio", type: "CLOB", nullable: "SI", def: "-", desc: "Listado de códigos de error de negocio y acciones esperadas." },
+          { name: "requiere_autenticacion", type: "NUMBER(1)", nullable: "SI", def: "1", desc: "Bandera: 1=Requiere autenticación, 0=Público." },
+          { name: "permiso_requerido", type: "VARCHAR2(100)", nullable: "SI", def: "-", desc: "Permiso de seguridad exigido." },
+          { name: "version_metodo", type: "VARCHAR2(20)", nullable: "SI", def: "'1.0.0'", desc: "Versión semántica del método." },
+          { name: "estado_publicacion", type: "VARCHAR2(30)", nullable: "SI", def: "'PUBLICADO'", desc: "Estado: BORRADOR, PUBLICADO, DEPRECADO." },
+          { name: "categoria_visual", type: "VARCHAR2(50)", nullable: "SI", def: "'OPERATIVO'", desc: "Categoría para tarjetas UI: SEGURIDAD, CONFIGURACION, etc." },
+          { name: "icono_interfaz", type: "VARCHAR2(50)", nullable: "SI", def: "'lucide-cpu'", desc: "Nombre de icono Lucide para renderizado." },
+          { name: "color_distintivo", type: "VARCHAR2(30)", nullable: "SI", def: "'#3b82f6'", desc: "Color distintivo en hexadecimal para la UI." },
+          { name: "etiquetas_busqueda", type: "VARCHAR2(500)", nullable: "SI", def: "-", desc: "Palabras clave separadas por comas para búsqueda rápida." }
         ]
       }
     ];

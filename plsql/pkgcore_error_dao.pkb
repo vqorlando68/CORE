@@ -69,10 +69,12 @@ AS
     END p_eliminar;
 
     -- 6. Eliminar todos los registros (Enfoque B: acotado al tenant activo)
-    PROCEDURE p_eliminar_registros IS
+    PROCEDURE p_eliminar_registros (
+        p_id_tenant IN core_error.id_tenant%TYPE DEFAULT NULL
+    ) IS
     BEGIN
         DELETE FROM core_error
-         WHERE id_tenant = TO_NUMBER(SYS_CONTEXT('CORE_CTX', 'ID_TENANT'));
+         WHERE id_tenant = NVL(p_id_tenant, TO_NUMBER(SYS_CONTEXT('CORE_CTX', 'ID_TENANT')));
     END p_eliminar_registros;
 
     -- 7. Verificar existencia por PK
@@ -117,10 +119,16 @@ AS
         p_rowid        OUT VARCHAR2
     ) RETURN BOOLEAN IS
     BEGIN
-        SELECT t.*, t.ROWID
-          INTO pro_core_error, p_rowid
-          FROM core_error t
-         WHERE t.id = pty_id AND t.id_tenant = NVL(pty_id_tenant, TO_NUMBER(SYS_CONTEXT('CORE_CTX', 'ID_TENANT')));
+        SELECT ROWID
+          INTO p_rowid
+          FROM core_error
+         WHERE id = pty_id AND id_tenant = NVL(pty_id_tenant, TO_NUMBER(SYS_CONTEXT('CORE_CTX', 'ID_TENANT')));
+
+        SELECT *
+          INTO pro_core_error
+          FROM core_error
+         WHERE ROWID = p_rowid;
+
         RETURN TRUE;
     EXCEPTION
         WHEN NO_DATA_FOUND THEN
@@ -197,12 +205,13 @@ AS
 
     -- 15. Actualizar todos los registros (Enfoque B: acotado al tenant activo)
     PROCEDURE p_actualizar_registros (
-        pro_core_error IN core_error%ROWTYPE
+        pro_core_error IN core_error%ROWTYPE,
+        p_id_tenant    IN core_error.id_tenant%TYPE DEFAULT NULL
     ) IS
     BEGIN
         UPDATE core_error
            SET ROW = pro_core_error
-         WHERE id_tenant = TO_NUMBER(SYS_CONTEXT('CORE_CTX', 'ID_TENANT'));
+         WHERE id_tenant = NVL(p_id_tenant, TO_NUMBER(SYS_CONTEXT('CORE_CTX', 'ID_TENANT')));
     END p_actualizar_registros;
 
     -- 16. Obtener valores por defecto

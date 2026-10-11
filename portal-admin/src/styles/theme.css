@@ -1,0 +1,140 @@
+/* ============================================================================
+   TEMA ÚNICO INSTITUCIONAL CORE SAAS — SISTEMA DE TOKENS Y VARIABLES CSS
+   Cumplimiento Estricto de la Regla 12 de AGENTS.md
+   ============================================================================ */
+
+:root,
+[data-theme="core"],
+[data-theme="dark"] {
+  /* Fondo y Superficies */
+  --bg-app: #060913;
+  --bg-sidebar: #0A0F1D;
+  --bg-surface: #0E162B;
+  --bg-surface-elevated: rgba(18, 28, 52, 0.75);
+  --bg-surface-hover: rgba(28, 43, 77, 0.85);
+  --bg-glass: rgba(10, 16, 32, 0.72);
+  --bg-glass-card: rgba(14, 22, 44, 0.65);
+  --bg-input: rgba(255, 255, 255, 0.05);
+  --bg-input-focus: rgba(255, 255, 255, 0.08);
+
+  /* Bordes */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.14);
+  --border-accent: rgba(56, 189, 248, 0.35);
+
+  /* Textos y Tipografía */
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --text-dim: #64748B;
+  --text-inverse: #060913;
+
+  /* Colores Principales y de Estado */
+  --color-primary: #38BDF8;
+  --color-primary-dark: #0284C7;
+  --color-primary-glow: rgba(56, 189, 248, 0.28);
+  --color-secondary: #818CF8;
+  --color-accent: #00F0FF;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-danger: #F43F5E;
+  --color-purple: #C084FC;
+
+  /* Badges y Tags */
+  --badge-bg-primary: rgba(56, 189, 248, 0.12);
+  --badge-border-primary: rgba(56, 189, 248, 0.3);
+  --badge-bg-success: rgba(16, 185, 129, 0.12);
+  --badge-border-success: rgba(16, 185, 129, 0.3);
+  --badge-bg-warning: rgba(245, 158, 11, 0.12);
+  --badge-border-warning: rgba(245, 158, 11, 0.3);
+  --badge-bg-danger: rgba(244, 63, 94, 0.12);
+  --badge-border-danger: rgba(244, 63, 94, 0.3);
+
+  /* Gradientes */
+  --grad-primary: linear-gradient(135deg, #0284C7 0%, #6366F1 100%);
+  --grad-accent: linear-gradient(135deg, #00F0FF 0%, #3B82F6 100%);
+  --grad-card: linear-gradient(145deg, rgba(22, 33, 62, 0.6) 0%, rgba(14, 21, 40, 0.6) 100%);
+
+  /* Sombras y Efectos */
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 10px 20px -3px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 20px 30px -5px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 25px rgba(56, 189, 248, 0.25);
+
+  /* Radios y Espaciados */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Fuentes */
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --glass-blur: blur(16px);
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Variante Tema Claro */
+[data-theme="light"] {
+  --bg-app: #F8FAFC;
+  --bg-sidebar: #F1F5F9;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #F8FAFC;
+  --bg-surface-hover: #F1F5F9;
+  --bg-glass: rgba(255, 255, 255, 0.85);
+  --bg-glass-card: rgba(255, 255, 255, 0.9);
+  --bg-input: #F1F5F9;
+  --bg-input-focus: #E2E8F0;
+
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-medium: rgba(0, 0, 0, 0.14);
+  --border-accent: rgba(2, 132, 199, 0.3);
+
+  --text-main: #0F172A;
+  --text-muted: #475569;
+  --text-dim: #64748B;
+  --text-inverse: #FFFFFF;
+
+  --color-primary: #0284C7;
+  --color-primary-dark: #0369A1;
+  --color-primary-glow: rgba(2, 132, 199, 0.15);
+  --color-secondary: #6366F1;
+  --color-accent: #0284C7;
+
+  --badge-bg-primary: rgba(2, 132, 199, 0.1);
+  --badge-border-primary: rgba(2, 132, 199, 0.25);
+
+  --grad-card: linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 100%);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 20px rgba(2, 132, 199, 0.15);
+}
+
+/* Variante Tema Infantil / Baby */
+[data-theme="baby"] {
+  --bg-app: #0F172A;
+  --bg-sidebar: #1E293B;
+  --bg-surface: #1E293B;
+  --bg-surface-elevated: #334155;
+  --bg-surface-hover: #475569;
+  --color-primary: #38BDF8;
+  --color-secondary: #F472B6;
+  --color-accent: #FBBF24;
+  --text-main: #F8FAFC;
+  --grad-primary: linear-gradient(135deg, #38BDF8 0%, #F472B6 100%);
+}
+
+/* Variante Tema Pirata / Dark Gold */
+[data-theme="pirata"] {
+  --bg-app: #0A0A0A;
+  --bg-sidebar: #141414;
+  --bg-surface: #1C1917;
+  --bg-surface-elevated: #292524;
+  --bg-surface-hover: #44403C;
+  --color-primary: #F59E0B;
+  --color-secondary: #D97706;
+  --color-accent: #EF4444;
+  --text-main: #F5F5F4;
+  --grad-primary: linear-gradient(135deg, #F59E0B 0%, #B45309 100%);
+}

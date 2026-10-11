@@ -19,6 +19,13 @@ PROMPT =========================================================================
 PROMPT Borrando paquetes y procedimientos utilitarios...
 
 BEGIN
+    EXECUTE IMMEDIATE 'DROP PACKAGE uti_paquetes_pkg';
+    DBMS_OUTPUT.PUT_LINE('Paquete uti_paquetes_pkg eliminado.');
+EXCEPTION WHEN OTHERS THEN NULL;
+END;
+/
+
+BEGIN
     EXECUTE IMMEDIATE 'DROP PACKAGE uti_manejo_trazas_pkg';
     DBMS_OUTPUT.PUT_LINE('Paquete uti_manejo_trazas_pkg eliminado.');
 EXCEPTION WHEN OTHERS THEN NULL;
@@ -59,9 +66,13 @@ END;
 /
 
 -- ----------------------------------------------------------------------------
--- 3. ELIMINACIÓN DE TABLAS (37 TABLAS EN ORDEN INVERSO CON CASCADE Y PURGE)
+-- 3. ELIMINACIÓN DE TABLAS (38 TABLAS EN ORDEN INVERSO CON CASCADE Y PURGE)
 -- ----------------------------------------------------------------------------
-PROMPT Borrando las 37 tablas del Core...
+PROMPT Borrando las 38 tablas del Core...
+
+-- Catálogo de Métodos y Documentación Gráfica
+BEGIN EXECUTE IMMEDIATE 'DROP TABLE core_documentacion_metodo CASCADE CONSTRAINTS PURGE'; EXCEPTION WHEN OTHERS THEN NULL; END;
+/
 
 -- Auditoría, Errores y Observabilidad
 BEGIN EXECUTE IMMEDIATE 'DROP TABLE core_error CASCADE CONSTRAINTS PURGE'; EXCEPTION WHEN OTHERS THEN NULL; END;
@@ -207,7 +218,8 @@ DECLARE
         'core_traza_ejecucion_seq', 'core_traza_llamado_seq',
         'core_traza_estadistica_seq', 'core_api_token_seq',
         'core_tipo_archivo_seq', 'core_archivo_seq',
-        'core_archivo_version_seq', 'core_error_seq'
+        'core_archivo_version_seq', 'core_error_seq',
+        'core_documentacion_metodo_seq'
     );
 BEGIN
     FOR i IN 1..v_secuencias.COUNT LOOP

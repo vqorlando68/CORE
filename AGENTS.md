@@ -251,3 +251,32 @@ El seguimiento y call-stack jerárquico se audita en 4 tablas de observabilidad 
 * **Archivo Único de Tema:** Toda definición del estilo visual de la interfaz de usuario (tipografía, fuentes Google Fonts / locales, paleta de colores, gradientes, escalas de espaciado, radios de bordes, sombras y variantes para modo claro y oscuro) **debe quedar almacenada obligatoriamente en un solo archivo con el nombre del tema** (ej. `tema-core.css`, `theme.css`, `tema-default.css` o equivalente según el stack).
 * **Consumo Exclusivo por Variables / Tokens:** Queda terminantemente prohibido quemar estilos directos, valores hexadecimales o tipografías dispersas en archivos HTML, plantillas o componentes individuales. Toda regla visual debe consumir las variables CSS (Custom Properties) o tokens semánticos provistos por dicho archivo de tema (ej. `var(--color-fondo)`, `var(--color-primario)`, `var(--fuente-principal)`).
 * **Intercambiabilidad e Identidad Multi-Tenant:** La arquitectura visual debe garantizar que el cambio completo de imagen, branding o soporte de temas personalizados por inquilino (`id_tenant`) se realice únicamente sustituyendo o alternando dicho archivo de tema, sin requerir modificaciones en la estructura de marcado ni en la lógica funcional.
+
+---
+
+## 13. Catálogo y Documentación en Lenguaje Natural de Orquestadores (`core_documentacion_metodo`)
+Para permitir que herramientas gráficas, frontends administrativos, portales para desarrolladores y analistas de negocio puedan visualizar de manera interactiva la documentación de los métodos de los orquestadores (`pkgln_`), la plataforma dispone de la tabla centralizada **`core_documentacion_metodo`**:
+* **Propósito:** Almacenar de forma estructurada y en **lenguaje natural no técnico** la descripción funcional completa de cada procedimiento expuesto en los paquetes `pkgln_`.
+* **Contenido Obligatorio por Método:**
+  1. **Encabezado y Metadatos:** `nombre_paquete`, `nombre_metodo`, `titulo_funcional`, `resumen_ejecutivo`, `actor_principal` (rol que lo dispara), `version_metodo`.
+  2. **Narrativa de Negocio:** `descripcion_negocio` (explicación en lenguaje natural del proceso), `flujo_funcional_pasos` (pasos secuenciales ordenados), `reglas_validacion` (condiciones y validaciones del dominio).
+  3. **Especificación de Payloads en Lenguaje Natural:**
+     * `descripcion_entrada_natural`: Explicación didáctica de los campos requeridos en `p_json_entrada`.
+     * `ejemplo_json_entrada`: Payload de entrada de ejemplo listo para pruebas (con constraint JSON lax).
+     * `descripcion_salida_natural`: Explicación de los datos que retorna `p_json_salida`.
+     * `ejemplo_json_salida`: Respuesta devuelta de ejemplo (con constraint JSON lax).
+     * `excepciones_negocio`: Posibles errores controlados y cómo corregirlos.
+  4. **Metadatos Visuales para el Frontend:** `categoria_visual` (SEGURIDAD, OPERATIVO, FACTURACION, etc.), `icono_interfaz` (token de icono Lucide/FontAwesome), `color_distintivo` (color hex para tarjetas), `etiquetas_busqueda` (palabras clave para filtrado rápido).
+* **Consistencia:** Toda modificación en la firma o comportamiento de un orquestador `pkgln_` debe reflejarse en su registro correspondiente en `core_documentacion_metodo`.
+
+---
+
+## 14. Generador Automático de Paquetes DAO (`uti_paquetes_pkg`)
+Para garantizar la estandarización absoluta y evitar discrepancias manuales de firmas o sintaxis en los 20 métodos oficiales de acceso a datos, se dispone del paquete utilitario **`uti_paquetes_pkg`**:
+* **Procedimiento:** `p_crear_dao(p_nombre_tabla IN VARCHAR2 DEFAULT NULL)`
+* **Comportamiento:**
+  1. Si recibe `p_nombre_tabla`: Genera y compila dinámicamente la especificación (`PKG<TABLA>_DAO.pks`) y el cuerpo (`PKG<TABLA>_DAO.pkb`) de la tabla indicada.
+  2. Si `p_nombre_tabla IS NULL`: Itera sobre todas las tablas del esquema (`user_tables WHERE table_name LIKE 'CORE_%'`) y compila automáticamente todos sus paquetes DAO.
+  3. Detecta automáticamente si la tabla posee soporte multi-tenant (`id_tenant`) para incorporar el Enfoque B mediante `SYS_CONTEXT('CORE_CTX', 'ID_TENANT')`.
+  4. Resuelve la obtención simultánea de `%ROWTYPE` y `ROWID` (evitando los errores `PLS-00494` y `ORA-03056`) mediante consulta optimizada por puntero interno.
+
