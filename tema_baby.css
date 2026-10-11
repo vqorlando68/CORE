@@ -1,0 +1,1143 @@
+/* ============================================================================
+   TEMA_BABY.CSS — ESTILO INFANTIL DIVERTIDO, VIVO & JUGUETÓN (PAW PATROL)
+   Plataforma Transversal Multi-Aplicaciones CORE
+   Inspiración: Bahía Aventura, Patrulla Canina, Juguetes, Dulces y Colores Vivos
+   Soporte Completo para Modo Claro (Día Soleado) y Modo Oscuro (Misión Nocturna)
+   ============================================================================ */
+
+/* --------------------------------------------------------------------------
+   0. FUENTES INFANTILES REDONDEADAS Y ALEGRES
+   -------------------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Baloo+2:wght@500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+/* --------------------------------------------------------------------------
+   1. VARIABLES Y DESIGN TOKENS — MODO CLARO (DÍA SOLEADO EN BAHÍA AVENTURA)
+   -------------------------------------------------------------------------- */
+
+:root,
+[data-theme="light"] {
+  /* Fondos Brillantes, Alegres y Esponjosos */
+  --bg-app: #EBF5FF;
+  --bg-sidebar: #FFFFFF;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #FFFFFF;
+  --bg-surface-hover: #F0F7FF;
+  --bg-glass: rgba(255, 255, 255, 0.92);
+  --bg-glass-card: rgba(255, 255, 255, 0.95);
+  --bg-input: #F3F8FE;
+  --bg-input-focus: #FFFFFF;
+
+  /* Bordes Gruesos, Redondeados y Tipo Juguete */
+  --border-subtle: rgba(13, 110, 253, 0.12);
+  --border-medium: rgba(13, 110, 253, 0.28);
+  --border-accent: #0077FE;
+  --border-glow: rgba(0, 119, 254, 0.35);
+
+  /* Textos Amigables y de Alto Contraste */
+  --text-main: #1A2E4C;
+  --text-muted: #4A6385;
+  --text-dim: #7B93B2;
+  --text-inverse: #FFFFFF;
+
+  /* Colores de la Patrulla Canina (Paw Patrol) */
+  --color-primary: #0077FE;          /* Chase: Azul Policía Brillante */
+  --color-primary-rgb: 0, 119, 254;
+  --color-primary-glow: rgba(0, 119, 254, 0.3);
+  --color-primary-dark: #0056B3;
+
+  --color-secondary: #FF2E55;        /* Marshall: Rojo Bombero Vivo */
+  --color-secondary-glow: rgba(255, 46, 85, 0.3);
+
+  --color-cyan: #00C4DF;             /* Zuma / Skye: Azul Turquesa / Mar */
+  --color-purple: #9D4EDD;           /* Everest: Púrpura Nieve / Lavanda */
+  --color-emerald: #00D06C;          /* Rocky: Verde Reciclaje Ecológico */
+  --color-emerald-glow: rgba(0, 208, 108, 0.25);
+  --color-amber: #FFB703;            /* Rubble: Amarillo Construcción Dorado */
+  --color-amber-glow: rgba(255, 183, 3, 0.3);
+  --color-rose: #FF2E55;             /* Skye / Marshall: Fresa / Rojo */
+  --color-rose-glow: rgba(255, 46, 85, 0.3);
+
+  /* Etiquetas Tipo Chapa de Cachorro */
+  --tag-pk: #D97706;
+  --tag-pk-bg: #FEF3C7;
+  --tag-fk: #0284C7;
+  --tag-fk-bg: #E0F2FE;
+  --tag-uk: #7C3AED;
+  --tag-uk-bg: #EDE9FE;
+  --tag-json: #059669;
+  --tag-json-bg: #D1FAE5;
+  --tag-seq: #E11D48;
+  --tag-seq-bg: #FFE4E6;
+
+  /* Gradientes de Caricatura y Dulces */
+  --grad-primary: linear-gradient(135deg, #0077FE 0%, #00B4D8 100%);
+  --grad-primary-hover: linear-gradient(135deg, #0056B3 0%, #0096C7 100%);
+  --grad-accent: linear-gradient(135deg, #FF2E55 0%, #FFB703 100%);
+  --grad-surface: linear-gradient(145deg, #FFFFFF 0%, #F5F9FF 100%);
+  --grad-border: linear-gradient(90deg, #0077FE, #FFB703, #FF2E55, #00D06C);
+  --grad-glow: radial-gradient(circle at 50% 0%, rgba(0, 119, 254, 0.12), transparent 70%);
+
+  /* Sombras Redondas 3D Bouncy */
+  --shadow-sm: 0 4px 0 rgba(0, 86, 179, 0.15);
+  --shadow-md: 0 6px 0 rgba(0, 86, 179, 0.18), 0 10px 20px rgba(0, 119, 254, 0.08);
+  --shadow-lg: 0 8px 0 rgba(0, 86, 179, 0.22), 0 16px 32px rgba(0, 119, 254, 0.12);
+  --shadow-neon: 0 6px 0 #0056B3, 0 10px 20px rgba(0, 119, 254, 0.3);
+  --shadow-neon-cyan: 0 0 16px rgba(0, 196, 223, 0.4);
+
+  /* Lienzo ERD Mapa de Misión Canina */
+  --graph-canvas-bg: #E8F4FD;
+  --graph-grid: rgba(0, 119, 254, 0.1);
+  --graph-node-bg: #FFFFFF;
+  --graph-node-border: #0077FE;
+  --graph-node-hover: #FFF9E6;
+  --graph-edge: rgba(0, 119, 254, 0.35);
+  --graph-edge-highlight: #FF2E55;
+}
+
+/* --------------------------------------------------------------------------
+   2. VARIABLES Y DESIGN TOKENS — MODO OSCURO (MISIÓN NOCTURNA DE RESCATE)
+   -------------------------------------------------------------------------- */
+
+[data-theme="dark"] {
+  /* Fondos Azul Noche y Ciudad Neón Infantil */
+  --bg-app: #0B132B;
+  --bg-sidebar: #111C3D;
+  --bg-surface: #15224A;
+  --bg-surface-elevated: rgba(26, 42, 86, 0.9);
+  --bg-surface-hover: rgba(35, 56, 114, 0.95);
+  --bg-glass: rgba(17, 28, 61, 0.88);
+  --bg-glass-card: rgba(22, 35, 76, 0.82);
+  --bg-input: rgba(11, 19, 43, 0.6);
+  --bg-input-focus: rgba(30, 48, 98, 0.8);
+
+  /* Bordes de Neón Amigables */
+  --border-subtle: rgba(56, 189, 248, 0.2);
+  --border-medium: rgba(56, 189, 248, 0.35);
+  --border-accent: #38BDF8;
+  --border-glow: rgba(56, 189, 248, 0.5);
+
+  /* Textos Nítidos y Luminosos */
+  --text-main: #FFFFFF;
+  --text-muted: #BFDBFE;
+  --text-dim: #93C5FD;
+  --text-inverse: #0B132B;
+
+  /* Neones Vivos de Patrulla Canina */
+  --color-primary: #38BDF8;          /* Chase: Azul Policía Neón */
+  --color-primary-rgb: 56, 189, 248;
+  --color-primary-glow: rgba(56, 189, 248, 0.4);
+  --color-primary-dark: #0284C7;
+
+  --color-secondary: #FF4D6D;        /* Marshall: Rojo Fresa Brillante */
+  --color-secondary-glow: rgba(255, 77, 109, 0.4);
+
+  --color-cyan: #06D6A0;             /* Zuma: Turquesa Neón */
+  --color-purple: #C77DFF;           /* Everest: Púrpura Neón */
+  --color-emerald: #10B981;          /* Rocky: Verde Neón */
+  --color-emerald-glow: rgba(16, 185, 129, 0.35);
+  --color-amber: #FFD166;            /* Rubble: Amarillo Neón */
+  --color-amber-glow: rgba(255, 209, 102, 0.35);
+  --color-rose: #FF4D6D;             /* Skye: Rosa Neón */
+  --color-rose-glow: rgba(255, 77, 109, 0.35);
+
+  --tag-pk: #FFD166;
+  --tag-pk-bg: rgba(255, 209, 102, 0.2);
+  --tag-fk: #38BDF8;
+  --tag-fk-bg: rgba(56, 189, 248, 0.2);
+  --tag-uk: #C77DFF;
+  --tag-uk-bg: rgba(199, 125, 255, 0.2);
+  --tag-json: #06D6A0;
+  --tag-json-bg: rgba(6, 214, 160, 0.2);
+  --tag-seq: #FF4D6D;
+  --tag-seq-bg: rgba(255, 77, 109, 0.2);
+
+  --grad-primary: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%);
+  --grad-primary-hover: linear-gradient(135deg, #0369A1 0%, #0284C7 100%);
+  --grad-accent: linear-gradient(135deg, #FF4D6D 0%, #FFD166 100%);
+  --grad-surface: linear-gradient(145deg, rgba(22, 35, 76, 0.9) 0%, rgba(17, 28, 61, 0.9) 100%);
+  --grad-border: linear-gradient(90deg, #38BDF8, #FFD166, #FF4D6D, #06D6A0);
+  --grad-glow: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.25), transparent 70%);
+
+  --shadow-sm: 0 4px 0 #070D1E;
+  --shadow-md: 0 6px 0 #070D1E, 0 10px 20px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 0 #070D1E, 0 16px 32px rgba(0, 0, 0, 0.6);
+  --shadow-neon: 0 0 20px rgba(56, 189, 248, 0.5);
+  --shadow-neon-cyan: 0 0 20px rgba(6, 214, 160, 0.4);
+
+  --graph-canvas-bg: #0B132B;
+  --graph-grid: rgba(56, 189, 248, 0.12);
+  --graph-node-bg: #15224A;
+  --graph-node-border: #38BDF8;
+  --graph-node-hover: #1E316A;
+  --graph-edge: rgba(56, 189, 248, 0.4);
+  --graph-edge-highlight: #FFD166;
+}
+
+/* --------------------------------------------------------------------------
+   3. TOKENS TIPOGRÁFICOS Y REDONDEO INFANTIL
+   -------------------------------------------------------------------------- */
+
+:root {
+  --font-sans: 'Fredoka', 'Baloo 2', system-ui, sans-serif;
+  --font-serif: 'Baloo 2', 'Fredoka', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --glass-blur: blur(12px);
+  --glass-blur-heavy: blur(20px);
+  --radius-xs: 8px;
+  --radius-sm: 14px;
+  --radius-md: 20px;
+  --radius-lg: 26px;
+  --radius-xl: 32px;
+  --radius-pill: 9999px;
+  --transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1); /* Efecto Bouncy Caricatura */
+  --transition-fast: all 0.15s ease-out;
+}
+
+/* --------------------------------------------------------------------------
+   4. BASES Y TIPOGRAFÍA
+   -------------------------------------------------------------------------- */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: var(--font-serif);
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  line-height: 1.5;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(var(--color-primary-rgb), 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(255, 183, 3, 0.12) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(0, 208, 108, 0.08) 0px, transparent 60%);
+  background-attachment: fixed;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, h4, .brand-title h1, .view-tab, .btn, .crumb-active, .rule-card-title, .detail-tab {
+  font-family: var(--font-sans);
+  letter-spacing: 0.02em;
+  font-weight: 700;
+}
+
+/* Barras de desplazamiento juguetonas */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-app);
+  border-radius: var(--radius-pill);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--bg-app);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   5. SIDEBAR — CUARTEL GENERAL DE LA PATRULLA
+   -------------------------------------------------------------------------- */
+
+.app-sidebar {
+  width: 360px;
+  min-width: 360px;
+  background: var(--bg-sidebar);
+  border-right: 3px solid var(--border-medium);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  z-index: 30;
+  position: relative;
+  box-shadow: 4px 0 15px rgba(0, 119, 254, 0.08);
+}
+
+.sidebar-header {
+  padding: 18px 20px;
+  border-bottom: 3px solid var(--border-medium);
+  background: var(--bg-glass);
+}
+
+.brand-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+/* Logo Chapa de Rescate Paw Patrol */
+.brand-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #FF2E55 0%, #FFB703 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 26px;
+  box-shadow: 0 4px 0 #B91C1C, 0 8px 15px rgba(255, 46, 85, 0.35);
+  border: 3px solid #FFFFFF;
+  flex-shrink: 0;
+  transform: rotate(-3deg);
+  transition: var(--transition);
+}
+
+.brand-logo:hover {
+  transform: rotate(5deg) scale(1.08);
+}
+
+.brand-title h1 {
+  font-size: 22px;
+  color: var(--text-main);
+  line-height: 1.1;
+}
+
+.brand-title span {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-primary);
+  font-weight: 700;
+  display: block;
+}
+
+.search-box {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.search-box input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 2px solid var(--border-medium);
+  border-radius: var(--radius-pill);
+  padding: 10px 16px 10px 42px;
+  color: var(--text-main);
+  font-size: 14px;
+  font-family: var(--font-sans);
+  outline: none;
+  transition: var(--transition);
+}
+
+.search-box input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(0, 119, 254, 0.2);
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-primary);
+}
+
+.filter-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+
+.chip-btn {
+  background: var(--bg-input);
+  border: 2px solid var(--border-medium);
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition);
+}
+
+.chip-btn.active, .chip-btn:hover {
+  background: var(--color-primary);
+  color: #FFFFFF;
+  border-color: var(--color-primary-dark);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+/* Lista de Tablas */
+.table-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+}
+
+.module-group {
+  margin-bottom: 18px;
+}
+
+.module-title {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-primary);
+  font-weight: 700;
+  padding: 6px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.module-badge {
+  background: var(--color-amber);
+  color: #1A2E4C;
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.table-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: 5px;
+  border: 2px solid transparent;
+}
+
+.table-item:hover {
+  background: var(--bg-surface-hover);
+  border-color: var(--border-subtle);
+  transform: translateX(4px);
+}
+
+.table-item.active {
+  background: #EBF5FF;
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+  transform: scale(1.02);
+}
+
+[data-theme="dark"] .table-item.active {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: var(--color-primary);
+}
+
+.table-item-name {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.table-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  box-shadow: 0 0 6px var(--color-primary-glow);
+}
+
+.table-item.test-table .table-dot {
+  background: var(--color-emerald);
+}
+
+/* --------------------------------------------------------------------------
+   6. TOP NAVBAR
+   -------------------------------------------------------------------------- */
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: transparent;
+  position: relative;
+}
+
+.top-nav {
+  height: 72px;
+  border-bottom: 3px solid var(--border-medium);
+  background: var(--bg-glass);
+  backdrop-filter: var(--glass-blur);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  z-index: 20;
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.crumb-root {
+  color: var(--text-dim);
+}
+
+.crumb-sep {
+  color: var(--color-amber);
+}
+
+.crumb-active {
+  color: var(--color-primary);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-view-switcher {
+  display: flex;
+  background: var(--bg-input);
+  border: 2px solid var(--border-medium);
+  border-radius: var(--radius-pill);
+  padding: 4px;
+  gap: 4px;
+}
+
+.view-tab {
+  padding: 7px 16px;
+  font-size: 13px;
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.view-tab.active {
+  background: var(--color-primary);
+  color: #FFFFFF;
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+.theme-toggle-btn {
+  background: var(--bg-input);
+  border: 2px solid var(--border-medium);
+  color: var(--color-primary);
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.theme-toggle-btn:hover {
+  background: var(--color-amber);
+  color: #1A2E4C;
+  transform: rotate(20deg) scale(1.1);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  border: 2px solid var(--border-medium);
+  background: var(--bg-surface);
+  color: var(--text-main);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #0077FE 0%, #00B4D8 100%);
+  border-color: #0056B3;
+  color: #FFFFFF;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #0056B3, 0 12px 20px rgba(0, 119, 254, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   7. HERO DE TABLA (TARJETA TIPO JUGUETE 3D)
+   -------------------------------------------------------------------------- */
+
+.main-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px;
+}
+
+.table-hero {
+  background: var(--bg-glass-card);
+  border: 3px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 24px;
+}
+
+.table-hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: var(--grad-border);
+}
+
+.hero-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.hero-title-row h2 {
+  font-size: 30px;
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  border: 2px solid;
+}
+
+.badge-global { background: #FEF3C7; color: #B45309; border-color: #FCD34D; }
+.badge-tenant { background: #E0F2FE; color: #0369A1; border-color: #BAE6FD; }
+.badge-test { background: #D1FAE5; color: #047857; border-color: #A7F3D0; }
+
+.hero-desc {
+  font-size: 16px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  max-width: 900px;
+}
+
+.hero-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 2px dashed var(--border-subtle);
+}
+
+.meta-label {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 700;
+}
+
+.meta-val {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   8. TABS DE DETALLE & TABLAS DEL DICCIONARIO
+   -------------------------------------------------------------------------- */
+
+.detail-nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 3px solid var(--border-medium);
+  padding-bottom: 10px;
+}
+
+.detail-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+  background: transparent;
+  border: 2px solid transparent;
+}
+
+.detail-tab.active {
+  color: #FFFFFF;
+  background: var(--color-primary);
+  border-color: var(--color-primary-dark);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+.table-container {
+  background: var(--bg-glass-card);
+  border: 3px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.dict-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.dict-table thead {
+  background: #EBF5FF;
+  border-bottom: 3px solid var(--border-medium);
+}
+
+[data-theme="dark"] .dict-table thead {
+  background: #111C3D;
+}
+
+.dict-table th {
+  padding: 14px 18px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.dict-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-main);
+}
+
+.dict-table tr:hover td {
+  background: var(--bg-surface-hover);
+}
+
+.col-name {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.col-type {
+  font-family: var(--font-mono);
+  color: var(--color-secondary);
+  font-weight: 600;
+}
+
+.pill-tag {
+  display: inline-flex;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 800;
+  border: 1px solid;
+}
+
+.pill-pk { background: var(--tag-pk-bg); color: var(--tag-pk); border-color: var(--tag-pk); }
+.pill-fk { background: var(--tag-fk-bg); color: var(--tag-fk); border-color: var(--tag-fk); }
+.pill-uk { background: var(--tag-uk-bg); color: var(--tag-uk); border-color: var(--tag-uk); }
+.pill-json { background: var(--tag-json-bg); color: var(--tag-json); border-color: var(--tag-json); }
+
+/* Código */
+.code-container {
+  background: var(--bg-surface);
+  border: 3px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  position: relative;
+  box-shadow: var(--shadow-md);
+}
+
+.code-container pre {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+.code-copy-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: var(--color-amber);
+  border: 2px solid #D97706;
+  border-radius: var(--radius-pill);
+  padding: 6px 16px;
+  font-size: 13px;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  color: #1A2E4C;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.code-copy-btn:hover {
+  transform: scale(1.06);
+}
+
+/* --------------------------------------------------------------------------
+   9. VISTA DE REGLAS (MISIONES DE LA PATRULLA)
+   -------------------------------------------------------------------------- */
+
+.rules-view-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.rules-header-card {
+  background: var(--bg-glass-card);
+  border: 3px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  position: relative;
+  box-shadow: var(--shadow-md);
+}
+
+.rules-header-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: var(--grad-border);
+}
+
+.rules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 20px;
+}
+
+.rule-card {
+  background: var(--bg-glass-card);
+  border: 3px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition);
+}
+
+.rule-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-lg);
+}
+
+.rule-number-badge {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 800;
+  color: #FFFFFF;
+  background: var(--color-primary);
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+}
+
+.rule-card-title {
+  font-size: 20px;
+  color: var(--color-primary);
+  line-height: 1.2;
+}
+
+.rule-card-desc {
+  font-size: 14.5px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.rule-snippet-box {
+  background: var(--bg-app);
+  border: 2px dashed var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-primary);
+  line-height: 1.5;
+}
+
+.rule-status-tag {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.rule-status-tag.mandatory { color: var(--color-secondary); }
+.rule-status-tag.standard { color: var(--color-emerald); }
+
+/* --------------------------------------------------------------------------
+   10. GRÁFICO ERD (CANVAS CANINO DE RESCATE)
+   -------------------------------------------------------------------------- */
+
+.graph-viewport-card {
+  background: var(--bg-glass-card);
+  border: 3px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 128px);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.graph-toolbar {
+  padding: 14px 20px;
+  border-bottom: 3px solid var(--border-medium);
+  background: var(--bg-surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.graph-canvas-container {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: var(--graph-canvas-bg);
+  background-image: radial-gradient(var(--graph-grid) 2px, transparent 2px);
+  background-size: 26px 26px;
+  cursor: grab;
+}
+
+.graph-canvas-container:active {
+  cursor: grabbing;
+}
+
+.graph-controls-floating {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg-glass);
+  padding: 8px;
+  border-radius: var(--radius-pill);
+  border: 3px solid var(--border-medium);
+  box-shadow: var(--shadow-md);
+}
+
+.graph-ctrl-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: 2px solid #FFFFFF;
+  color: #FFFFFF;
+  font-family: var(--font-sans);
+  font-size: 20px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.graph-ctrl-btn:hover {
+  transform: scale(1.15);
+  background: var(--color-amber);
+  color: #1A2E4C;
+}
+
+.graph-legend-floating {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: var(--bg-glass);
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  border: 3px solid var(--border-medium);
+  box-shadow: var(--shadow-md);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  font-weight: 700;
+}
+
+.legend-color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #FFFFFF;
+}
+
+.graph-node-tooltip {
+  position: absolute;
+  background: var(--bg-surface-elevated);
+  border: 3px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: var(--shadow-lg);
+  pointer-events: none;
+  min-width: 240px;
+  max-width: 320px;
+  display: none;
+  transform: translate(-50%, -105%);
+}
+
+.tooltip-title {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.tooltip-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   11. MOTOR DE PRUEBAS
+   -------------------------------------------------------------------------- */
+
+.testing-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.test-banner {
+  background: var(--bg-glass-card);
+  border: 3px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+
+.test-workspace-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 20px;
+}
+
+.test-box {
+  background: var(--bg-glass-card);
+  border: 3px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.test-editor {
+  width: 100%;
+  height: 220px;
+  background: var(--bg-app);
+  border: 2px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  outline: none;
+}
+
+/* --------------------------------------------------------------------------
+   12. TOAST NOTIFICATION
+   -------------------------------------------------------------------------- */
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--bg-surface);
+  border: 3px solid var(--color-primary);
+  color: var(--text-main);
+  padding: 14px 24px;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 700;
+  z-index: 1000;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+@media (max-width: 1024px) {
+  .app-sidebar { width: 300px; min-width: 300px; }
+  .test-workspace-grid { grid-template-columns: 1fr; }
+  .rules-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  body { flex-direction: column; }
+  .app-sidebar { width: 100%; min-width: 100%; height: 300px; }
+  .app-main { height: calc(100vh - 300px); }
+  .top-nav { padding: 0 16px; }
+  .main-scroll { padding: 16px; }
+}

@@ -1,0 +1,1110 @@
+/* ============================================================================
+   TEMA_PIRATA.CSS — ESTILO PERGAMINO & ESCRITURA PIRATA DE ALTA MAR
+   Plataforma Transversal Multi-Aplicaciones CORE
+   Inspiración: Cartas de Navegación, Mapas del Tesoro, Sellos de Lacre, Doblones y Brújulas
+   Soporte Integral para Modo Claro (Pergamino Dorado) y Modo Oscuro (Pergamino Quemado a Medianoche)
+   ============================================================================ */
+
+/* --------------------------------------------------------------------------
+   0. FUENTES DE PIRATAS Y CALIGRAFÍA NÁUTICA ANTIGUA
+   -------------------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Pirata+One&family=IM+Fell+English:ital@0;1&family=MedievalSharp&family=JetBrains+Mono:wght@400;600&display=swap');
+
+/* --------------------------------------------------------------------------
+   1. VARIABLES Y DESIGN TOKENS — MODO OSCURO (CAMAROTE DEL CAPITÁN A MEDIANOCHE)
+   -------------------------------------------------------------------------- */
+
+:root,
+[data-theme="dark"] {
+  /* Fondos Pergamino Quemado y Madera Roble de Galeón */
+  --bg-app: #120C07;
+  --bg-sidebar: #18100A;
+  --bg-surface: #1E150E;
+  --bg-surface-elevated: rgba(36, 25, 17, 0.88);
+  --bg-surface-hover: rgba(52, 37, 26, 0.92);
+  --bg-glass: rgba(24, 16, 10, 0.82);
+  --bg-glass-card: rgba(30, 21, 14, 0.78);
+  --bg-input: rgba(0, 0, 0, 0.35);
+  --bg-input-focus: rgba(45, 31, 20, 0.6);
+
+  /* Bordes de Bronce Envejecido y Cobre */
+  --border-subtle: rgba(217, 119, 6, 0.18);
+  --border-medium: rgba(217, 119, 6, 0.32);
+  --border-accent: #D97706;
+  --border-glow: rgba(245, 158, 11, 0.45);
+
+  /* Tintas y Caligrafía de Pluma */
+  --text-main: #F4E7D3;
+  --text-muted: #CDB89C;
+  --text-dim: #998368;
+  --text-inverse: #150E08;
+
+  /* Acentos de Oro Pirata, Doblones y Fuego de Antorcha */
+  --color-primary: #F59E0B;
+  --color-primary-rgb: 245, 158, 11;
+  --color-primary-glow: rgba(245, 158, 11, 0.35);
+  --color-primary-dark: #B45309;
+
+  --color-secondary: #EA580C;
+  --color-secondary-glow: rgba(234, 88, 12, 0.3);
+
+  --color-cyan: #2DD4BF;
+  --color-purple: #D97706;
+  --color-emerald: #10B981;
+  --color-emerald-glow: rgba(16, 185, 129, 0.25);
+  --color-amber: #FBBF24;
+  --color-amber-glow: rgba(251, 191, 36, 0.3);
+  --color-rose: #DC2626;
+  --color-rose-glow: rgba(220, 38, 38, 0.35);
+
+  /* Etiquetas estilo Sellos de Lacre */
+  --tag-pk: #F59E0B;
+  --tag-pk-bg: rgba(245, 158, 11, 0.18);
+  --tag-fk: #EA580C;
+  --tag-fk-bg: rgba(234, 88, 12, 0.18);
+  --tag-uk: #FBBF24;
+  --tag-uk-bg: rgba(251, 191, 36, 0.16);
+  --tag-json: #10B981;
+  --tag-json-bg: rgba(16, 185, 129, 0.16);
+  --tag-seq: #D97706;
+  --tag-seq-bg: rgba(217, 119, 6, 0.16);
+
+  /* Gradientes de Oro, Cuero y Lacre */
+  --grad-primary: linear-gradient(135deg, #B45309 0%, #78350F 100%);
+  --grad-primary-hover: linear-gradient(135deg, #D97706 0%, #92400E 100%);
+  --grad-accent: linear-gradient(135deg, #F59E0B 0%, #DC2626 100%);
+  --grad-surface: linear-gradient(145deg, rgba(38, 26, 17, 0.85) 0%, rgba(24, 16, 10, 0.85) 100%);
+  --grad-border: linear-gradient(90deg, #F59E0B, #DC2626, #B45309);
+  --grad-glow: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.2), transparent 70%);
+
+  /* Sombras de Fuego de Candil */
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 8px 18px rgba(0, 0, 0, 0.65);
+  --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.75), 0 0 20px rgba(180, 83, 9, 0.2);
+  --shadow-neon: 0 0 18px rgba(245, 158, 11, 0.4);
+  --shadow-neon-cyan: 0 0 18px rgba(45, 212, 191, 0.35);
+
+  /* Mapa Náutico / ERD Canvas */
+  --graph-canvas-bg: #110B07;
+  --graph-grid: rgba(217, 119, 6, 0.08);
+  --graph-node-bg: #1D140C;
+  --graph-node-border: rgba(245, 158, 11, 0.45);
+  --graph-node-hover: #2B1D12;
+  --graph-edge: rgba(245, 158, 11, 0.3);
+  --graph-edge-highlight: #F59E0B;
+}
+
+/* --------------------------------------------------------------------------
+   2. VARIABLES Y DESIGN TOKENS — MODO CLARO (PERGAMINO ANTIGUO A LA LUZ DEL DÍA)
+   -------------------------------------------------------------------------- */
+
+[data-theme="light"] {
+  /* Fondos de Papel Pergamino Envejecido con Textura Cálida */
+  --bg-app: #F5EBD7;
+  --bg-sidebar: #EDE0C7;
+  --bg-surface: #FAF4E6;
+  --bg-surface-elevated: rgba(250, 244, 230, 0.94);
+  --bg-surface-hover: #E8D8BA;
+  --bg-glass: rgba(243, 231, 209, 0.88);
+  --bg-glass-card: rgba(248, 240, 224, 0.92);
+  --bg-input: #E4D3B4;
+  --bg-input-focus: #FFFFFF;
+
+  /* Bordes de Papel Rasgado y Cuero Café */
+  --border-subtle: rgba(120, 53, 15, 0.16);
+  --border-medium: rgba(120, 53, 15, 0.3);
+  --border-accent: #B45309;
+  --border-glow: rgba(180, 83, 9, 0.3);
+
+  /* Tinta de Pluma Sepia y Carbón Antiguo */
+  --text-main: #2A180B;
+  --text-muted: #57371E;
+  --text-dim: #7C5535;
+  --text-inverse: #FAF4E6;
+
+  /* Colores de Mapa del Tesoro */
+  --color-primary: #B45309;
+  --color-primary-rgb: 180, 83, 9;
+  --color-primary-glow: rgba(180, 83, 9, 0.22);
+  --color-primary-dark: #78350F;
+
+  --color-secondary: #9A3412;
+  --color-secondary-glow: rgba(154, 52, 18, 0.2);
+
+  --color-cyan: #0F766E;
+  --color-purple: #78350F;
+  --color-emerald: #15803D;
+  --color-emerald-glow: rgba(21, 128, 61, 0.2);
+  --color-amber: #B45309;
+  --color-amber-glow: rgba(180, 83, 9, 0.2);
+  --color-rose: #991B1B;
+  --color-rose-glow: rgba(153, 27, 27, 0.2);
+
+  --tag-pk: #78350F;
+  --tag-pk-bg: rgba(120, 53, 15, 0.14);
+  --tag-fk: #9A3412;
+  --tag-fk-bg: rgba(154, 52, 18, 0.14);
+  --tag-uk: #B45309;
+  --tag-uk-bg: rgba(180, 83, 9, 0.14);
+  --tag-json: #15803D;
+  --tag-json-bg: rgba(21, 128, 61, 0.14);
+  --tag-seq: #78350F;
+  --tag-seq-bg: rgba(120, 53, 15, 0.14);
+
+  --grad-primary: linear-gradient(135deg, #B45309 0%, #78350F 100%);
+  --grad-primary-hover: linear-gradient(135deg, #92400E 0%, #451A03 100%);
+  --grad-accent: linear-gradient(135deg, #B45309 0%, #991B1B 100%);
+  --grad-surface: linear-gradient(145deg, #FAF4E6 0%, #EDE0C7 100%);
+  --grad-border: linear-gradient(90deg, #B45309, #991B1B, #D97706);
+  --grad-glow: radial-gradient(circle at 50% 0%, rgba(180, 83, 9, 0.1), transparent 70%);
+
+  --shadow-sm: 0 1px 4px rgba(74, 40, 16, 0.12);
+  --shadow-md: 0 6px 16px rgba(74, 40, 16, 0.16);
+  --shadow-lg: 0 14px 28px rgba(74, 40, 16, 0.2);
+  --shadow-neon: 0 0 14px rgba(180, 83, 9, 0.25);
+  --shadow-neon-cyan: 0 0 14px rgba(15, 118, 110, 0.25);
+
+  --graph-canvas-bg: #F4E8D1;
+  --graph-grid: rgba(120, 53, 15, 0.08);
+  --graph-node-bg: #FAF4E6;
+  --graph-node-border: rgba(180, 83, 9, 0.4);
+  --graph-node-hover: #F0DFC0;
+  --graph-edge: rgba(154, 52, 18, 0.32);
+  --graph-edge-highlight: #B45309;
+}
+
+/* --------------------------------------------------------------------------
+   3. TOKENS ESTRUCTURALES Y TIPOGRAFÍAS DE PIRATAS
+   -------------------------------------------------------------------------- */
+
+:root {
+  --font-sans: 'Pirata One', 'MedievalSharp', cursive, Georgia, serif;
+  --font-serif: 'IM Fell English', Georgia, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --glass-blur: blur(8px);
+  --glass-blur-heavy: blur(14px);
+  --radius-xs: 3px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-pill: 9999px;
+  --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: all 0.15s ease-out;
+}
+
+/* --------------------------------------------------------------------------
+   4. ESTILOS BASE Y TEXTURA DE PERGAMINO
+   -------------------------------------------------------------------------- */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: var(--font-serif);
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  line-height: 1.5;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(var(--color-primary-rgb), 0.12) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(154, 52, 18, 0.1) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(120, 53, 15, 0.05) 0px, transparent 60%);
+  background-attachment: fixed;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  letter-spacing: 0.01em;
+}
+
+/* Títulos con tipografía Pirata */
+h1, h2, h3, h4, .brand-title h1, .view-tab, .btn, .crumb-active, .rule-card-title, .detail-tab {
+  font-family: var(--font-sans);
+  letter-spacing: 0.04em;
+}
+
+/* Barras de desplazamiento estilo pergamino */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-sidebar);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-subtle);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* --------------------------------------------------------------------------
+   5. SIDEBAR — BITÁCORA DEL NAVÍO
+   -------------------------------------------------------------------------- */
+
+.app-sidebar {
+  width: 360px;
+  min-width: 360px;
+  background: var(--bg-sidebar);
+  border-right: 2px solid var(--border-medium);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  z-index: 30;
+  position: relative;
+  box-shadow: var(--shadow-md);
+}
+
+.sidebar-header {
+  padding: 18px 20px;
+  border-bottom: 2px solid var(--border-medium);
+  background: var(--bg-glass);
+}
+
+.brand-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+/* Logo Sello de Lacre / Brújula Pirata */
+.brand-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #DC2626 0%, #7F1D1D 80%, #450A0A 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FDE047;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 24px;
+  box-shadow: 0 0 12px rgba(220, 38, 38, 0.4), inset 0 0 6px rgba(0, 0, 0, 0.6);
+  border: 2px solid #F59E0B;
+  flex-shrink: 0;
+}
+
+.brand-title h1 {
+  font-size: 21px;
+  color: var(--text-main);
+  line-height: 1.1;
+}
+
+.brand-title span {
+  font-family: var(--font-serif);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-primary);
+  font-weight: 700;
+  display: block;
+}
+
+.search-box {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.search-box input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 9px 14px 9px 38px;
+  color: var(--text-main);
+  font-size: 13px;
+  outline: none;
+  font-family: var(--font-serif);
+  transition: var(--transition);
+}
+
+.search-box input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 10px var(--color-primary-glow);
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+}
+
+.filter-chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.chip-btn {
+  background: var(--bg-input);
+  border: 1px solid var(--border-medium);
+  color: var(--text-muted);
+  padding: 4px 11px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition);
+}
+
+.chip-btn.active, .chip-btn:hover {
+  background: var(--color-primary);
+  color: var(--text-inverse);
+  border-color: var(--color-primary-dark);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Lista de Tablas */
+.table-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.module-group {
+  margin-bottom: 16px;
+}
+
+.module-title {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-primary);
+  padding: 6px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed var(--border-subtle);
+  margin-bottom: 6px;
+}
+
+.module-badge {
+  background: var(--border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 1px 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.table-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: 4px;
+  border: 1px solid transparent;
+}
+
+.table-item:hover {
+  background: var(--bg-surface-hover);
+  border-color: var(--border-subtle);
+}
+
+.table-item.active {
+  background: linear-gradient(90deg, rgba(var(--color-primary-rgb), 0.22), rgba(154, 52, 18, 0.12));
+  border-color: var(--color-primary);
+  box-shadow: inset 0 0 10px rgba(180, 83, 9, 0.15);
+}
+
+.table-item-name {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.table-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  box-shadow: 0 0 6px var(--color-primary-glow);
+}
+
+.table-item.test-table .table-dot {
+  background: var(--color-emerald);
+}
+
+/* --------------------------------------------------------------------------
+   6. TOP NAVBAR
+   -------------------------------------------------------------------------- */
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: transparent;
+  position: relative;
+}
+
+.top-nav {
+  height: 68px;
+  border-bottom: 2px solid var(--border-medium);
+  background: var(--bg-glass);
+  backdrop-filter: var(--glass-blur);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  z-index: 20;
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+}
+
+.crumb-root {
+  color: var(--text-dim);
+  font-family: var(--font-sans);
+  font-size: 16px;
+}
+
+.crumb-sep {
+  color: var(--color-primary);
+}
+
+.crumb-active {
+  color: var(--color-primary);
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-view-switcher {
+  display: flex;
+  background: var(--bg-input);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  gap: 3px;
+}
+
+.view-tab {
+  padding: 6px 14px;
+  font-size: 14px;
+  border-radius: var(--radius-xs);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.view-tab.active {
+  background: var(--color-primary);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-sm);
+  font-weight: 700;
+}
+
+.theme-toggle-btn {
+  background: var(--bg-input);
+  border: 1px solid var(--border-medium);
+  color: var(--text-muted);
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.theme-toggle-btn:hover {
+  background: var(--color-primary);
+  color: var(--text-inverse);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition);
+  border: 1px solid var(--border-medium);
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+.btn-primary {
+  background: var(--grad-primary);
+  border-color: var(--color-primary);
+  color: #FAF4E6;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  background: var(--grad-primary-hover);
+  box-shadow: 0 0 16px var(--color-primary-glow);
+}
+
+/* --------------------------------------------------------------------------
+   7. HERO DE TABLA (PERGAMINO ENROLLADO)
+   -------------------------------------------------------------------------- */
+
+.main-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px;
+}
+
+.table-hero {
+  background: var(--bg-glass-card);
+  border: 2px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 26px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 24px;
+}
+
+.table-hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--grad-border);
+}
+
+.hero-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.hero-title-row h2 {
+  font-size: 28px;
+  color: var(--color-primary);
+  letter-spacing: 0.05em;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: var(--radius-xs);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--border-medium);
+}
+
+.badge-global { background: rgba(120, 53, 15, 0.15); color: var(--color-primary); }
+.badge-tenant { background: rgba(180, 83, 9, 0.15); color: var(--color-primary); }
+.badge-test { background: rgba(21, 128, 61, 0.15); color: var(--color-emerald); }
+
+.hero-desc {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  max-width: 900px;
+}
+
+.hero-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--border-subtle);
+}
+
+.meta-label {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.meta-val {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-main);
+}
+
+/* --------------------------------------------------------------------------
+   8. TABS DE DETALLE & TABLAS DEL DICCIONARIO
+   -------------------------------------------------------------------------- */
+
+.detail-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--border-medium);
+  padding-bottom: 10px;
+}
+
+.detail-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: var(--radius-xs);
+  font-size: 15px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.detail-tab.active {
+  color: var(--text-inverse);
+  background: var(--color-primary);
+  border-color: var(--color-primary-dark);
+}
+
+.table-container {
+  background: var(--bg-glass-card);
+  border: 2px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.dict-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.dict-table thead {
+  background: var(--bg-surface-hover);
+  border-bottom: 2px solid var(--border-medium);
+}
+
+.dict-table th {
+  padding: 12px 18px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.dict-table td {
+  padding: 13px 18px;
+  border-bottom: 1px dashed var(--border-subtle);
+  color: var(--text-main);
+}
+
+.dict-table tr:hover td {
+  background: var(--bg-surface-hover);
+}
+
+.col-name {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.col-type {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.pill-tag {
+  display: inline-flex;
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  font-size: 11px;
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.pill-pk { background: var(--tag-pk-bg); color: var(--tag-pk); border: 1px solid var(--tag-pk); }
+.pill-fk { background: var(--tag-fk-bg); color: var(--tag-fk); border: 1px solid var(--tag-fk); }
+.pill-uk { background: var(--tag-uk-bg); color: var(--tag-uk); border: 1px solid var(--tag-uk); }
+.pill-json { background: var(--tag-json-bg); color: var(--tag-json); border: 1px solid var(--tag-json); }
+
+/* Código */
+.code-container {
+  background: var(--bg-surface);
+  border: 2px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 22px;
+  position: relative;
+  box-shadow: var(--shadow-md);
+}
+
+.code-container pre {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+.code-copy-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xs);
+  padding: 4px 12px;
+  font-size: 13px;
+  font-family: var(--font-sans);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.code-copy-btn:hover {
+  background: var(--color-primary);
+  color: var(--text-inverse);
+}
+
+/* --------------------------------------------------------------------------
+   9. VISTA DE REGLAS (CÓDIGO PIRATA DEL NAVÍO)
+   -------------------------------------------------------------------------- */
+
+.rules-view-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.rules-header-card {
+  background: var(--bg-glass-card);
+  border: 2px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 28px;
+  position: relative;
+  box-shadow: var(--shadow-lg);
+}
+
+.rules-header-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--grad-border);
+}
+
+.rules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 20px;
+}
+
+.rule-card {
+  background: var(--bg-glass-card);
+  border: 2px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition);
+}
+
+.rule-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-lg), 0 0 15px var(--color-primary-glow);
+}
+
+.rule-number-badge {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--color-primary);
+  background: rgba(var(--color-primary-rgb), 0.15);
+  border: 1px solid var(--border-accent);
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+}
+
+.rule-card-title {
+  font-size: 20px;
+  color: var(--color-primary);
+  line-height: 1.2;
+}
+
+.rule-card-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.rule-snippet-box {
+  background: var(--bg-app);
+  border: 1px dashed var(--border-medium);
+  border-radius: var(--radius-xs);
+  padding: 12px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--color-primary);
+  line-height: 1.5;
+}
+
+.rule-status-tag {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.rule-status-tag.mandatory { color: var(--color-rose); }
+.rule-status-tag.standard { color: var(--color-emerald); }
+
+/* --------------------------------------------------------------------------
+   10. MAPA DEL TESORO (ERD GRAPH CANVAS)
+   -------------------------------------------------------------------------- */
+
+.graph-viewport-card {
+  background: var(--bg-glass-card);
+  border: 2px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 128px);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.graph-toolbar {
+  padding: 12px 20px;
+  border-bottom: 2px solid var(--border-medium);
+  background: var(--bg-surface-hover);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.graph-canvas-container {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: var(--graph-canvas-bg);
+  background-image: radial-gradient(var(--graph-grid) 1.5px, transparent 1.5px);
+  background-size: 28px 28px;
+  cursor: grab;
+}
+
+.graph-canvas-container:active {
+  cursor: grabbing;
+}
+
+.graph-controls-floating {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg-glass);
+  padding: 6px;
+  border-radius: var(--radius-xs);
+  border: 2px solid var(--border-medium);
+  box-shadow: var(--shadow-md);
+}
+
+.graph-ctrl-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-input);
+  border: 1px solid var(--border-medium);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.graph-ctrl-btn:hover {
+  background: var(--color-primary);
+  color: var(--text-inverse);
+}
+
+.graph-legend-floating {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: var(--bg-glass);
+  padding: 12px 16px;
+  border-radius: var(--radius-xs);
+  border: 2px solid var(--border-medium);
+  box-shadow: var(--shadow-md);
+  font-size: 12px;
+}
+
+.legend-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.3);
+}
+
+.graph-node-tooltip {
+  position: absolute;
+  background: var(--bg-surface-elevated);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-xs);
+  padding: 14px;
+  box-shadow: var(--shadow-lg);
+  pointer-events: none;
+  min-width: 240px;
+  max-width: 320px;
+  display: none;
+  transform: translate(-50%, -105%);
+}
+
+.tooltip-title {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  color: var(--color-primary);
+}
+
+.tooltip-desc {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   11. MOTOR DE PRUEBAS
+   -------------------------------------------------------------------------- */
+
+.testing-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.test-banner {
+  background: var(--bg-glass-card);
+  border: 2px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 24px;
+}
+
+.test-workspace-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 20px;
+}
+
+.test-box {
+  background: var(--bg-glass-card);
+  border: 2px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.test-editor {
+  width: 100%;
+  height: 220px;
+  background: var(--bg-app);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xs);
+  padding: 12px;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  outline: none;
+}
+
+/* --------------------------------------------------------------------------
+   12. TOAST NOTIFICATION
+   -------------------------------------------------------------------------- */
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--bg-surface-elevated);
+  border: 2px solid var(--color-primary);
+  color: var(--text-main);
+  padding: 12px 20px;
+  border-radius: var(--radius-xs);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  z-index: 1000;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+@media (max-width: 1024px) {
+  .app-sidebar { width: 300px; min-width: 300px; }
+  .test-workspace-grid { grid-template-columns: 1fr; }
+  .rules-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  body { flex-direction: column; }
+  .app-sidebar { width: 100%; min-width: 100%; height: 300px; }
+  .app-main { height: calc(100vh - 300px); }
+  .top-nav { padding: 0 16px; }
+  .main-scroll { padding: 16px; }
+}
