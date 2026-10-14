@@ -18,9 +18,13 @@ import {
   AlertTriangle,
   X,
   ExternalLink,
-  GitBranch
+  GitBranch,
+  Maximize2,
+  Minimize2
 } from 'lucide-react';
 import { FlowchartDiagram } from './FlowchartDiagram';
+
+type ModalSize = 'normal' | 'wide' | 'fullscreen';
 
 interface MethodDocViewerProps {
   methods: DocumentacionMetodo[];
@@ -32,6 +36,7 @@ export const MethodDocViewer: React.FC<MethodDocViewerProps> = ({ methods }) => 
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [activeMethod, setActiveMethod] = useState<DocumentacionMetodo | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [modalSize, setModalSize] = useState<ModalSize>('normal');
 
   const categories = ['ALL', 'SEGURIDAD', 'TELEMETRIA', 'OPERATIVO', 'CONFIGURACION'];
 
@@ -174,7 +179,17 @@ export const MethodDocViewer: React.FC<MethodDocViewerProps> = ({ methods }) => 
       {/* MODAL DETALLADO EN LENGUAJE NATURAL */}
       {activeMethod && (
         <div className="modal-overlay" onClick={() => setActiveMethod(null)}>
-          <div className="modal-content" style={{ maxWidth: '850px' }} onClick={(e) => e.stopPropagation()}>
+          <div 
+            className="modal-content" 
+            style={{ 
+              maxWidth: modalSize === 'fullscreen' ? '98vw' : modalSize === 'wide' ? '1280px' : '850px',
+              width: modalSize === 'fullscreen' ? '98vw' : modalSize === 'wide' ? '95%' : '90%',
+              height: modalSize === 'fullscreen' ? '96vh' : 'auto',
+              maxHeight: modalSize === 'fullscreen' ? '96vh' : '90vh',
+              transition: 'max-width 0.25s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s cubic-bezier(0.16, 1, 0.3, 1), height 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+            }} 
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-header">
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
@@ -188,9 +203,88 @@ export const MethodDocViewer: React.FC<MethodDocViewerProps> = ({ methods }) => 
                   {activeMethod.titulo_funcional}
                 </h2>
               </div>
-              <button onClick={() => setActiveMethod(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                <X size={20} />
-              </button>
+
+              {/* Controles de Tamaño y Cierre del Modal */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                {/* Selector de Tamaño */}
+                <div 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '4px', 
+                    background: 'var(--bg-app)', 
+                    padding: '3px 6px', 
+                    borderRadius: '8px', 
+                    border: '1px solid var(--border-subtle)' 
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setModalSize('normal')}
+                    className={`btn btn-sm ${modalSize === 'normal' ? 'btn-primary' : 'btn-secondary'}`}
+                    style={{ padding: '3px 8px', fontSize: '11px', borderRadius: '4px', border: 'none' }}
+                    title="Tamaño Estándar (850px)"
+                  >
+                    Normal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setModalSize('wide')}
+                    className={`btn btn-sm ${modalSize === 'wide' ? 'btn-primary' : 'btn-secondary'}`}
+                    style={{ padding: '3px 8px', fontSize: '11px', borderRadius: '4px', border: 'none' }}
+                    title="Tamaño Ancho (1280px)"
+                  >
+                    Ancho
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setModalSize('fullscreen')}
+                    className={`btn btn-sm ${modalSize === 'fullscreen' ? 'btn-primary' : 'btn-secondary'}`}
+                    style={{ padding: '3px 8px', fontSize: '11px', borderRadius: '4px', border: 'none' }}
+                    title="Pantalla Completa"
+                  >
+                    Completo
+                  </button>
+                </div>
+
+                {/* Botón Maximizar / Restaurar */}
+                <button 
+                  onClick={() => setModalSize((prev) => prev === 'fullscreen' ? 'normal' : 'fullscreen')}
+                  style={{ 
+                    background: 'var(--bg-surface-elevated)', 
+                    border: '1px solid var(--border-subtle)', 
+                    borderRadius: '6px',
+                    color: 'var(--text-muted)', 
+                    cursor: 'pointer', 
+                    padding: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  title={modalSize === 'fullscreen' ? 'Restaurar tamaño normal' : 'Maximizar a pantalla completa'}
+                >
+                  {modalSize === 'fullscreen' ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+                </button>
+
+                {/* Botón Cerrar */}
+                <button 
+                  onClick={() => setActiveMethod(null)} 
+                  style={{ 
+                    background: 'var(--bg-surface-elevated)', 
+                    border: '1px solid var(--border-subtle)', 
+                    borderRadius: '6px',
+                    color: 'var(--text-muted)', 
+                    cursor: 'pointer', 
+                    padding: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  title="Cerrar modal"
+                >
+                  <X size={15} />
+                </button>
+              </div>
             </div>
 
             <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

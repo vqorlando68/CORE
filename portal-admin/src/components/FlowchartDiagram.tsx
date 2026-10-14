@@ -10,7 +10,6 @@ import {
   Sparkles, 
   Code2, 
   Database, 
-  Workflow, 
   Check, 
   Copy,
   Layers,
@@ -20,7 +19,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 
-export type DiagramStyle = 'modern' | 'blueprint' | 'timeline';
+export type DiagramStyle = 'modern' | 'timeline';
 
 interface FlowchartDiagramProps {
   pasosTexto: string;
@@ -238,16 +237,6 @@ export const FlowchartDiagram: React.FC<FlowchartDiagramProps> = ({
           >
             <Sparkles size={13} />
             <span>Modern Glass (Enterprise)</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setDiagramStyle('blueprint')}
-            className={`btn btn-sm ${diagramStyle === 'blueprint' ? 'btn-primary' : 'btn-secondary'}`}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
-          >
-            <Workflow size={13} />
-            <span>Blueprint Clásico</span>
           </button>
 
           <button
@@ -582,250 +571,7 @@ export const FlowchartDiagram: React.FC<FlowchartDiagramProps> = ({
       )}
 
       {/* =========================================================================
-          ESTILO 2: BLUEPRINT CLÁSICO (LÍNEAS PUNTEADAS CON CHIPS DE MÉTODOS)
-          ========================================================================= */}
-      {diagramStyle === 'blueprint' && (
-        <div
-          style={{
-            background: 'var(--bg-surface-elevated)',
-            border: '1px solid var(--border-subtle)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '40px 20px',
-            overflowX: 'auto',
-            overflowY: 'hidden',
-            display: 'flex',
-            justifyContent: 'center',
-            minHeight: '480px',
-            boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.05)'
-          }}
-        >
-          <div
-            style={{
-              transform: `scale(${zoom})`,
-              transformOrigin: 'top center',
-              transition: 'transform 0.15s ease',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              width: '100%',
-              maxWidth: '680px',
-              position: 'relative'
-            }}
-          >
-            {nodes.map((node) => {
-              if (node.type === 'start') {
-                return (
-                  <React.Fragment key={node.id}>
-                    <div
-                      style={{
-                        border: '2.5px dashed #d97736',
-                        borderRadius: '50px',
-                        padding: '12px 60px',
-                        fontWeight: 900,
-                        fontSize: '22px',
-                        letterSpacing: '2px',
-                        color: 'var(--text-main)',
-                        background: 'var(--bg-surface)',
-                        boxShadow: '0 4px 12px rgba(217, 119, 54, 0.12)',
-                        textAlign: 'center'
-                      }}
-                    >
-                      {node.label}
-                    </div>
-                    <BlueprintArrowConnector />
-                  </React.Fragment>
-                );
-              }
-
-              if (node.type === 'process') {
-                return (
-                  <React.Fragment key={node.id}>
-                    <div
-                      style={{
-                        border: '2px dashed #d97736',
-                        borderRadius: '6px',
-                        padding: '16px 24px',
-                        minWidth: '280px',
-                        maxWidth: '420px',
-                        textAlign: 'center',
-                        fontSize: '13.5px',
-                        fontWeight: 600,
-                        color: 'var(--text-main)',
-                        background: 'var(--bg-surface)',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                        lineHeight: 1.4,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '8px',
-                        alignItems: 'center'
-                      }}
-                    >
-                      <span>{node.label}</span>
-                      {node.invokedMethod && (
-                        <MethodHighlightChip 
-                          method={node.invokedMethod} 
-                          type={node.methodType}
-                          compact
-                          onCopy={() => copyToClipboard(node.invokedMethod!)}
-                          isCopied={copiedMethod === node.invokedMethod}
-                        />
-                      )}
-                    </div>
-                    <BlueprintArrowConnector />
-                  </React.Fragment>
-                );
-              }
-
-              if (node.type === 'decision') {
-                return (
-                  <React.Fragment key={node.id}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        position: 'relative',
-                        margin: '12px 0'
-                      }}
-                    >
-                      {/* Rombo central */}
-                      <div
-                        style={{
-                          width: '260px',
-                          height: '260px',
-                          border: '2.5px dashed #d97736',
-                          transform: 'rotate(45deg)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          background: 'var(--bg-surface)',
-                          boxShadow: '0 4px 16px rgba(217, 119, 54, 0.08)',
-                          zIndex: 2
-                        }}
-                      >
-                        <div
-                          style={{
-                            transform: 'rotate(-45deg)',
-                            textAlign: 'center',
-                            padding: '16px',
-                            fontSize: '13.5px',
-                            fontWeight: 700,
-                            color: 'var(--text-main)',
-                            maxWidth: '190px',
-                            lineHeight: 1.35,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: '6px'
-                          }}
-                        >
-                          <span>{node.label}</span>
-                          {node.invokedMethod && (
-                            <MethodHighlightChip 
-                              method={node.invokedMethod} 
-                              type={node.methodType}
-                              compact
-                              onCopy={() => copyToClipboard(node.invokedMethod!)}
-                              isCopied={copiedMethod === node.invokedMethod}
-                            />
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Rama lateral SÍ */}
-                      <div
-                        style={{
-                          position: 'absolute',
-                          left: 'calc(50% + 140px)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          zIndex: 3
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <span style={{ fontSize: '12px', fontWeight: 800, color: '#d97736' }}>SI</span>
-                          <svg width="34" height="20" style={{ overflow: 'visible' }}>
-                            <line x1="0" y1="10" x2="26" y2="10" stroke="#d97736" strokeWidth="2.5" />
-                            <polygon points="24,5 34,10 24,15" fill="#d97736" />
-                          </svg>
-                        </div>
-
-                        <div
-                          style={{
-                            border: '2px dashed #d97736',
-                            borderRadius: '4px',
-                            padding: '14px 20px',
-                            minWidth: '180px',
-                            maxWidth: '240px',
-                            textAlign: 'center',
-                            fontSize: '13px',
-                            fontWeight: 700,
-                            color: 'var(--text-main)',
-                            background: 'var(--bg-surface)',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '6px',
-                            alignItems: 'center'
-                          }}
-                        >
-                          <span>{node.yesAction}</span>
-                          {node.yesMethod && (
-                            <MethodHighlightChip 
-                              method={node.yesMethod} 
-                              type="service"
-                              compact
-                              onCopy={() => copyToClipboard(node.yesMethod!)}
-                              isCopied={copiedMethod === node.yesMethod}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Conector vertical NO */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '4px 0' }}>
-                      <span style={{ fontSize: '12px', fontWeight: 800, color: '#d97736', marginBottom: '-2px' }}>
-                        NO
-                      </span>
-                      <BlueprintArrowConnector />
-                    </div>
-                  </React.Fragment>
-                );
-              }
-
-              if (node.type === 'end') {
-                return (
-                  <React.Fragment key={node.id}>
-                    <div
-                      style={{
-                        border: '2.5px dashed #d97736',
-                        borderRadius: '50px',
-                        padding: '12px 70px',
-                        fontWeight: 900,
-                        fontSize: '22px',
-                        letterSpacing: '2px',
-                        color: 'var(--text-main)',
-                        background: 'var(--bg-surface)',
-                        boxShadow: '0 4px 12px rgba(217, 119, 54, 0.12)',
-                        textAlign: 'center'
-                      }}
-                    >
-                      {node.label}
-                    </div>
-                  </React.Fragment>
-                );
-              }
-
-              return null;
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* =========================================================================
-          ESTILO 3: LÍNEA DE TIEMPO / TIMELINE PASO A PASO
+          ESTILO 2: LÍNEA DE TIEMPO / TIMELINE PASO A PASO
           ========================================================================= */}
       {diagramStyle === 'timeline' && (
         <div
@@ -1001,16 +747,6 @@ const ModernArrowConnector: React.FC = () => (
     <svg width="24" height="34" viewBox="0 0 24 34">
       <line x1="12" y1="0" x2="12" y2="24" stroke="var(--color-primary)" strokeWidth="2" strokeDasharray="3 3" />
       <polygon points="6,22 12,32 18,22" fill="var(--color-primary)" />
-    </svg>
-  </div>
-);
-
-// Flecha conectora para el estilo blueprint
-const BlueprintArrowConnector: React.FC = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '6px 0', userSelect: 'none' }}>
-    <svg width="24" height="36" viewBox="0 0 24 36">
-      <line x1="12" y1="0" x2="12" y2="26" stroke="#d97736" strokeWidth="2.5" />
-      <polygon points="6,24 12,36 18,24" fill="#d97736" />
     </svg>
   </div>
 );
