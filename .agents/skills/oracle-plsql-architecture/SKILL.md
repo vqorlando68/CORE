@@ -1022,6 +1022,9 @@ END pkgln_modulo;
 ## 10. Estándar Universal e Innegociable de Manejo de Fechas (YYYY-MM-DD)
 
 ### 10.1 Regla General
+> [!IMPORTANT]
+> **Regla Mandatoria para Métodos Nuevos con Parámetros DATE:**
+> Todo método nuevo (procedimiento `p_*` o función `f_*`) que reciba o manipule parámetros de fecha (`DATE`), DEBE utilizar estrictamente el formato ISO **`YYYY-MM-DD`** (ejemplo: `'2026-10-24'`) tanto en el JSON de entrada (`p_json_entrada`) como en el JSON de salida (`p_json_salida`), DAOs y cursores `SYS_REFCURSOR`. Queda prohibido el uso de formatos dependientes del NLS de sesión, formatos locales (ej. `dd/mm/yyyy`) o timestamps con hora no solicitados en campos puramente de fecha.
 Cualquier método, procedimiento, función, cursor o JSON que reciba o retorne una fecha DEBE utilizar de manera estricta y obligatoria el formato ISO **`YYYY-MM-DD`** (ejemplo: `'2026-10-21'`). Queda prohibido el uso de formatos dependientes del NLS de sesión, formatos locales (ej. `dd/mm/yyyy`) o timestamps con hora no solicitados en campos puramente de fecha.
 
 ### 10.2 Fechas de Entrada (`p_json_entrada` o parámetros VARCHAR2)
@@ -1123,8 +1126,9 @@ SELECT JSON_ARRAYAGG(
 ### 12.1 Subprogramas (Procedimientos y Funciones)
 > [!IMPORTANT]
 > **Regla Innegociable de Prefijos de Subprogramas:**
-> * **TODO PROCEDIMIENTO NUEVO** debe empezar obligatoriamente con el prefijo **`p_`** (tanto en paquetes DAO como en `pkgca_`, `pkgcn_`, `pkgln_` y `uti_`).
-> * **TODA FUNCIÓN NUEVA** debe empezar obligatoriamente con el prefijo **`f_`** (tanto en paquetes DAO como en `pkgca_`, `pkgcn_`, `pkgln_` y `uti_`).
+> * **TODO PROCEDIMIENTO NUEVO** debe empezar obligatoriamente con el prefijo **`p_`** (tanto en paquetes DAO como en `pkgca_`, `pkgcn_`, `pkgln_` y `uti_`, ej. `p_insertar`, `p_actualizar`, `p_procesar_usuario`).
+> * **TODA FUNCIÓN NUEVA** debe empezar obligatoriamente con el prefijo **`f_`** (tanto en paquetes DAO como en `pkgca_`, `pkgcn_`, `pkgln_` y `uti_`, ej. `f_traer`, `f_existe`, `f_buscar_citas`).
+> * **Manejo de Parámetros DATE en Métodos Nuevos:** Si un método es nuevo y recibe o retorna parámetros de fecha (`DATE`), DEBE utilizar obligatoriamente el formato **`YYYY-MM-DD`** tanto en el JSON de entrada (`p_json_entrada`) como en el JSON de salida (`p_json_salida`), DAOs y cursores.
 > * Queda terminantemente prohibido el uso de prefijos alternativos como `pr_`, `fn_`, `sp_`, `func_` o subprogramas sin prefijo tipado.
 
 | Tipo de Subprograma | Prefijo Obligatorio | Ejemplos Permitidos | Prohibido |

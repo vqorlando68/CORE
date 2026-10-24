@@ -68,6 +68,7 @@ Este repositorio define el Core Transversal multi-inquilino para la construcció
 ## 3. Nomenclatura de Subprogramas (Procedimientos y Funciones)
 * **Procedimientos:** Todo procedimiento nuevo debe empezar obligatoriamente por el prefijo **`p_`** (tanto en paquetes DAO como en `pkgca_`, `pkgcn_`, `pkgln_` y `uti_`, ej. `p_insertar`, `p_actualizar`, `p_eliminar`, `p_procesar_usuario`, `p_iniciar_sesion`).
 * **Funciones:** Toda función nueva debe empezar obligatoriamente por el prefijo **`f_`** (tanto en paquetes DAO como en `pkgca_`, `pkgcn_`, `pkgln_` y `uti_`, ej. `f_traer`, `f_existe`, `f_json`, `f_buscar_citas`, `f_calcular_total`).
+* **Parámetros DATE en Métodos Nuevos:** Si un método es nuevo y recibe o manipula parámetros de fecha (`DATE`), debe utilizar obligatoriamente el formato **`YYYY-MM-DD`** tanto en el JSON de entrada (`p_json_entrada`) como en el de salida (`p_json_salida`).
 * **Prohibido:** Queda terminantemente prohibido usar prefijos como `pr_`, `fn_`, `sp_`, `func_` o subprogramas sin prefijo tipado.
 
 ---
@@ -159,6 +160,7 @@ END p_do_commit;
 ---
 
 ## 10. Estándar Universal e Innegociable de Manejo de Fechas (YYYY-MM-DD)
+* **Regla Mandatoria para Métodos Nuevos con Parámetros DATE:** Si un método es nuevo y recibe o manipula parámetros de fecha (`DATE`), debe utilizar obligatoriamente el formato ISO **`YYYY-MM-DD`** tanto en el JSON de entrada (`p_json_entrada`) como en el JSON de salida (`p_json_salida`), DAOs y cursores.
 * Toda fecha que ingrese (`p_json_entrada` o parámetros) o egrese (`p_json_salida`, DAOs, cursores) debe utilizar obligatoriamente el formato ISO **`YYYY-MM-DD`** (ej. `'2026-10-24'`).
 * **Entradas:** Convertir con `v_fecha := TO_DATE(TRIM(v_fecha_str), 'YYYY-MM-DD');`. En caso de formato inválido, no lanzar excepción sino devolver error en `p_json_salida` con código `-20005` y finalizar con `RETURN;`.
 * **Salidas:** En JSON nativo y `SYS_REFCURSOR`, proyectar explícitamente formateando con `TO_CHAR(columna, 'YYYY-MM-DD')`.
