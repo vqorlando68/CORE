@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" data-theme="core">
 <head>
   <meta charset="UTF-8">
@@ -1959,6 +1959,84 @@
     // =========================================================================
     // 7. GESTIÓN DEL MODAL Y PESTAÑAS
     // =========================================================================
+    function formatNarrativaNatural(rawText) {
+      if (!rawText || !rawText.trim()) {
+        return '<p style="color: var(--text-muted); font-size: 13px;">Sin narrativa declarada.</p>';
+      }
+
+      var lines = rawText.split(/\r?\n/);
+      var expandedLines = [];
+
+      lines.forEach(function(l) {
+        var trimmed = l.trim();
+        if (!trimmed.startsWith('- ') && !trimmed.startsWith('* ') && !/^\d+\.\s+/.test(trimmed) && trimmed.includes(' - ')) {
+          var parts = trimmed.split(/\s+-\s+/);
+          parts.forEach(function(p, idx) {
+            if (idx === 0) {
+              if (p.trim()) expandedLines.push(p.trim());
+            } else {
+              expandedLines.push('- ' + p.trim());
+            }
+          });
+        } else {
+          expandedLines.push(l);
+        }
+      });
+
+      var html = '';
+      var listType = null; // 'ul' or 'ol'
+
+      function formatInline(str) {
+        return str
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--color-primary); font-weight: 600;">$1</strong>')
+          .replace(/`([^`]+)`/g, '<code style="font-family: var(--font-mono); font-size: 12px; background: rgba(56, 189, 248, 0.12); color: var(--color-primary); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.25);">$1</code>');
+      }
+
+      for (var i = 0; i < expandedLines.length; i++) {
+        var line = expandedLines[i].trim();
+        if (!line) {
+          if (listType) {
+            html += '</' + listType + '>';
+            listType = null;
+          }
+          continue;
+        }
+
+        if (line.startsWith('- ') || line.startsWith('* ')) {
+          if (listType !== 'ul') {
+            if (listType) html += '</' + listType + '>';
+            html += '<ul style="margin: 10px 0 16px 24px; padding-left: 0; list-style-type: disc; display: flex; flex-direction: column; gap: 8px;">';
+            listType = 'ul';
+          }
+          var itemText = line.substring(2).trim();
+          html += '<li style="line-height: 1.6; color: var(--text-main); font-size: 14px;">' + formatInline(itemText) + '</li>';
+        } else if (/^\d+\.\s+/.test(line)) {
+          if (listType !== 'ol') {
+            if (listType) html += '</' + listType + '>';
+            html += '<ol style="margin: 10px 0 16px 24px; padding-left: 0; display: flex; flex-direction: column; gap: 8px;">';
+            listType = 'ol';
+          }
+          var itemText = line.replace(/^\d+\.\s+/, '').trim();
+          html += '<li style="line-height: 1.6; color: var(--text-main); font-size: 14px;">' + formatInline(itemText) + '</li>';
+        } else {
+          if (listType) {
+            html += '</' + listType + '>';
+            listType = null;
+          }
+          html += '<p style="margin-bottom: 12px; line-height: 1.6; color: var(--text-main); font-size: 14px;">' + formatInline(line) + '</p>';
+        }
+      }
+
+      if (listType) {
+        html += '</' + listType + '>';
+      }
+
+      return html;
+    }
+
     function openMethodModal(methodId) {
       activeMethod = currentMethods.find(m => m.id === methodId);
       if (!activeMethod) return;
@@ -2009,7 +2087,7 @@
       document.getElementById('jsonOutCode').textContent = activeMethod.json_salida || `{\n  "codigo": 0,\n  "mensaje": "Operación completada exitosamente",\n  "datos": {\n    "id": 1250\n  }\n}`;
 
       // 5. Narrativa Natural
-      document.getElementById('naturalContent').textContent = activeMethod.descripcion_negocio || 'Sin narrativa declarada.';
+      document.getElementById('naturalContent').innerHTML = formatNarrativaNatural(activeMethod.descripcion_negocio);
 
       document.getElementById('detailModal').classList.add('open');
     }
@@ -2121,6 +2199,10 @@
     // =========================================================================
     const fileInput = document.getElementById('mdFileInput');
     const dropzoneBox = document.getElementById('dropzoneBox');
+
+    fileInput.addEventListener('click', () => {
+      fileInput.value = '';
+    });
 
     fileInput.addEventListener('change', (e) => {
       if (e.target.files && e.target.files[0]) {
