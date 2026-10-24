@@ -66,8 +66,8 @@ Este repositorio define el Core Transversal multi-inquilino para la construcció
 ---
 
 ## 3. Nomenclatura de Subprogramas (Procedimientos y Funciones)
-* **Procedimientos:** Todo procedimiento nuevo debe empezar obligatoriamente por el prefijo **`p_`** (ej. `p_insertar`, `p_actualizar`, `p_eliminar`, `p_procesar_usuario`, `p_iniciar_sesion`).
-* **Funciones:** Toda función nueva debe empezar obligatoriamente por el prefijo **`f_`** (ej. `f_traer`, `f_existe`, `f_json`, `f_buscar_citas`, `f_calcular_total`).
+* **Procedimientos:** Todo procedimiento nuevo debe empezar obligatoriamente por el prefijo **`p_`** (tanto en paquetes DAO como en `pkgca_`, `pkgcn_`, `pkgln_` y `uti_`, ej. `p_insertar`, `p_actualizar`, `p_eliminar`, `p_procesar_usuario`, `p_iniciar_sesion`).
+* **Funciones:** Toda función nueva debe empezar obligatoriamente por el prefijo **`f_`** (tanto en paquetes DAO como en `pkgca_`, `pkgcn_`, `pkgln_` y `uti_`, ej. `f_traer`, `f_existe`, `f_json`, `f_buscar_citas`, `f_calcular_total`).
 * **Prohibido:** Queda terminantemente prohibido usar prefijos como `pr_`, `fn_`, `sp_`, `func_` o subprogramas sin prefijo tipado.
 
 ---
@@ -84,7 +84,7 @@ Queda terminantemente prohibido el uso de nombres de variables o parámetros sin
 
 ---
 
-## 5. Regla de Invocación desde el Frontend (Orquestadores `pkgln_`)
+## 5. Regla de Invocación desde el Frontend y Política 'Cero RAISE_APPLICATION_ERROR' (`pkgln_`)
 Todo objeto/procedimiento PL/SQL expuesto para ser llamado desde el front-end o API Gateway pertenece obligatoriamente a la capa orquestadora **`pkgln_`** y debe implementar la siguiente firma estándar de 2 parámetros CLOB:
 
 ```sql
@@ -96,24 +96,46 @@ PROCEDURE p_nombre_operacion (
 
 * **Nombres Fijos Obligatorios:** Los parámetros deben llamarse exactamente `p_json_entrada` (IN CLOB) y `p_json_salida` (OUT CLOB).
 * **Parseo y Generación:** Usar `JSON_OBJECT_T.parse(p_json_entrada)` para lectura y funciones SQL/JSON nativas (`JSON_OBJECT`, `JSON_ARRAYAGG`) con `RETURNING CLOB` para la salida. Queda prohibida la concatenación manual de cadenas para armar JSON.
-* **Validación y Registro Obligatorio de Trazabilidad con `uti_manejo_trazas_pkg`:** Todo subprograma en `pkgln_` debe delegar obligatoriamente la gestión de telemetría en el paquete transversal **`uti_manejo_trazas_pkg`** (el cual se comporta como un paquete de la capa `pkgln_`):
+* **Política de 'Cero RAISE_APPLICATION_ERROR' en `pkgln_`:**
+  - Queda **terminantemente prohibido ejecutar `RAISE_APPLICATION_ERROR`** en cualquier procedimiento de la capa orquestadora `pkgln_` o expuesto al frontend.
+  - **Errores de Negocio:** Se ejecuta `ROLLBACK;`, se construye el objeto JSON de salida en `p_json_salida` (`codigo` negativo ej. `-20001`, `error: -20001`, `mensaje: '...'`, `datos: null`) y se finaliza con `RETURN;`.
+  - **Errores Inesperados (`WHEN OTHERS`):** Tras ejecutar `ROLLBACK;`, registrar el fallo forense en `core_error` con `uti_ge_excepciones_pkg.p_grabar_log(vro_error);` y finalizar la traza con `uti_manejo_trazas_pkg.p_finalizar_traza_error(...)`, se construye en `p_json_salida` un JSON estructurado con `codigo: -20000`, `error: -20000`, `mensaje: 'Se presento un error comunicarse con soporte. Número error: ' || vro_error.id`, `id_error: vro_error.id` y `datos: null`.
+* **Validación y Registro Obligatorio de Trazabilidad con `uti_manejo_trazas_pkg`:** Todo subprograma en `pkgln_` debe delegar obligatoriamente la gestión de telemetría en el paquete transversal **`uti_manejo_trazas_pkg`**:
   1. Verificar al inicio mediante `uti_manejo_trazas_pkg.f_debe_trazar(...)` si el objeto tiene profilado activo en `core_traza_config`.
-  2. Si está activo, invocar de inmediato `uti_manejo_trazas_pkg.p_iniciar_traza(...)` para registrar la cabecera en `core_traza_ejecucion` (`estado = 'EN_PROCESO'`, `fecha_inicio`, `json_entrada`, `codigo_traza`).
-  3. Al finalizar con éxito la lógica de negocio y posterior a `p_do_commit(...)`, invocar `uti_manejo_trazas_pkg.p_finalizar_traza(...)` para actualizar `core_traza_ejecucion` (`estado = 'EXITO'`, `fecha_fin`, `duracion_ms`, `json_salida`).
-  4. En caso de error inesperado en `WHEN OTHERS`, tras ejecutar `ROLLBACK;`, invocar inmediatamente `uti_manejo_trazas_pkg.p_finalizar_traza_error(...)` (`estado = 'ERROR'`, `codigo_error = SQLCODE`, `mensaje_error = SQLERRM`) antes de persistir el fallo en `core_error` con `uti_ge_excepciones_pkg.p_grabar_log(vro_error);`.
-* **Control Transaccional Controlado:** Queda **terminantemente prohibido ejecutar `COMMIT;` directo**. Toda confirmación de transacción debe ejecutarse exclusivamente en el orquestador invocando `p_do_commit('<paquete>.<subprograma>');` (ej. `p_do_commit('pkgln_usuarios.p_crear_usuario');`) al completar con éxito todas las operaciones. En caso de fallo en el bloque `WHEN OTHERS`, se ejecuta inmediatamente `ROLLBACK;` antes de persistir el error con `uti_ge_excepciones_pkg.p_grabar_log(vro_error);`.
+  2. Si está activo, invocar de inmediato `uti_manejo_trazas_pkg.p_iniciar_traza(...)` para registrar la cabecera en `core_traza_ejecucion`.
+  3. Al finalizar con éxito la lógica de negocio y posterior a `p_do_commit(...)`, invocar `uti_manejo_trazas_pkg.p_finalizar_traza(...)` para actualizar `core_traza_ejecucion`.
+  4. En caso de error inesperado en `WHEN OTHERS`, tras ejecutar `ROLLBACK;`, invocar inmediatamente `uti_manejo_trazas_pkg.p_finalizar_traza_error(...)` antes de persistir el fallo en `core_error`.
+* **Control Transaccional Controlado:** Queda **terminantemente prohibido ejecutar `COMMIT;` directo**. Toda confirmación de transacción debe ejecutarse exclusivamente en el orquestador invocando `p_do_commit('<paquete>.<subprograma>');` al completar con éxito todas las operaciones.
 
 ---
 
-## 6. Paquetes DML Multi-Tabla y Procesamiento JSON (`pkgcn_`)
+## 6. Paquetes de Acceso y DML No-PK Mono-Tabla (`pkgca_<nombre_tabla>`)
+Los paquetes con prefijo **`pkgca_`** tienen la responsabilidad exclusiva de operaciones sobre **UNA SOLA TABLA FÍSICA**:
+* **Nomenclatura Estricta:** `pkgca_<nombre_tabla>` en singular (ej. `pkgca_core_horario_profesional`, `pkgca_core_usuario`).
+* **Prohibición Total de Multi-Tabla y JOINs:** Queda **terminantemente prohibido realizar `JOINs`**, vincular tablas secundarias o tocar más de una tabla dentro de un paquete `pkgca_`. Si una consulta o proceso involucra más de una tabla, pertenece obligatoriamente a `pkgcn_<negocio>`.
+* **Retorno Multi-fila:** Retorna conjuntos de registros de esa entidad mediante `SYS_REFCURSOR`.
+* **Prohibición Transaccional:** Prohibido ejecutar `p_do_commit` o `ROLLBACK`.
+
+---
+
+## 7. Paquetes Multi-Tabla: DML, Consultas Relacionales y Procesamiento JSON (`pkgcn_<negocio>`)
 Los paquetes con prefijo **`pkgcn_`** tienen como responsabilidad exclusiva:
-1. Ejecutar sentencias DML que afecten a más de una tabla de manera coordinada.
-2. Procesar o desestructurar payloads JSON complejos para devolver valores utilizando sentencias SQL nativas como **`JSON_TABLE`**.
-3. **Prohibición de Commit:** Los paquetes `pkgcn_` no ejecutan `p_do_commit` ni controlan la transacción final; son invocados por los orquestadores `pkgln_`.
+1. **Consultas Relacionales Multi-Tabla:** Vistas de negocio, reportes y búsquedas relacionales que requieren combinar dos o más tablas tradicionales con `(+)` en el WHERE.
+2. **Sentencias DML Multi-Tabla:** Inserciones, actualizaciones o eliminaciones que coordinan cambios atómicos sobre múltiples tablas del proceso.
+3. **Procesamiento y Parsing JSON (`JSON_TABLE`):** Desestructurar arreglos o registros JSON en filas relacionales e interactuar con múltiples tablas.
+4. **Prohibición de Commit:** Los paquetes `pkgcn_` no ejecutan `p_do_commit` ni controlan la transacción final; son invocados por los orquestadores `pkgln_`.
 
 ---
 
-## 7. Procedimiento Centralizado de Commit Controlado (`p_do_commit`)
+## 8. Paquetes Utilitarios Transversales (`uti_`)
+Los paquetes con prefijo **`uti_`** (generalmente con sufijo `_pkg`, ej. `uti_archivos_pkg`, `uti_validaciones_pkg`, `uti_manejo_trazas_pkg`, `uti_ge_excepciones_pkg`, `uti_paquetes_pkg`) encapsulan rutinas técnicas auxiliares **estrictamente agnósticas al negocio**:
+1. **Cero Lógica de Negocio:** No deben contener reglas de dominio, comerciales ni flujos de negocio.
+2. **Cero Control Transaccional:** Queda **terminantemente prohibido ejecutar `COMMIT;`, `ROLLBACK;` o `p_do_commit`** dentro de un paquete `uti_` (salvo transacciones autónomas técnicas con `PRAGMA AUTONOMOUS_TRANSACTION`).
+3. **Reutilización Transversal:** Pueden ser consumidos libremente por cualquier capa (`pkgln_`, `pkgcn_`, `pkgca_` o DAOs).
+
+---
+
+## 9. Procedimiento Centralizado de Commit Controlado (`p_do_commit`)
 Todo commit en la plataforma debe ejecutarse a través de este procedimiento estándar:
 
 ```sql
@@ -136,7 +158,14 @@ END p_do_commit;
 
 ---
 
-## 8. Documentación y Control de Cambios en `.pks`
+## 10. Estándar Universal e Innegociable de Manejo de Fechas (YYYY-MM-DD)
+* Toda fecha que ingrese (`p_json_entrada` o parámetros) o egrese (`p_json_salida`, DAOs, cursores) debe utilizar obligatoriamente el formato ISO **`YYYY-MM-DD`** (ej. `'2026-10-24'`).
+* **Entradas:** Convertir con `v_fecha := TO_DATE(TRIM(v_fecha_str), 'YYYY-MM-DD');`. En caso de formato inválido, no lanzar excepción sino devolver error en `p_json_salida` con código `-20005` y finalizar con `RETURN;`.
+* **Salidas:** En JSON nativo y `SYS_REFCURSOR`, proyectar explícitamente formateando con `TO_CHAR(columna, 'YYYY-MM-DD')`.
+
+---
+
+## 11. Documentación Obligatoria, Archivo de Flujo Gráfico (`<nombre_paquete>.md`) y Control de Cambios en `.pks`
 En la especificación de todo paquete (`.pks`), **antes de cada objeto (procedimiento o función)**, debe ubicarse obligatoriamente un bloque de documentación estructurado.
 Es requisito obligatorio **documentar en detalle la estructura (schema) y un ejemplo completo del JSON de entrada (`p_json_entrada`) como del JSON de salida (`p_json_salida`)**. Asimismo, cuando se realice cualquier modificación o ajuste de funcionalidad, **debe agregarse un registro por fecha en el historial de modificaciones**.
 
@@ -215,9 +244,12 @@ Es requisito obligatorio **documentar en detalle la estructura (schema) y un eje
     );
 ```
 
+### Regla Obligatoria: Archivo de Flujo Gráfico por Paquete (`<nombre_paquete>.md`)
+Cada vez que se cree o modifique un procedimiento o función dentro de un paquete orquestador `pkgln_<dominio>`, **se debe crear o actualizar obligatoriamente un archivo Markdown con el nombre del paquete: `<nombre_paquete>.md`** (ej: `pkgln_citas.md`, `pkgln_usuarios.md`) que sirve de insumo para graficar interactivamente el árbol de decisiones, flujo funcional en lenguaje natural y la tabla de objetos llamados.
+
 ---
 
-## 9. Motor de Pruebas de Objetos (`core_test_*`)
+## 12. Motor de Pruebas de Objetos (`core_test_*`)
 Las pruebas automatizadas de los objetos construidos se registran y auditan en las 7 tablas del motor de pruebas:
 * `core_test_objeto`: Catálogo de endpoints PL/SQL y schemas JSON.
 * `core_test_suite`: Baterías y suites de pruebas (Smoke, Regresión).
@@ -229,7 +261,7 @@ Las pruebas automatizadas de los objetos construidos se registran y auditan en l
 
 ---
 
-## 10. Telemetría, APM y Seguimiento de Llamados (`core_traza_*` y `uti_manejo_trazas_pkg`)
+## 13. Telemetría, APM y Seguimiento de Llamados (`core_traza_*` y `uti_manejo_trazas_pkg`)
 El seguimiento y call-stack jerárquico se audita en 4 tablas de observabilidad y se gestiona mediante el paquete transversal **`uti_manejo_trazas_pkg`** (que opera como un paquete de la capa `pkgln_` y provee servicios autónomos a todos los orquestadores):
 * `core_traza_config`: Reglas condicionales de activación en caliente (por usuario, rango de tiempo u objeto).
 * `core_traza_ejecucion`: Cabecera de invocación raíz (tiempos inicio/fin, duracion_ms, `json_entrada`, `json_salida`, estado).
@@ -239,7 +271,7 @@ El seguimiento y call-stack jerárquico se audita en 4 tablas de observabilidad 
 
 ---
 
-## 11. Seguridad M2M, Sesiones, Gestión Documental y Excepciones Forenses
+## 14. Seguridad M2M, Sesiones, Gestión Documental y Excepciones Forenses
 * `core_sesion_activa`: Control de sesiones activas concurrentes, JWT/token hashing (`hash_token_sesion`), agente de usuario (`agente_usuario`), IP de origen y revocación en tiempo real.
 * `core_api_token`: Credenciales de integración Machine-to-Machine con hash seguro (`hash_token` SHA-256/512), límite de peticiones (`limite_peticiones_min`), alcances JSON (`alcances_json`) y revocación.
 * `core_archivo`: Repositorio centralizado de metadatos de documentos, adjuntos, reportes e imágenes con hash SHA-256, URL pública/pre-firmada (`url_archivo`) e integración a Object Storage / S3.
@@ -247,14 +279,14 @@ El seguimiento y call-stack jerárquico se audita en 4 tablas de observabilidad 
 
 ---
 
-## 12. Estándares de Frontend y Diseño UI (Tokens y Archivo Único de Tema)
+## 15. Estándares de Frontend y Diseño UI (Tokens y Archivo Único de Tema)
 * **Archivo Único de Tema:** Toda definición del estilo visual de la interfaz de usuario (tipografía, fuentes Google Fonts / locales, paleta de colores, gradientes, escalas de espaciado, radios de bordes, sombras y variantes para modo claro y oscuro) **debe quedar almacenada obligatoriamente en un solo archivo con el nombre del tema** (ej. `tema-core.css`, `theme.css`, `tema-default.css` o equivalente según el stack).
 * **Consumo Exclusivo por Variables / Tokens:** Queda terminantemente prohibido quemar estilos directos, valores hexadecimales o tipografías dispersas en archivos HTML, plantillas o componentes individuales. Toda regla visual debe consumir las variables CSS (Custom Properties) o tokens semánticos provistos por dicho archivo de tema (ej. `var(--color-fondo)`, `var(--color-primario)`, `var(--fuente-principal)`).
 * **Intercambiabilidad e Identidad Multi-Tenant:** La arquitectura visual debe garantizar que el cambio completo de imagen, branding o soporte de temas personalizados por inquilino (`id_tenant`) se realice únicamente sustituyendo o alternando dicho archivo de tema, sin requerir modificaciones en la estructura de marcado ni en la lógica funcional.
 
 ---
 
-## 13. Catálogo y Documentación en Lenguaje Natural de Orquestadores (`core_documentacion_metodo`)
+## 16. Catálogo y Documentación en Lenguaje Natural de Orquestadores (`core_documentacion_metodo`)
 Para permitir que herramientas gráficas, frontends administrativos, portales para desarrolladores y analistas de negocio puedan visualizar de manera interactiva la documentación de los métodos de los orquestadores (`pkgln_`), la plataforma dispone de la tabla centralizada **`core_documentacion_metodo`**:
 * **Propósito:** Almacenar de forma estructurada y en **lenguaje natural no técnico** la descripción funcional completa de cada procedimiento expuesto en los paquetes `pkgln_`.
 * **Contenido Obligatorio por Método:**
@@ -271,7 +303,7 @@ Para permitir que herramientas gráficas, frontends administrativos, portales pa
 
 ---
 
-## 14. Generador Automático de Paquetes DAO (`uti_paquetes_pkg`)
+## 17. Generador Automático de Paquetes DAO (`uti_paquetes_pkg`)
 Para garantizar la estandarización absoluta y evitar discrepancias manuales de firmas o sintaxis en los 20 métodos oficiales de acceso a datos, se dispone del paquete utilitario **`uti_paquetes_pkg`**:
 * **Procedimiento:** `p_crear_dao(p_nombre_tabla IN VARCHAR2 DEFAULT NULL)`
 * **Comportamiento:**
@@ -279,4 +311,3 @@ Para garantizar la estandarización absoluta y evitar discrepancias manuales de 
   2. Si `p_nombre_tabla IS NULL`: Itera sobre todas las tablas del esquema (`user_tables WHERE table_name LIKE 'CORE_%'`) y compila automáticamente todos sus paquetes DAO.
   3. Detecta automáticamente si la tabla posee soporte multi-tenant (`id_tenant`) para incorporar el Enfoque B mediante `SYS_CONTEXT('CORE_CTX', 'ID_TENANT')`.
   4. Resuelve la obtención simultánea de `%ROWTYPE` y `ROWID` (evitando los errores `PLS-00494` y `ORA-03056`) mediante consulta optimizada por puntero interno.
-

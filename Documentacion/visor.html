@@ -1,0 +1,2220 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="core">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>CORE Engine — Visor de Documentación y Flujo de Métodos Orquestadores</title>
+
+  <!-- Fuentes Oficiales del Ecosistema CORE -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       1. VARIABLES Y TOKENS DE DISEÑO OFICIALES (EMBEBIDO POR DEFECTO)
+       ========================================================================== */
+    :root,
+    [data-theme="core"],
+    [data-theme="dark"] {
+      --bg-app: #060913;
+      --bg-sidebar: #0A0F1D;
+      --bg-surface: #0E162B;
+      --bg-surface-elevated: rgba(18, 28, 52, 0.75);
+      --bg-surface-hover: rgba(28, 43, 77, 0.85);
+      --bg-glass: rgba(10, 16, 32, 0.78);
+      --bg-glass-card: rgba(14, 22, 44, 0.65);
+      --bg-input: rgba(255, 255, 255, 0.05);
+      --bg-input-focus: rgba(255, 255, 255, 0.09);
+
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-medium: rgba(255, 255, 255, 0.15);
+      --border-accent: rgba(56, 189, 248, 0.35);
+
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --text-dim: #64748B;
+      --text-inverse: #060913;
+
+      --color-primary: #38BDF8;
+      --color-primary-dark: #0284C7;
+      --color-primary-glow: rgba(56, 189, 248, 0.28);
+      --color-secondary: #818CF8;
+      --color-accent: #00F0FF;
+      --color-success: #10B981;
+      --color-warning: #F59E0B;
+      --color-danger: #F43F5E;
+      --color-purple: #C084FC;
+
+      --badge-bg-primary: rgba(56, 189, 248, 0.12);
+      --badge-border-primary: rgba(56, 189, 248, 0.3);
+
+      --grad-primary: linear-gradient(135deg, #0284C7 0%, #6366F1 100%);
+      --grad-accent: linear-gradient(135deg, #00F0FF 0%, #3B82F6 100%);
+      --grad-card: linear-gradient(145deg, rgba(22, 33, 62, 0.6) 0%, rgba(14, 21, 40, 0.6) 100%);
+
+      --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
+      --shadow-md: 0 10px 20px -3px rgba(0, 0, 0, 0.5);
+      --shadow-lg: 0 20px 30px -5px rgba(0, 0, 0, 0.6);
+      --shadow-glow: 0 0 25px rgba(56, 189, 248, 0.25);
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', Consolas, Monaco, monospace;
+      --glass-blur: blur(16px);
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    [data-theme="light"] {
+      --bg-app: #F8FAFC;
+      --bg-sidebar: #F1F5F9;
+      --bg-surface: #FFFFFF;
+      --bg-surface-elevated: #F8FAFC;
+      --bg-surface-hover: #F1F5F9;
+      --bg-glass: rgba(255, 255, 255, 0.88);
+      --bg-glass-card: rgba(255, 255, 255, 0.92);
+      --bg-input: #F1F5F9;
+      --bg-input-focus: #E2E8F0;
+
+      --border-subtle: rgba(0, 0, 0, 0.08);
+      --border-medium: rgba(0, 0, 0, 0.15);
+      --border-accent: rgba(2, 132, 199, 0.35);
+
+      --text-main: #0F172A;
+      --text-muted: #475569;
+      --text-dim: #64748B;
+      --text-inverse: #FFFFFF;
+
+      --color-primary: #0284C7;
+      --color-primary-dark: #0369A1;
+      --color-primary-glow: rgba(2, 132, 199, 0.15);
+      --color-secondary: #6366F1;
+      --color-accent: #0284C7;
+
+      --badge-bg-primary: rgba(2, 132, 199, 0.1);
+      --badge-border-primary: rgba(2, 132, 199, 0.25);
+
+      --grad-card: linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 100%);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --shadow-glow: 0 0 20px rgba(2, 132, 199, 0.15);
+    }
+
+    [data-theme="baby"] {
+      --bg-app: #0F172A;
+      --bg-sidebar: #1E293B;
+      --bg-surface: #1E293B;
+      --bg-surface-elevated: #334155;
+      --bg-surface-hover: #475569;
+      --color-primary: #38BDF8;
+      --color-secondary: #F472B6;
+      --color-accent: #FBBF24;
+      --text-main: #F8FAFC;
+      --grad-primary: linear-gradient(135deg, #38BDF8 0%, #F472B6 100%);
+    }
+
+    [data-theme="pirata"] {
+      --bg-app: #0A0A0A;
+      --bg-sidebar: #141414;
+      --bg-surface: #1C1917;
+      --bg-surface-elevated: #292524;
+      --bg-surface-hover: #44403C;
+      --color-primary: #F59E0B;
+      --color-secondary: #D97706;
+      --color-accent: #EF4444;
+      --text-main: #F5F5F4;
+      --grad-primary: linear-gradient(135deg, #F59E0B 0%, #B45309 100%);
+    }
+
+    /* ==========================================================================
+       2. RESET Y ESTILOS BASE
+       ========================================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-app);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* Contenedor Principal */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ==========================================================================
+       3. TOP HEADER / BARRA DE NAVEGACIÓN
+       ========================================================================== */
+    .app-header {
+      height: 70px;
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--bg-glass);
+      backdrop-filter: var(--glass-blur);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: var(--grad-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 18px;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .brand-text h1 {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+    }
+
+    .brand-text span {
+      font-size: 11px;
+      color: var(--color-primary);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .theme-selector-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      padding: 4px 10px;
+      border-radius: var(--radius-md);
+    }
+
+    .theme-selector-group label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .theme-select {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-size: 12.5px;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .theme-select option {
+      background: var(--bg-surface);
+      color: var(--text-main);
+    }
+
+    /* ==========================================================================
+       4. BOTONES Y COMPONENTES REUTILIZABLES
+       ========================================================================== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      border: 1px solid transparent;
+      outline: none;
+      text-decoration: none;
+      font-family: inherit;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: var(--radius-sm);
+    }
+
+    .btn-primary {
+      background: var(--grad-primary);
+      color: #ffffff;
+      box-shadow: 0 2px 10px var(--color-primary-glow);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-surface);
+      color: var(--text-main);
+      border-color: var(--border-subtle);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-surface-hover);
+      border-color: var(--border-medium);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border-color: transparent;
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg-surface-hover);
+      color: var(--text-main);
+    }
+
+    .btn-danger {
+      background: rgba(244, 63, 94, 0.12);
+      color: #f43f5e;
+      border-color: rgba(244, 63, 94, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: rgba(244, 63, 94, 0.22);
+      border-color: #f43f5e;
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    /* ==========================================================================
+       5. ÁREA DE CARGA Y SELECCIÓN DE ARCHIVO (.MD)
+       ========================================================================== */
+    .upload-banner {
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.05) 0%, transparent 100%), var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 24px 28px;
+    }
+
+    .upload-container {
+      max-width: 1380px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .dropzone-box {
+      border: 2px dashed var(--border-accent);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      text-align: center;
+      background: var(--bg-glass-card);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .dropzone-box:hover,
+    .dropzone-box.drag-over {
+      border-color: var(--color-primary);
+      background: rgba(56, 189, 248, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .dropzone-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--badge-bg-primary);
+      border: 1px solid var(--badge-border-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-primary);
+    }
+
+    .dropzone-text h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .dropzone-text p {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .sample-picker {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .sample-picker span {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    /* ==========================================================================
+       6. CUERPO PRINCIPAL: FILTROS Y TARJETAS
+       ========================================================================== */
+    .main-content {
+      max-width: 1380px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 28px;
+      flex: 1;
+    }
+
+    .view-header {
+      margin-bottom: 24px;
+    }
+
+    .view-title-group h2 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+    }
+
+    .view-title-group p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .search-filter-bar {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .search-icon-svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 16px 10px 42px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      font-size: 13.5px;
+      outline: none;
+      font-family: inherit;
+      transition: all var(--transition-fast);
+    }
+
+    .form-input:focus {
+      border-color: var(--color-primary);
+      background: var(--bg-input-focus);
+      box-shadow: 0 0 0 3px var(--color-primary-glow);
+    }
+
+    .category-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Grid de Métodos */
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 20px;
+    }
+
+    .method-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .method-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-accent);
+      box-shadow: var(--shadow-md), 0 0 20px var(--color-primary-glow);
+      background: var(--bg-surface-hover);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .badge-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #ffffff;
+      flex-shrink: 0;
+    }
+
+    .badge-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tag-category {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      background: var(--badge-bg-primary);
+      color: var(--color-primary);
+      border: 1px solid var(--badge-border-primary);
+      letter-spacing: 0.5px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.35;
+    }
+
+    .card-signature {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--color-primary);
+      background: var(--bg-input);
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      display: inline-block;
+      border: 1px solid var(--border-subtle);
+      word-break: break-all;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 14px;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .card-cta {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--color-primary);
+      font-weight: 700;
+      font-size: 12.5px;
+    }
+
+    /* ==========================================================================
+       7. MODAL DE VISUALIZACIÓN DETALLADA Y FLUJO GRÁFICO
+       ========================================================================== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-normal);
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-dialog {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 980px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg), 0 0 50px rgba(0, 0, 0, 0.6);
+      transition: all var(--transition-normal);
+      overflow: hidden;
+    }
+
+    .modal-dialog.wide {
+      max-width: 1280px;
+    }
+
+    .modal-dialog.fullscreen {
+      max-width: 98vw;
+      height: 96vh;
+      max-height: 96vh;
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-glass);
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .modal-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+    }
+
+    .modal-title-wrap h3 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .modal-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    /* Pestañas del Modal - Corregido para evitar compresión vertical y scrollbar nativo */
+    .modal-tabs {
+      display: flex;
+      align-items: stretch;
+      padding: 0 24px;
+      background: var(--bg-sidebar);
+      border-bottom: 1px solid var(--border-subtle);
+      gap: 4px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      flex-shrink: 0;
+      min-height: 48px;
+      height: 48px;
+      scrollbar-width: thin;
+      box-sizing: border-box;
+    }
+
+    .modal-tabs::-webkit-scrollbar {
+      height: 3px;
+    }
+
+    .modal-tabs::-webkit-scrollbar-thumb {
+      background: var(--border-medium);
+      border-radius: 4px;
+    }
+
+    .tab-btn {
+      padding: 0 18px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: inherit;
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+      flex-shrink: 0;
+      height: 100%;
+      box-sizing: border-box;
+      line-height: 1;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+      background: var(--badge-bg-primary);
+    }
+
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ==========================================================================
+       8. MOTOR DE GRAFICACIÓN DE FLUJO (DIAGRAMAS MODERN GLASS & TIMELINE)
+       ========================================================================== */
+    .diagram-controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--bg-surface-elevated);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .diagram-viewport {
+      background: radial-gradient(ellipse at 50% 0%, rgba(37, 99, 235, 0.08), transparent 75%), var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 40px 20px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      display: flex;
+      justify-content: center;
+      min-height: 480px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .diagram-canvas {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 720px;
+      transform-origin: top center;
+      transition: transform 0.15s ease;
+    }
+
+    /* Nodos del Diagrama */
+    .node-terminal {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: var(--radius-full);
+      padding: 10px 32px;
+      font-weight: 800;
+      font-size: 14.5px;
+      letter-spacing: 1.5px;
+      color: var(--text-main);
+      backdrop-filter: blur(8px);
+      user-select: none;
+    }
+
+    .node-start {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(16, 185, 129, 0.2));
+      border: 1.5px solid var(--color-primary);
+      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);
+    }
+
+    .node-end {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.18), rgba(245, 158, 11, 0.18));
+      border: 1.5px solid var(--color-danger);
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.25);
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .node-process-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px 20px;
+      width: 100%;
+      max-width: 460px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .node-process-card:hover {
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+    }
+
+    .node-step-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .node-step-badge {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--color-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .node-step-type {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .node-label {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.45;
+    }
+
+    .node-decision-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      position: relative;
+      margin: 6px 0;
+    }
+
+    .node-decision-card {
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.08), rgba(245, 158, 11, 0.02)), var(--bg-surface);
+      border: 1.5px solid rgba(245, 158, 11, 0.45);
+      border-radius: 12px;
+      padding: 16px 20px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 2;
+    }
+
+    .branch-yes-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 14px;
+      z-index: 2;
+    }
+
+    .branch-yes-card {
+      background: var(--bg-surface);
+      border: 1px dashed #10b981;
+      border-radius: 8px;
+      padding: 12px 14px;
+      min-width: 180px;
+      max-width: 250px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .bifurcation-card {
+      border: 1.5px solid rgba(0, 240, 255, 0.5) !important;
+      background: linear-gradient(180deg, rgba(0, 240, 255, 0.08), rgba(0, 240, 255, 0.02)), var(--bg-surface) !important;
+      box-shadow: 0 4px 20px rgba(0, 240, 255, 0.08) !important;
+    }
+
+    .terminal-eval-card {
+      border: 1.5px solid rgba(244, 63, 94, 0.5) !important;
+      background: linear-gradient(180deg, rgba(244, 63, 94, 0.08), rgba(244, 63, 94, 0.02)), var(--bg-surface) !important;
+      box-shadow: 0 4px 20px rgba(244, 63, 94, 0.08) !important;
+    }
+
+    .branch-return-card {
+      border: 1px dashed #10b981 !important;
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.02)), var(--bg-surface) !important;
+    }
+
+    .branch-exit-card {
+      border: 1px dashed #f43f5e !important;
+      background: linear-gradient(180deg, rgba(244, 63, 94, 0.08), rgba(244, 63, 94, 0.02)), var(--bg-surface) !important;
+    }
+
+    .return-flow-tag {
+      margin-top: 4px;
+      padding-top: 5px;
+      border-top: 1px dashed rgba(16, 185, 129, 0.35);
+    }
+
+    .rejoin-connector-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin: 4px 0 6px 0;
+      position: relative;
+      user-select: none;
+    }
+
+    .rejoin-svg-wrapper {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .rejoin-sublabels {
+      display: flex;
+      justify-content: space-between;
+      width: 320px;
+      font-size: 10.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: -18px;
+      margin-bottom: 6px;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .sublabel-no {
+      color: var(--text-muted);
+      background: var(--bg-surface);
+      padding: 1px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .sublabel-rejoin {
+      color: #10b981;
+      background: var(--bg-surface);
+      padding: 1px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .method-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      max-width: 100%;
+      word-break: break-all;
+    }
+
+    .chip-dao {
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      color: #38bdf8;
+    }
+
+    .chip-uti {
+      background: rgba(168, 85, 247, 0.12);
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      color: #c084fc;
+    }
+
+    .chip-cn {
+      background: rgba(14, 165, 233, 0.12);
+      border: 1px solid rgba(14, 165, 233, 0.35);
+      color: #0ea5e9;
+    }
+
+    .chip-ca {
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      color: #818cf8;
+    }
+
+    .chip-tx {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #f87171;
+    }
+
+    .chip-table {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #10b981;
+    }
+
+    /* Flecha Conectora SVG */
+    .arrow-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 4px 0;
+      user-select: none;
+    }
+
+    /* Línea de Tiempo */
+    .timeline-container {
+      padding: 24px;
+      background: var(--bg-surface-elevated);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      position: relative;
+    }
+
+    .timeline-step-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 12.5px;
+      flex-shrink: 0;
+      border: 1.5px solid;
+    }
+
+    .timeline-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 14px 18px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* ==========================================================================
+       9. TABLAS DE MAPA DE OBJETOS INVOCADOS Y ESQUEMAS
+       ========================================================================== */
+    .data-table-container {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+      background: var(--bg-surface);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    .data-table th {
+      background: var(--bg-sidebar);
+      padding: 12px 16px;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-main);
+    }
+
+    .data-table tr:hover td {
+      background: var(--bg-surface-hover);
+    }
+
+    .code-box {
+      background: #090d16;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      color: #38bdf8;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .app-header {
+        padding: 0 16px;
+      }
+      .main-content {
+        padding: 16px;
+      }
+      .grid-cards {
+        grid-template-columns: 1fr;
+      }
+      .branch-yes-group {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- HEADER TOP -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="brand-logo">C</div>
+        <div class="brand-text">
+          <h1>Catálogo y Documentación de Métodos Orquestadores</h1>
+          <span>Visualizador de Flujos y Graficación (.md)</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Selector de Archivo .md -->
+        <label for="mdFileInput" class="btn btn-primary btn-sm">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          <span>Seleccionar .md</span>
+        </label>
+        <input type="file" id="mdFileInput" accept=".md,.markdown,text/markdown" style="display: none;">
+
+        <!-- Botón de Borrar Cargados (Header) -->
+        <button type="button" id="btnClearLoadedHeader" class="btn btn-danger btn-sm" onclick="clearLoadedFiles()" style="display: none;" title="Eliminar archivos cargados y limpiar la página">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          <span>Borrar cargados</span>
+        </button>
+
+        <!-- Selector de Tema Institucional -->
+        <div class="theme-selector-group">
+          <label for="themeSelect">Tema:</label>
+          <select id="themeSelect" class="theme-select">
+            <option value="core">Core Dark (Oficial)</option>
+            <option value="light">Claro (Light)</option>
+            <option value="baby">Infantil (Baby)</option>
+            <option value="pirata">Pirata (Dark Gold)</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <!-- BANNER DE CARGA / DROPZONE -->
+    <section class="upload-banner">
+      <div class="upload-container">
+        <div class="dropzone-box" id="dropzoneBox">
+          <div class="dropzone-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          </div>
+          <div class="dropzone-text">
+            <h3 id="currentFileTitle">Arrastra o selecciona un archivo .md de documentación</h3>
+            <p id="currentFileSubtitle">Soporta la plantilla oficial de flujo: Lenguaje Natural, Decisiones y Objetos Invocados</p>
+          </div>
+        </div>
+
+        <!-- Barra de Estado y Acción de Borrado -->
+        <div class="banner-status-bar" id="bannerStatusBar" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 2px 4px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 12.5px; font-weight: 700; color: var(--text-muted);" id="statusIndicatorText">Estado: Sin archivos cargados</span>
+          </div>
+          <button type="button" id="btnClearLoadedBanner" class="btn btn-danger btn-sm" onclick="clearLoadedFiles()" style="display: none;" title="Eliminar archivo cargado y dejar la página vacía">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+            <span>Borrar cargados</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+      <div class="view-header">
+        <div class="view-title-group">
+          <h2 id="packageTitle">Catálogo de Métodos Documentados</h2>
+          <p id="packageSummary">Selecciona cualquier tarjeta para visualizar el diagrama de flujo interactivo, decisiones y dependencias relacionales.</p>
+        </div>
+      </div>
+
+      <!-- Barra de Filtros y Búsqueda -->
+      <div class="search-filter-bar">
+        <div class="search-input-wrapper">
+          <svg class="search-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="searchInput" class="form-input" placeholder="Buscar por título, paquete, método o etiqueta...">
+        </div>
+
+        <div class="category-chips" id="categoryChips">
+          <button class="btn btn-sm btn-primary" onclick="setCategoryFilter('ALL')">Todas</button>
+          <button class="btn btn-sm btn-secondary" onclick="setCategoryFilter('SEGURIDAD')">Seguridad</button>
+          <button class="btn btn-sm btn-secondary" onclick="setCategoryFilter('TELEMETRIA')">Telemetría</button>
+          <button class="btn btn-sm btn-secondary" onclick="setCategoryFilter('OPERATIVO')">Operativo</button>
+          <button class="btn btn-sm btn-secondary" onclick="setCategoryFilter('CONFIGURACION')">Configuración</button>
+        </div>
+      </div>
+
+      <!-- Grid de Métodos -->
+      <div class="grid-cards" id="methodsGrid">
+        <!-- Se inyecta dinámicamente con JS -->
+      </div>
+    </main>
+
+  </div>
+
+  <!-- MODAL DE VISUALIZACIÓN DETALLADA -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal-dialog" id="modalDialog">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="badge-icon" id="modalBadgeIcon" style="background: var(--color-primary);">⚡</div>
+          <div>
+            <h3 id="modalMethodTitle">Detalle del Método</h3>
+            <span id="modalMethodSignature" class="card-signature">pkgln_modulo.p_metodo</span>
+          </div>
+        </div>
+
+        <div class="modal-header-actions">
+          <button type="button" class="btn btn-ghost btn-sm" title="Alternar Ancho / Pantalla Completa" onclick="toggleModalSize()">
+            <svg id="expandIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+          </button>
+          <button type="button" class="btn btn-ghost btn-sm" title="Cerrar modal" onclick="closeModal()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Pestañas del Modal -->
+      <div class="modal-tabs">
+        <button type="button" class="tab-btn active" data-tab="flowchart" onclick="switchTab('flowchart')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+          <span>Flujo Gráfico</span>
+        </button>
+        <button type="button" class="tab-btn" data-tab="decisions" onclick="switchTab('decisions')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+          <span>Decisiones y Reglas</span>
+        </button>
+        <button type="button" class="tab-btn" data-tab="invocations" onclick="switchTab('invocations')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+          <span>Objetos Invocados</span>
+        </button>
+        <button type="button" class="tab-btn" data-tab="payloads" onclick="switchTab('payloads')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          <span>Esquemas JSON</span>
+        </button>
+        <button type="button" class="tab-btn" data-tab="natural" onclick="switchTab('natural')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          <span>Narrativa Natural</span>
+        </button>
+      </div>
+
+      <!-- Contenido de las Pestañas -->
+      <div class="modal-body">
+        
+        <!-- Pestaña 1: Flujo Gráfico -->
+        <div id="tab-flowchart" class="tab-panel">
+          <div class="diagram-controls-bar">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Estilo Visual:</span>
+              <button type="button" id="btnStyleModern" class="btn btn-sm btn-primary" onclick="setDiagramStyle('modern')">
+                <span>✨ Modern Glass (Enterprise)</span>
+              </button>
+              <button type="button" id="btnStyleTimeline" class="btn btn-sm btn-secondary" onclick="setDiagramStyle('timeline')">
+                <span>📋 Línea de Tiempo</span>
+              </button>
+            </div>
+
+            <!-- Controles de Zoom -->
+            <div id="zoomControls" style="display: flex; align-items: center; gap: 6px;">
+              <span id="zoomLabel" style="font-size: 11px; color: var(--text-muted);">Zoom: 100%</span>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="changeZoom(-0.1)" title="Reducir zoom">-</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="resetZoom()" title="Restablecer">100%</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="changeZoom(0.1)" title="Aumentar zoom">+</button>
+            </div>
+          </div>
+
+          <!-- Lienzo del Diagrama Modern Glass -->
+          <div id="modernViewport" class="diagram-viewport" style="margin-top: 14px;">
+            <div id="modernCanvas" class="diagram-canvas">
+              <!-- Nodos inyectados con JS -->
+            </div>
+          </div>
+
+          <!-- Lienzo de Línea de Tiempo -->
+          <div id="timelineViewport" class="timeline-container" style="display: none; margin-top: 14px;">
+            <!-- Pasos timeline inyectados con JS -->
+          </div>
+        </div>
+
+        <!-- Pestaña 2: Decisiones y Bifurcaciones -->
+        <div id="tab-decisions" class="tab-panel" style="display: none;">
+          <div id="decisionsContainer" style="display: flex; flex-direction: column; gap: 14px;">
+            <!-- Inyectado por JS -->
+          </div>
+        </div>
+
+        <!-- Pestaña 3: Mapa de Objetos Invocados -->
+        <div id="tab-invocations" class="tab-panel" style="display: none;">
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 60px; text-align: center;">Orden</th>
+                  <th>Objeto Invocado</th>
+                  <th>Capa</th>
+                  <th>Tipo</th>
+                  <th>Propósito de la Invocación</th>
+                  <th>Condición / Momento</th>
+                </tr>
+              </thead>
+              <tbody id="invocationsTableBody">
+                <!-- Filas inyectadas por JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pestaña 4: Esquemas JSON -->
+        <div id="tab-payloads" class="tab-panel" style="display: none;">
+          <div style="display: flex; flex-direction: column; gap: 18px;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h4 style="font-size: 13px; font-weight: 800; color: var(--color-primary); text-transform: uppercase;">Payload JSON de Entrada (p_json_entrada)</h4>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="copyCode('jsonInCode')">Copiar</button>
+              </div>
+              <pre class="code-box" id="jsonInCode">{ "id_tenant": 1 }</pre>
+            </div>
+
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h4 style="font-size: 13px; font-weight: 800; color: var(--color-success); text-transform: uppercase;">Payload JSON de Salida (p_json_salida)</h4>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="copyCode('jsonOutCode')">Copiar</button>
+              </div>
+              <pre class="code-box" id="jsonOutCode">{ "codigo": 0, "mensaje": "Éxito" }</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pestaña 5: Narrativa Natural -->
+        <div id="tab-natural" class="tab-panel" style="display: none;">
+          <div id="naturalContent" style="font-size: 14px; line-height: 1.7; color: var(--text-main); background: var(--bg-surface-elevated); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+            <!-- Narrativa inyectada por JS -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT DEL VISOR INTERACTIVO -->
+  <script>
+    // =========================================================================
+    // 1. ESTADO GLOBAL DE LA APLICACIÓN
+    // =========================================================================
+    let currentMethods = [];
+    let activeMethod = null;
+    let selectedCategory = 'ALL';
+    let currentZoom = 1;
+    let currentDiagramStyle = 'modern';
+    let modalSizeMode = 'normal';
+
+    // =========================================================================
+    // 2. EJEMPLOS PRECUALIFICADOS SEGÚN EL ESTÁNDAR
+    // =========================================================================
+    // 2. MODO LIMPIO - SIN EJEMPLOS PRECARGADOS
+    // =========================================================================
+    // La página inicia sin archivos precargados para permitir carga limpia por el usuario.
+
+    // =========================================================================
+    // 3. PARSER HEURÍSTICO INTELIGENTE DE ARCHIVOS .MD
+    // =========================================================================
+    function parseMarkdownDoc(mdText, fileName = 'archivo.md') {
+      const lines = mdText.split('\n');
+      let packageName = fileName.replace(/\.md$/i, '');
+      const methods = [];
+      let currentMethod = null;
+      let currentSection = '';
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+
+        // 1. Detección de Nombre de Paquete (# Diagrama y Flujo... o # Titulo)
+        if (line.startsWith('# ') && !line.startsWith('## ')) {
+          const rawName = line.replace(/^#\s*/, '').replace(/Diagrama y Flujo de Información:\s*/i, '').trim();
+          if (rawName) packageName = rawName;
+          continue;
+        }
+
+        // 2. Detección de Método (## Método: ... o ## p_...)
+        if (line.startsWith('## ') && !line.startsWith('### ')) {
+          if (currentMethod) methods.push(currentMethod);
+
+          let methodTitle = line.replace(/^##\s*/, '').replace(/Método:\s*/i, '').trim();
+          let methodName = methodTitle.split('(')[0].trim();
+
+          currentMethod = {
+            id: 'm-' + (methods.length + 1),
+            nombre_paquete: packageName,
+            nombre_metodo: methodName,
+            titulo_funcional: methodTitle,
+            descripcion_negocio: '',
+            decisiones: [],
+            pasos_texto: '',
+            objetos_invocados: [],
+            json_entrada: '',
+            json_salida: '',
+            categoria_visual: inferCategory(methodName, methodTitle)
+          };
+          currentSection = '';
+          continue;
+        }
+
+        if (!currentMethod) {
+          continue;
+        }
+
+        // 3. Detección de Subsecciones (### ...)
+        if (line.startsWith('### ')) {
+          const subNorm = line.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+          if (subNorm.includes('descripc') || subNorm.includes('lenguaje natural') || subNorm.includes('resumen')) currentSection = 'desc';
+          else if (subNorm.includes('decision') || subNorm.includes('bifurcac') || subNorm.includes('flujo') || subNorm.includes('paso') || subNorm.includes('regla')) currentSection = 'dec';
+          else if (subNorm.includes('objeto') || subNorm.includes('llamado') || subNorm.includes('invoca') || subNorm.includes('mapa') || subNorm.includes('tabla')) currentSection = 'obj';
+          else if (subNorm.includes('json') || subNorm.includes('payload') || subNorm.includes('esquema')) currentSection = 'json';
+          else currentSection = 'other';
+          continue;
+        }
+
+        // 4. Captura de contenido según subsección
+        if (currentSection === 'desc') {
+          if (line) currentMethod.descripcion_negocio += (currentMethod.descripcion_negocio ? '\n' : '') + line;
+        } else if (currentSection === 'dec') {
+          if (line.startsWith('- ') || line.startsWith('* ') || /^\d+[\.\)]/.test(line)) {
+            currentMethod.decisiones.push(line);
+            currentMethod.pasos_texto += (currentMethod.pasos_texto ? '\n' : '') + line;
+          }
+        } else if (currentSection === 'obj') {
+          if (line.startsWith('|') && !line.includes('---') && !line.toLowerCase().includes('orden')) {
+            const cols = line.split('|').map(c => c.trim()).filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
+            if (cols.length >= 3) {
+              currentMethod.objetos_invocados.push({
+                orden: cols[0] || (currentMethod.objetos_invocados.length + 1),
+                nombre: cols[1].replace(/`/g, '') || '',
+                capa: cols[2] ? cols[2].replace(/`/g, '') : 'DAO',
+                tipo: cols[3] || 'Procedimiento',
+                proposito: cols[4] || '',
+                condicion: cols[5] || 'Siempre'
+              });
+            }
+          }
+        } else if (line.startsWith('```json') || line.includes('// JSON ENTRADA') || line.includes('// JSON SALIDA')) {
+          // Bloques de código JSON
+          let jsonBuffer = '';
+          i++;
+          while (i < lines.length && !lines[i].trim().startsWith('```')) {
+            jsonBuffer += lines[i] + '\n';
+            i++;
+          }
+          if (jsonBuffer.toLowerCase().includes('salida') || jsonBuffer.includes('"codigo":')) {
+            currentMethod.json_salida = jsonBuffer.trim();
+          } else {
+            currentMethod.json_entrada = jsonBuffer.trim();
+          }
+        }
+      }
+
+      if (currentMethod) methods.push(currentMethod);
+
+      if (methods.length === 0) {
+        methods.push({
+          id: 'm-1',
+          nombre_paquete: packageName,
+          nombre_metodo: packageName.toLowerCase(),
+          titulo_funcional: packageName,
+          descripcion_negocio: '',
+          decisiones: [],
+          pasos_texto: '',
+          objetos_invocados: [],
+          json_entrada: '',
+          json_salida: '',
+          categoria_visual: 'OPERATIVO'
+        });
+      }
+
+      // Si no hubo decisiones explícitas pero sí objetos invocados, generamos pasos a partir de la tabla
+      methods.forEach(m => {
+        if (!m.pasos_texto && m.objetos_invocados.length > 0) {
+          m.pasos_texto = m.objetos_invocados.map(o => `${o.orden}. Invoca ${o.nombre} para ${o.proposito} (${o.condicion})`).join('\n');
+        }
+        if (!m.descripcion_negocio) {
+          m.descripcion_negocio = `Método orquestador ${m.nombre_metodo} del paquete ${m.nombre_paquete}. Ejecuta la lógica funcional y gobierna el control transaccional.`;
+        }
+      });
+
+      return { packageName, methods };
+    }
+
+    function inferCategory(metodo, titulo) {
+      const text = (metodo + ' ' + titulo).toLowerCase();
+      if (text.includes('auth') || text.includes('sesion') || text.includes('token') || text.includes('seguridad') || text.includes('login') || text.includes('password')) return 'SEGURIDAD';
+      if (text.includes('traza') || text.includes('telemetria') || text.includes('log') || text.includes('error')) return 'TELEMETRIA';
+      if (text.includes('config') || text.includes('parametro') || text.includes('regla')) return 'CONFIGURACION';
+      return 'OPERATIVO';
+    }
+
+    // =========================================================================
+    // 4. EXTRACTOR Y PROCESADOR DE NODOS DE FLUJO
+    // =========================================================================
+    function determineMethodType(method) {
+      const m = method.toLowerCase();
+      if (m.includes('_dao') || m.startsWith('pkgcore_')) return 'dao';
+      if (m.includes('uti_') || m.includes('excepcion') || m.includes('traza')) return 'uti';
+      if (m.includes('commit') || m.includes('rollback')) return 'tx';
+      if (m.includes('pkgcn_')) return 'cn';
+      if (m.includes('pkgca_')) return 'ca';
+      if (m.startsWith('core_')) return 'table';
+      return 'cn';
+    }
+
+    function extractMethodFromText(text) {
+      const explicit = text.match(/`([^`]+)`/);
+      if (explicit) {
+        return { cleanText: text.replace(explicit[0], '').trim(), method: explicit[1], type: determineMethodType(explicit[1]) };
+      }
+      const pkgMatch = text.match(/\b(uti_[a-zA-Z0-9_]+_pkg\.[a-zA-Z0-9_]+|PKGCORE_[a-zA-Z0-9_]+_DAO\.[a-zA-Z0-9_]+|pkgln_[a-zA-Z0-9_]+\.[a-zA-Z0-9_]+|pkgcn_[a-zA-Z0-9_]+\.[a-zA-Z0-9_]+|pkgca_[a-zA-Z0-9_]+\.[a-zA-Z0-9_]+|p_do_commit(?:\(\))?)\b/i);
+      if (pkgMatch) {
+        return { cleanText: text, method: pkgMatch[0], type: determineMethodType(pkgMatch[0]) };
+      }
+      return { cleanText: text };
+    }
+
+    function generateFlowNodes(method) {
+      const nodes = [];
+      nodes.push({ id: 'start', type: 'start', label: 'INICIO' });
+
+      const lines = (method.pasos_texto || '').split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+      let stepNum = 1;
+      lines.forEach((rawLine, idx) => {
+        const clean = rawLine.replace(/^[-*]\s*/, '').replace(/^\d+[\.\)]\s*/, '').replace(/\*\*/g, '').trim();
+        const lower = clean.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+        const isDecision = lower.includes('si ') || lower.includes('consulta si') || lower.includes('valida si') || lower.includes('existe ') || lower.includes('¿') || lower.includes('bifurcac') || lower.includes('decision');
+
+        if (isDecision) {
+          let cond = clean;
+          let yesAction = 'Continuar flujo / Rechazar';
+
+          if (clean.includes(';')) {
+            const parts = clean.split(';');
+            cond = parts[0].trim();
+            yesAction = parts[1].trim();
+          }
+
+          const condExt = extractMethodFromText(cond);
+          const yesExt = extractMethodFromText(yesAction);
+
+          const actionNorm = yesAction.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+          const isTerminalExit = actionNorm.includes('salida') || actionNorm.includes('interrumpe') || 
+                                 actionNorm.includes('rechaza') || actionNorm.includes('aborta') || 
+                                 actionNorm.includes('error') || actionNorm.includes('codigo -') || 
+                                 actionNorm.includes('retorna -') || actionNorm.includes('bloqueada');
+                                 
+          const returnsToMain = !isTerminalExit || actionNorm.includes('vuelve') || 
+                                actionNorm.includes('retorna al flujo') || actionNorm.includes('reincorpora') || 
+                                actionNorm.includes('reintegra');
+
+          nodes.push({
+            id: 'dec-' + idx,
+            stepNumber: stepNum++,
+            type: 'decision',
+            label: condExt.cleanText,
+            invokedMethod: condExt.method,
+            methodType: condExt.type,
+            yesAction: yesExt.cleanText,
+            yesMethod: yesExt.method,
+            returnsToMain: returnsToMain && !isTerminalExit,
+            isTerminalExit: isTerminalExit && !actionNorm.includes('vuelve al flujo')
+          });
+        } else {
+          const procExt = extractMethodFromText(clean);
+          nodes.push({
+            id: 'proc-' + idx,
+            stepNumber: stepNum++,
+            type: 'process',
+            label: procExt.cleanText,
+            invokedMethod: procExt.method,
+            methodType: procExt.type
+          });
+        }
+      });
+
+      nodes.push({ id: 'end', type: 'end', label: 'FIN' });
+      return nodes;
+    }
+
+    // =========================================================================
+    // 5. RENDERIZADO DEL GRID DE TARJETAS
+    // =========================================================================
+    function renderMethodsGrid() {
+      const container = document.getElementById('methodsGrid');
+      const searchVal = document.getElementById('searchInput').value.toLowerCase();
+
+      if (currentMethods.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 60px 24px; background: var(--bg-surface); border-radius: var(--radius-lg); border: 2px dashed var(--border-medium); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--badge-bg-primary); border: 1px solid var(--badge-border-primary); display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--color-primary);">📂</div>
+            <div>
+              <h3 style="font-size: 17px; font-weight: 800; color: var(--text-main);">Sin archivos cargados en la página</h3>
+              <p style="font-size: 13.5px; color: var(--text-muted); max-width: 480px; margin-top: 6px; line-height: 1.5;">Arrastra un archivo Markdown (.md) a la zona superior o usa el botón para cargar y analizar métodos, decisiones y flujos gráficos.</p>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('mdFileInput').click()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              <span>Seleccionar archivo .md</span>
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      const filtered = currentMethods.filter(m => {
+        const matchCat = selectedCategory === 'ALL' || m.categoria_visual === selectedCategory;
+        const matchQuery = !searchVal || 
+          m.titulo_funcional.toLowerCase().includes(searchVal) ||
+          m.nombre_metodo.toLowerCase().includes(searchVal) ||
+          m.nombre_paquete.toLowerCase().includes(searchVal) ||
+          m.descripcion_negocio.toLowerCase().includes(searchVal);
+        return matchCat && matchQuery;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 48px; background: var(--bg-surface); border-radius: var(--radius-lg); border: 1px dashed var(--border-subtle);">
+            <p style="font-size: 15px; color: var(--text-muted); font-weight: 600;">No se encontraron métodos que coincidan con la búsqueda o categoría seleccionada.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => `
+        <div class="method-card" onclick="openMethodModal('${item.id}')" style="border-left: 4px solid var(--color-primary);">
+          <div class="card-top">
+            <div class="badge-meta">
+              <div class="badge-icon" style="background: var(--color-primary);">⚡</div>
+              <span class="tag-category">${item.categoria_visual}</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-dim); font-weight: 700;">${item.nombre_paquete}</span>
+          </div>
+
+          <div>
+            <h3 class="card-title">${item.titulo_funcional}</h3>
+            <div style="margin-top: 6px;">
+              <span class="card-signature">${item.nombre_paquete}.${item.nombre_metodo}</span>
+            </div>
+            <p class="card-desc" style="margin-top: 8px;">${item.descripcion_negocio}</p>
+          </div>
+
+          <div class="card-footer">
+            <span>${item.objetos_invocados.length} llamadas</span>
+            <div class="card-cta">
+              <span>Ver Flujo</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // =========================================================================
+    // 6. RENDERIZADO DEL DIAGRAMA (MODERN GLASS & TIMELINE)
+    // =========================================================================
+    function renderDiagram(method) {
+      const nodes = generateFlowNodes(method);
+      const modernCanvas = document.getElementById('modernCanvas');
+      const timelineViewport = document.getElementById('timelineViewport');
+
+      // 1. Render Modern Glass
+      let modernHtml = '';
+      nodes.forEach((node, idx) => {
+        if (node.type === 'start') {
+          modernHtml += `
+            <div class="node-terminal node-start">
+              <span class="pulse-dot" style="background: #10b981; box-shadow: 0 0 8px #10b981;"></span>
+              <span>${node.label}</span>
+            </div>
+            <div class="arrow-connector">
+              <svg width="24" height="34" viewBox="0 0 24 34">
+                <line x1="12" y1="0" x2="12" y2="24" stroke="var(--color-primary)" stroke-width="2" stroke-dasharray="3 3" />
+                <polygon points="6,22 12,32 18,22" fill="var(--color-primary)" />
+              </svg>
+            </div>
+          `;
+        } else if (node.type === 'process') {
+          modernHtml += `
+            <div class="node-process-card">
+              <div class="node-step-header">
+                <span class="node-step-badge">Paso ${String(node.stepNumber).padStart(2, '0')}</span>
+                <span class="node-step-type">Acción de Negocio</span>
+              </div>
+              <div class="node-label">${node.label}</div>
+              ${node.invokedMethod ? `
+                <div>
+                  <span class="method-chip chip-${node.methodType || 'dao'}">[${(node.methodType || 'DAO').toUpperCase()}] ${node.invokedMethod}</span>
+                </div>
+              ` : ''}
+            </div>
+            <div class="arrow-connector">
+              <svg width="24" height="34" viewBox="0 0 24 34">
+                <line x1="12" y1="0" x2="12" y2="24" stroke="var(--color-primary)" stroke-width="2" stroke-dasharray="3 3" />
+                <polygon points="6,22 12,32 18,22" fill="var(--color-primary)" />
+              </svg>
+            </div>
+          `;
+        } else if (node.type === 'decision') {
+          if (node.returnsToMain) {
+            // Bifurcación condicional que VUELVE al flujo principal
+            modernHtml += `
+              <div class="node-decision-row">
+                <div class="node-decision-card bifurcation-card">
+                  <div class="node-step-header">
+                    <span style="font-size: 11px; font-weight: 800; color: #00f0ff; text-transform: uppercase;">🔀 Bifurcación Condicional</span>
+                    <span style="font-size: 10.5px; color: var(--text-muted);">Paso ${String(node.stepNumber).padStart(2, '0')}</span>
+                  </div>
+                  <div class="node-label" style="font-weight: 700;">${node.label}</div>
+                  ${node.invokedMethod ? `
+                    <div>
+                      <span class="method-chip chip-${node.methodType || 'dao'}">[${(node.methodType || 'DAO').toUpperCase()}] ${node.invokedMethod}</span>
+                    </div>
+                  ` : ''}
+                </div>
+
+                ${node.yesAction ? `
+                  <div class="branch-yes-group">
+                    <span style="font-size: 11px; font-weight: 800; color: #10b981; background: rgba(16, 185, 129, 0.12); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.3);">SÍ</span>
+                    <svg width="24" height="16">
+                      <line x1="0" y1="8" x2="16" y2="8" stroke="#10b981" stroke-width="2" />
+                      <polygon points="14,4 22,8 14,12" fill="#10b981" />
+                    </svg>
+                    <div class="branch-yes-card branch-return-card">
+                      <div style="font-size: 12px; font-weight: 600; color: var(--text-main);">${node.yesAction}</div>
+                      ${node.yesMethod ? `<span class="method-chip chip-${node.methodType || 'dao'}" style="font-size: 10.5px;">${node.yesMethod}</span>` : ''}
+                      <div class="return-flow-tag">
+                        <span style="font-size: 10.5px; font-weight: 700; color: #10b981; display: inline-flex; align-items: center; gap: 4px;">
+                          ↩ Vuelve al flujo principal
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+
+              <!-- Conector de convergencia / retorno al tronco principal -->
+              <div class="rejoin-connector-container">
+                <div class="rejoin-svg-wrapper">
+                  <svg width="340" height="42" viewBox="0 0 340 42" fill="none">
+                    <!-- Tronco directo (NO / por defecto) -->
+                    <path d="M 85 0 L 85 20 Q 85 32 165 32 L 168 32" stroke="var(--color-primary)" stroke-width="2" stroke-dasharray="3 3"/>
+                    <!-- Rama de retorno desde la bifurcación (SÍ) -->
+                    <path d="M 265 0 L 265 20 Q 265 32 175 32 L 172 32" stroke="#10b981" stroke-width="2" stroke-dasharray="3 3"/>
+                    <!-- Flecha central unificada hacia abajo -->
+                    <line x1="170" y1="28" x2="170" y2="38" stroke="var(--color-primary)" stroke-width="2"/>
+                    <polygon points="165,34 170,40 175,34" fill="var(--color-primary)"/>
+                  </svg>
+                </div>
+                <div class="rejoin-sublabels">
+                  <span class="sublabel-no">NO / Por defecto</span>
+                  <span class="sublabel-rejoin">↩ Reintegra al flujo</span>
+                </div>
+              </div>
+            `;
+          } else if (node.isTerminalExit) {
+            // Salida terminal de error (interrumpe el flujo)
+            modernHtml += `
+              <div class="node-decision-row">
+                <div class="node-decision-card terminal-eval-card">
+                  <div class="node-step-header">
+                    <span style="font-size: 11px; font-weight: 800; color: #f43f5e; text-transform: uppercase;">⚠️ Validación / Error</span>
+                    <span style="font-size: 10.5px; color: var(--text-muted);">Paso ${String(node.stepNumber).padStart(2, '0')}</span>
+                  </div>
+                  <div class="node-label" style="font-weight: 700;">${node.label}</div>
+                  ${node.invokedMethod ? `
+                    <div>
+                      <span class="method-chip chip-${node.methodType || 'dao'}">[${(node.methodType || 'DAO').toUpperCase()}] ${node.invokedMethod}</span>
+                    </div>
+                  ` : ''}
+                </div>
+
+                ${node.yesAction ? `
+                  <div class="branch-yes-group">
+                    <span style="font-size: 11px; font-weight: 800; color: #f43f5e; background: rgba(244, 63, 94, 0.12); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(244, 63, 94, 0.3);">FALLO</span>
+                    <svg width="24" height="16">
+                      <line x1="0" y1="8" x2="16" y2="8" stroke="#f43f5e" stroke-width="2" />
+                      <polygon points="14,4 22,8 14,12" fill="#f43f5e" />
+                    </svg>
+                    <div class="branch-yes-card branch-exit-card">
+                      <div style="font-size: 12px; font-weight: 600; color: #fda4af;">${node.yesAction}</div>
+                      ${node.yesMethod ? `<span class="method-chip chip-dao" style="font-size: 10.5px;">${node.yesMethod}</span>` : ''}
+                      <span style="font-size: 10px; font-weight: 800; color: #f43f5e; text-transform: uppercase; margin-top: 4px;">⛔ Salida / Interrupción</span>
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+
+              <div style="display: flex; flex-direction: column; align-items: center; margin: 4px 0;">
+                <span style="font-size: 10.5px; font-weight: 800; color: var(--color-success); background: var(--bg-surface); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border-subtle); margin-bottom: -2px; z-index: 3;">VÁLIDO / CONTINÚA</span>
+                <div class="arrow-connector">
+                  <svg width="24" height="34" viewBox="0 0 24 34">
+                    <line x1="12" y1="0" x2="12" y2="24" stroke="var(--color-primary)" stroke-width="2" stroke-dasharray="3 3" />
+                    <polygon points="6,22 12,32 18,22" fill="var(--color-primary)" />
+                  </svg>
+                </div>
+              </div>
+            `;
+          } else {
+            // Decisión estándar
+            modernHtml += `
+              <div class="node-decision-row">
+                <div class="node-decision-card">
+                  <div class="node-step-header">
+                    <span style="font-size: 11px; font-weight: 800; color: #f59e0b; text-transform: uppercase;">⚠️ Validación Condicional</span>
+                    <span style="font-size: 10.5px; color: var(--text-muted);">Paso ${String(node.stepNumber).padStart(2, '0')}</span>
+                  </div>
+                  <div class="node-label" style="font-weight: 700;">${node.label}</div>
+                  ${node.invokedMethod ? `
+                    <div>
+                      <span class="method-chip chip-${node.methodType || 'dao'}">[${(node.methodType || 'DAO').toUpperCase()}] ${node.invokedMethod}</span>
+                    </div>
+                  ` : ''}
+                </div>
+
+                ${node.yesAction ? `
+                  <div class="branch-yes-group">
+                    <span style="font-size: 11px; font-weight: 800; color: #10b981; background: rgba(16, 185, 129, 0.12); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.3);">SÍ</span>
+                    <svg width="24" height="16">
+                      <line x1="0" y1="8" x2="16" y2="8" stroke="#10b981" stroke-width="2" />
+                      <polygon points="14,4 22,8 14,12" fill="#10b981" />
+                    </svg>
+                    <div class="branch-yes-card">
+                      <div style="font-size: 12px; font-weight: 600; color: var(--text-main);">${node.yesAction}</div>
+                      ${node.yesMethod ? `<span class="method-chip chip-dao" style="font-size: 10.5px;">${node.yesMethod}</span>` : ''}
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+
+              <div style="display: flex; flex-direction: column; align-items: center; margin: 4px 0;">
+                <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); background: var(--bg-surface); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border-subtle); margin-bottom: -2px; z-index: 3;">NO</span>
+                <div class="arrow-connector">
+                  <svg width="24" height="34" viewBox="0 0 24 34">
+                    <line x1="12" y1="0" x2="12" y2="24" stroke="var(--color-primary)" stroke-width="2" stroke-dasharray="3 3" />
+                    <polygon points="6,22 12,32 18,22" fill="var(--color-primary)" />
+                  </svg>
+                </div>
+              </div>
+            `;
+          }
+        } else if (node.type === 'end') {
+          modernHtml += `
+            <div class="node-terminal node-end">
+              <span class="pulse-dot" style="background: var(--color-danger);"></span>
+              <span>${node.label}</span>
+            </div>
+          `;
+        }
+      });
+      modernCanvas.innerHTML = modernHtml;
+
+      // 2. Render Timeline
+      const timelineNodes = nodes.filter(n => n.type === 'process' || n.type === 'decision');
+      timelineViewport.innerHTML = timelineNodes.map((n, i) => `
+        <div class="timeline-item">
+          <div class="timeline-step-badge" style="background: ${n.type === 'decision' ? (n.returnsToMain ? 'rgba(0, 240, 255, 0.15)' : n.isTerminalExit ? 'rgba(244, 63, 94, 0.15)' : 'rgba(245, 158, 11, 0.15)') : 'rgba(37, 99, 235, 0.15)'}; border-color: ${n.type === 'decision' ? (n.returnsToMain ? '#00f0ff' : n.isTerminalExit ? '#f43f5e' : '#f59e0b') : 'var(--color-primary)'}; color: ${n.type === 'decision' ? (n.returnsToMain ? '#00f0ff' : n.isTerminalExit ? '#f43f5e' : '#f59e0b') : 'var(--color-primary)'};">
+            ${n.stepNumber || i + 1}
+          </div>
+          <div class="timeline-card">
+            <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">
+              ${n.type === 'decision' ? (n.returnsToMain ? '🔀 Bifurcación con Retorno' : n.isTerminalExit ? '⚠️ Validación de Error' : '⚠️ Validación Condicional') : '⚡ Paso de Ejecución'}
+            </span>
+            <div style="font-size: 13.5px; font-weight: 600; color: var(--text-main);">${n.label}</div>
+            ${n.invokedMethod ? `
+              <div><span class="method-chip chip-${n.methodType || 'dao'}">[${(n.methodType || 'DAO').toUpperCase()}] ${n.invokedMethod}</span></div>
+            ` : ''}
+            ${n.type === 'decision' && n.yesAction ? `
+              <div style="margin-top: 6px; padding: 8px 12px; background: ${n.returnsToMain ? 'rgba(16, 185, 129, 0.08)' : n.isTerminalExit ? 'rgba(244, 63, 94, 0.08)' : 'rgba(245, 158, 11, 0.08)'}; border-radius: 6px; border: 1px solid ${n.returnsToMain ? 'rgba(16, 185, 129, 0.25)' : n.isTerminalExit ? 'rgba(244, 63, 94, 0.25)' : 'rgba(245, 158, 11, 0.25)'}; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+                <div>
+                  <span style="font-size: 11px; font-weight: 800; color: ${n.returnsToMain ? '#10b981' : n.isTerminalExit ? '#f43f5e' : '#f59e0b'}; margin-right: 6px;">${n.returnsToMain ? '🔀 RAMA CONDICIONAL:' : n.isTerminalExit ? '⛔ SALIDA POR FALLO:' : 'RAMA SÍ:'}</span>
+                  <span style="font-size: 12.5px; color: var(--text-main);">${n.yesAction}</span>
+                </div>
+                ${n.returnsToMain ? `
+                  <span style="font-size: 10.5px; font-weight: 700; color: #10b981; background: rgba(16, 185, 129, 0.15); padding: 2px 6px; border-radius: 4px;">↩ Vuelve al flujo</span>
+                ` : n.isTerminalExit ? `
+                  <span style="font-size: 10.5px; font-weight: 700; color: #f43f5e; background: rgba(244, 63, 94, 0.15); padding: 2px 6px; border-radius: 4px;">Interrumpe Flujo</span>
+                ` : ''}
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // =========================================================================
+    // 7. GESTIÓN DEL MODAL Y PESTAÑAS
+    // =========================================================================
+    function openMethodModal(methodId) {
+      activeMethod = currentMethods.find(m => m.id === methodId);
+      if (!activeMethod) return;
+
+      document.getElementById('modalMethodTitle').textContent = activeMethod.titulo_funcional;
+      document.getElementById('modalMethodSignature').textContent = `${activeMethod.nombre_paquete}.${activeMethod.nombre_metodo}`;
+
+      // Reset tabs & Zoom
+      switchTab('flowchart');
+      resetZoom();
+      setDiagramStyle('modern');
+
+      // 1. Render Diagrama
+      renderDiagram(activeMethod);
+
+      // 2. Render Decisiones
+      const decContainer = document.getElementById('decisionsContainer');
+      if (activeMethod.decisiones.length > 0) {
+        decContainer.innerHTML = activeMethod.decisiones.map(d => `
+          <div style="background: var(--bg-surface-elevated); padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); display: flex; gap: 12px; align-items: flex-start;">
+            <span style="color: #f59e0b; font-weight: 800;">⚖️</span>
+            <div style="font-size: 13px; line-height: 1.5; color: var(--text-main); font-weight: 500;">${d.replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--color-primary);">$1</strong>')}</div>
+          </div>
+        `).join('');
+      } else {
+        decContainer.innerHTML = `<p style="color: var(--text-muted); font-size: 13px;">No se especificaron decisiones explícitas en el archivo .md.</p>`;
+      }
+
+      // 3. Render Objetos Invocados
+      const tableBody = document.getElementById('invocationsTableBody');
+      if (activeMethod.objetos_invocados.length > 0) {
+        tableBody.innerHTML = activeMethod.objetos_invocados.map(o => `
+          <tr>
+            <td style="text-align: center; font-weight: 700; color: var(--color-primary);">${o.orden}</td>
+            <td style="font-family: var(--font-mono); font-weight: 600; color: var(--text-main);">${o.nombre}</td>
+            <td><span class="method-chip chip-${determineMethodType(o.nombre)}" style="font-size: 11px;">${o.capa}</span></td>
+            <td style="color: var(--text-muted); font-size: 12px;">${o.tipo}</td>
+            <td style="color: var(--text-main);">${o.proposito}</td>
+            <td style="color: var(--text-dim); font-size: 12px;">${o.condicion}</td>
+          </tr>
+        `).join('');
+      } else {
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">No se declaró tabla de objetos invocados en el archivo.</td></tr>`;
+      }
+
+      // 4. Render Esquemas JSON
+      document.getElementById('jsonInCode').textContent = activeMethod.json_entrada || `{\n  "id_tenant": 1,\n  "id_usuario_ejecutor": 105,\n  "datos": {\n    "ejemplo": "valor"\n  }\n}`;
+      document.getElementById('jsonOutCode').textContent = activeMethod.json_salida || `{\n  "codigo": 0,\n  "mensaje": "Operación completada exitosamente",\n  "datos": {\n    "id": 1250\n  }\n}`;
+
+      // 5. Narrativa Natural
+      document.getElementById('naturalContent').textContent = activeMethod.descripcion_negocio || 'Sin narrativa declarada.';
+
+      document.getElementById('detailModal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('detailModal').classList.remove('open');
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
+      });
+      document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.style.display = panel.id === `tab-${tabName}` ? 'block' : 'none';
+      });
+    }
+
+    function toggleModalSize() {
+      const dialog = document.getElementById('modalDialog');
+      if (modalSizeMode === 'normal') {
+        modalSizeMode = 'wide';
+        dialog.className = 'modal-dialog wide';
+      } else if (modalSizeMode === 'wide') {
+        modalSizeMode = 'fullscreen';
+        dialog.className = 'modal-dialog fullscreen';
+      } else {
+        modalSizeMode = 'normal';
+        dialog.className = 'modal-dialog';
+      }
+    }
+
+    // =========================================================================
+    // 8. CONTROLES DE ZOOM Y ESTILOS DE DIAGRAMA
+    // =========================================================================
+    function setDiagramStyle(style) {
+      currentDiagramStyle = style;
+      const modernBtn = document.getElementById('btnStyleModern');
+      const timelineBtn = document.getElementById('btnStyleTimeline');
+      const modernViewport = document.getElementById('modernViewport');
+      const timelineViewport = document.getElementById('timelineViewport');
+      const zoomControls = document.getElementById('zoomControls');
+
+      if (style === 'modern') {
+        modernBtn.className = 'btn btn-sm btn-primary';
+        timelineBtn.className = 'btn btn-sm btn-secondary';
+        modernViewport.style.display = 'flex';
+        timelineViewport.style.display = 'none';
+        zoomControls.style.display = 'flex';
+      } else {
+        modernBtn.className = 'btn btn-sm btn-secondary';
+        timelineBtn.className = 'btn btn-sm btn-primary';
+        modernViewport.style.display = 'none';
+        timelineViewport.style.display = 'flex';
+        zoomControls.style.display = 'none';
+      }
+    }
+
+    function changeZoom(delta) {
+      currentZoom = Math.min(1.8, Math.max(0.5, currentZoom + delta));
+      applyZoom();
+    }
+
+    function resetZoom() {
+      currentZoom = 1;
+      applyZoom();
+    }
+
+    function applyZoom() {
+      document.getElementById('modernCanvas').style.transform = `scale(${currentZoom})`;
+      document.getElementById('zoomLabel').textContent = `Zoom: ${Math.round(currentZoom * 100)}%`;
+    }
+
+    function copyCode(elementId) {
+      const text = document.getElementById(elementId).textContent;
+      navigator.clipboard.writeText(text);
+      alert('¡Copiado al portapapeles!');
+    }
+
+    // =========================================================================
+    // 9. FILTROS Y BÚSQUEDA
+    // =========================================================================
+    function setCategoryFilter(category) {
+      selectedCategory = category;
+      document.querySelectorAll('#categoryChips button').forEach(btn => {
+        const isActive = btn.textContent.toUpperCase().includes(category) || (category === 'ALL' && btn.textContent === 'Todas');
+        btn.className = `btn btn-sm ${isActive ? 'btn-primary' : 'btn-secondary'}`;
+      });
+      renderMethodsGrid();
+    }
+
+    document.getElementById('searchInput').addEventListener('input', renderMethodsGrid);
+
+    // =========================================================================
+    // 10. GESTIÓN DE TEMAS (PERSISTENCIA Y CAMBIO DINÁMICO)
+    // =========================================================================
+    const themeSelect = document.getElementById('themeSelect');
+    const savedTheme = localStorage.getItem('core_theme') || 'core';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themeSelect.value = savedTheme;
+
+    themeSelect.addEventListener('change', (e) => {
+      const newTheme = e.target.value;
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('core_theme', newTheme);
+    });
+
+    // =========================================================================
+    // 11. CARGADOR DE ARCHIVOS .MD (FILE INPUT + DRAG & DROP)
+    // =========================================================================
+    const fileInput = document.getElementById('mdFileInput');
+    const dropzoneBox = document.getElementById('dropzoneBox');
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        loadFile(e.target.files[0]);
+      }
+    });
+
+    dropzoneBox.addEventListener('click', () => fileInput.click());
+
+    dropzoneBox.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzoneBox.classList.add('drag-over');
+    });
+
+    dropzoneBox.addEventListener('dragleave', () => {
+      dropzoneBox.classList.remove('drag-over');
+    });
+
+    dropzoneBox.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzoneBox.classList.remove('drag-over');
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        loadFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    function loadFile(file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const text = event.target.result;
+        processMarkdownContent(text, file.name);
+      };
+      reader.readAsText(file);
+    }
+
+    function processMarkdownContent(text, fileName) {
+      const parsed = parseMarkdownDoc(text, fileName);
+      currentMethods = parsed.methods;
+
+      document.getElementById('currentFileTitle').textContent = `Archivo cargado: ${fileName}`;
+      document.getElementById('currentFileSubtitle').textContent = `Se detectaron ${parsed.methods.length} método(s) documentados para el paquete ${parsed.packageName}`;
+      document.getElementById('packageTitle').textContent = `Catálogo de Métodos: ${parsed.packageName}`;
+      document.getElementById('packageSummary').textContent = `Especificación funcional y flujos interactivos para ${parsed.methods.length} subprograma(s).`;
+
+      const statusIndicator = document.getElementById('statusIndicatorText');
+      if (statusIndicator) statusIndicator.textContent = `Archivo activo: ${fileName} (${parsed.methods.length} método(s))`;
+      const clearBtnHeader = document.getElementById('btnClearLoadedHeader');
+      if (clearBtnHeader) clearBtnHeader.style.display = 'inline-flex';
+      const clearBtnBanner = document.getElementById('btnClearLoadedBanner');
+      if (clearBtnBanner) clearBtnBanner.style.display = 'inline-flex';
+
+      renderMethodsGrid();
+    }
+
+    function clearLoadedFiles() {
+      currentMethods = [];
+      activeMethod = null;
+      const fileInput = document.getElementById('mdFileInput');
+      if (fileInput) fileInput.value = '';
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) searchInput.value = '';
+      selectedCategory = 'ALL';
+      document.querySelectorAll('#categoryChips button').forEach(btn => {
+        const isAll = btn.textContent.toUpperCase().includes('TODAS');
+        btn.className = `btn btn-sm ${isAll ? 'btn-primary' : 'btn-secondary'}`;
+      });
+      document.getElementById('currentFileTitle').textContent = 'Arrastra o selecciona un archivo .md de documentación';
+      document.getElementById('currentFileSubtitle').textContent = 'Soporta la plantilla oficial de flujo: Lenguaje Natural, Decisiones y Objetos Invocados';
+      document.getElementById('packageTitle').textContent = 'Catálogo de Métodos Documentados';
+      document.getElementById('packageSummary').textContent = 'No hay ningún archivo cargado actualmente. Selecciona un archivo .md para visualizar sus métodos.';
+      const statusIndicator = document.getElementById('statusIndicatorText');
+      if (statusIndicator) statusIndicator.textContent = 'Estado: Sin archivos cargados';
+      const clearBtnHeader = document.getElementById('btnClearLoadedHeader');
+      if (clearBtnHeader) clearBtnHeader.style.display = 'none';
+      const clearBtnBanner = document.getElementById('btnClearLoadedBanner');
+      if (clearBtnBanner) clearBtnBanner.style.display = 'none';
+      renderMethodsGrid();
+    }
+
+    // Cerrar modal con tecla Escape o clic fuera
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    document.getElementById('detailModal').addEventListener('click', (e) => {
+      if (e.target.id === 'detailModal') closeModal();
+    });
+
+    // =========================================================================
+    // 12. INICIALIZACIÓN POR DEFECTO SIN ARCHIVOS CARGADOS
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      clearLoadedFiles();
+    });
+  </script>
+</body>
+</html>
