@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es" data-theme="core">
 <head>
   <meta charset="UTF-8">
@@ -754,13 +754,13 @@
       background: radial-gradient(ellipse at 50% 0%, rgba(37, 99, 235, 0.08), transparent 75%), var(--bg-surface-elevated);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
-      padding: 40px 20px;
-      overflow-x: auto;
-      overflow-y: hidden;
+      padding: 40px 30px;
+      overflow: auto;
       display: flex;
       justify-content: center;
       min-height: 480px;
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      position: relative;
     }
 
     .diagram-canvas {
@@ -768,9 +768,11 @@
       flex-direction: column;
       align-items: center;
       width: 100%;
-      max-width: 720px;
+      max-width: 1100px;
+      min-width: 960px;
       transform-origin: top center;
       transition: transform 0.15s ease;
+      position: relative;
     }
 
     /* Nodos del Diagrama */
@@ -855,35 +857,291 @@
       line-height: 1.45;
     }
 
+    /* ==========================================================================
+       ROMBO DE DECISIÓN (DIAMOND DECISION NODE) - FLUJO GRÁFICO OFICIAL
+       ========================================================================== */
     .node-decision-row {
       display: flex;
       align-items: center;
       justify-content: center;
       width: 100%;
       position: relative;
-      margin: 6px 0;
+      margin: 0;
     }
 
-    .node-decision-card {
-      background: linear-gradient(180deg, rgba(245, 158, 11, 0.08), rgba(245, 158, 11, 0.02)), var(--bg-surface);
-      border: 1.5px solid rgba(245, 158, 11, 0.45);
-      border-radius: 12px;
-      padding: 16px 20px;
-      width: 100%;
+    .node-decision-diamond-wrap {
+      position: relative;
+      width: 440px;
+      height: 180px;
+      min-width: 440px;
+      min-height: 180px;
       max-width: 440px;
-      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.08);
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      z-index: 2;
-    }
-
-    .branch-yes-group {
+      max-height: 180px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-left: 14px;
-      z-index: 2;
+      justify-content: center;
+      padding: 18px 65px;
+      z-index: 5;
+      transition: all 0.25s ease;
+      filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.18));
+      box-sizing: border-box;
+      cursor: pointer;
+    }
+
+    .node-decision-diamond-wrap:hover {
+      transform: translateY(-2px);
+      filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.28));
+    }
+
+    .diamond-svg-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .diamond-polygon {
+      stroke-width: 2;
+      stroke-linejoin: round;
+      transition: all 0.25s ease;
+    }
+
+    /* 1. Validación / Error (Fallo) - Rombo Rojo */
+    .diamond-danger .diamond-polygon {
+      fill: var(--bg-surface);
+      stroke: #f43f5e;
+    }
+    .diamond-danger:hover .diamond-polygon {
+      stroke: #fb7185;
+      stroke-width: 2.5;
+    }
+
+    /* 2. Bifurcación condicional - Rombo Cian */
+    .diamond-cyan .diamond-polygon {
+      fill: var(--bg-surface);
+      stroke: #00f0ff;
+    }
+    .diamond-cyan:hover .diamond-polygon {
+      stroke: #38bdf8;
+      stroke-width: 2.5;
+    }
+
+    /* 3. Decisión estándar - Rombo Ámbar */
+    .diamond-warning .diamond-polygon {
+      fill: var(--bg-surface);
+      stroke: #f59e0b;
+    }
+    .diamond-warning:hover .diamond-polygon {
+      stroke: #fbbf24;
+      stroke-width: 2.5;
+    }
+
+    /* Contenido interno del Rombo - Restringido al rectángulo seguro */
+    .diamond-inner {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 5px;
+      width: 100%;
+      max-width: 245px;
+      max-height: 125px;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .diamond-badge-header {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      padding: 2px 10px;
+      border-radius: var(--radius-full);
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      flex-shrink: 0;
+    }
+
+    .diamond-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.35;
+      max-width: 240px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-height: 33px;
+      word-break: break-word;
+    }
+
+    .diamond-hint {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--color-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.85;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    /* Puertos o puntos conectores en los 3 vértices clave del rombo */
+    .diamond-port {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      border: 2px solid;
+      z-index: 6;
+      pointer-events: none;
+    }
+    .diamond-port-top {
+      top: -4px;
+      left: calc(50% - 4px);
+    }
+    .diamond-port-right {
+      right: -4px;
+      top: calc(50% - 4px);
+    }
+    .diamond-port-bottom {
+      bottom: -4px;
+      left: calc(50% - 4px);
+    }
+
+    /* ==========================================================================
+       TOOLTIP FLOTANTE GLOBAL INTELIGENTE (POSITION FIXED - SIN RECORTES)
+       ========================================================================== */
+    .diamond-floating-tooltip {
+      position: fixed;
+      background: var(--bg-surface-elevated);
+      border: 1.5px solid var(--border-medium);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      font-size: 12px;
+      color: var(--text-main);
+      width: 340px;
+      max-width: 340px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+      z-index: 10000;
+      text-align: left;
+      line-height: 1.45;
+      backdrop-filter: blur(16px);
+      white-space: normal;
+      display: none;
+    }
+
+    .diamond-floating-tooltip.visible {
+      opacity: 1;
+      display: block;
+    }
+
+    /* Conectores y Badges de Caminos Alternativos (SÍ / NO) */
+    .branch-yes-group {
+      position: absolute;
+      left: calc(50% + 220px);
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 0;
+      z-index: 10;
+      white-space: nowrap;
+    }
+
+    .path-badge-yes {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      user-select: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .connector-no-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      position: relative;
+    }
+
+    .path-badge-no {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      padding: 4px 12px;
+      border-radius: 6px;
+      user-select: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      z-index: 4;
+      white-space: nowrap;
+    }
+
+    /* Popover / Cuadro de Decisión Completa al dar Clic */
+    .decision-popover-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(6px);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .decision-popover-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .decision-popover-card {
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border-medium);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 520px;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      animation: popoverZoomIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes popoverZoomIn {
+      from { opacity: 0; transform: scale(0.92); }
+      to { opacity: 1; transform: scale(1); }
     }
 
     .branch-yes-card {
@@ -897,6 +1155,7 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
+      white-space: normal;
     }
 
     .bifurcation-card {
@@ -1405,6 +1664,56 @@
     </div>
   </div>
 
+  <!-- MODAL / CUADRO FLOTANTE DE DETALLE DE PUNTO DE DECISIÓN -->
+  <div class="decision-popover-overlay" id="decisionPopover" onclick="closeDecisionPopover(event)">
+    <div class="decision-popover-card" onclick="event.stopPropagation()">
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span id="popoverBadge" class="diamond-badge-header">⚠️ Punto de Decisión</span>
+          <span id="popoverStepTag" style="font-size: 11px; font-weight: 700; color: var(--text-dim);">Paso 01</span>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="closeDecisionPopover()" title="Cerrar cuadro" style="padding: 4px 8px; font-size: 14px;">✕</button>
+      </div>
+
+      <div>
+        <h4 style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Condición / Regla de Evaluación:</h4>
+        <p id="popoverConditionText" style="font-size: 13.5px; font-weight: 600; color: var(--text-main); line-height: 1.55; background: var(--bg-surface-elevated); padding: 12px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);"></p>
+      </div>
+
+      <div id="popoverMethodContainer" style="display: none;">
+        <h4 style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Objeto Invocado en la Evaluación:</h4>
+        <div id="popoverMethodChip"></div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 4px;">
+        <h4 style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Caminos Alternativos del Flujo:</h4>
+
+        <div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 14px; background: rgba(16, 185, 129, 0.08); border: 1px dashed rgba(16, 185, 129, 0.35); border-radius: 8px;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 11px; font-weight: 800; color: #10b981; background: rgba(16, 185, 129, 0.2); padding: 1px 6px; border-radius: 4px;">SÍ</span>
+            <span id="popoverYesLabel" style="font-size: 11px; font-weight: 700; color: #10b981;">Camino Alternativo / Fallo:</span>
+          </div>
+          <span id="popoverYesAction" style="font-size: 13px; color: var(--text-main); font-weight: 500;"></span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 14px; background: rgba(56, 189, 248, 0.08); border: 1px dashed rgba(56, 189, 248, 0.35); border-radius: 8px;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 11px; font-weight: 800; color: var(--color-primary); background: rgba(56, 189, 248, 0.2); padding: 1px 6px; border-radius: 4px;">NO</span>
+            <span id="popoverNoLabel" style="font-size: 11px; font-weight: 700; color: var(--color-primary);">Continuación del Tronco Principal:</span>
+          </div>
+          <span id="popoverNoAction" style="font-size: 13px; color: var(--text-main); font-weight: 500;">El flujo continúa normalmente hacia el siguiente paso del proceso.</span>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeDecisionPopover()">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOOLTIP FLOTANTE GLOBAL PARA PUNTOS DE DECISIÓN (POSITION FIXED SIN RECORTES) -->
+  <div id="diamondFloatingTooltip" class="diamond-floating-tooltip"></div>
+
   <!-- JAVASCRIPT DEL VISOR INTERACTIVO -->
   <script>
     // =========================================================================
@@ -1416,6 +1725,167 @@
     let currentZoom = 1;
     let currentDiagramStyle = 'modern';
     let modalSizeMode = 'normal';
+    let currentFlowNodes = [];
+
+    // Funciones del Cuadro / Popover de Decisión
+    function openDecisionPopover(nodeId) {
+      const node = currentFlowNodes.find(n => n.id === nodeId);
+      if (!node) return;
+
+      const isError = node.isTerminalExit;
+      const isBifurcation = node.returnsToMain;
+
+      const badgeEl = document.getElementById('popoverBadge');
+      const stepTagEl = document.getElementById('popoverStepTag');
+      const condEl = document.getElementById('popoverConditionText');
+      const methodWrap = document.getElementById('popoverMethodContainer');
+      const methodChip = document.getElementById('popoverMethodChip');
+      const yesLabel = document.getElementById('popoverYesLabel');
+      const yesAction = document.getElementById('popoverYesAction');
+      const noLabel = document.getElementById('popoverNoLabel');
+      const noAction = document.getElementById('popoverNoAction');
+
+      if (isError) {
+        badgeEl.textContent = '⚠️ Validación / Error';
+        badgeEl.style.color = '#f43f5e';
+        badgeEl.style.borderColor = 'rgba(244, 63, 94, 0.4)';
+        yesLabel.textContent = 'SÍ (FALLO / INTERRUPCIÓN):';
+        yesLabel.style.color = '#f43f5e';
+        noLabel.textContent = 'NO (VÁLIDO / CONTINÚA):';
+        noLabel.style.color = '#10b981';
+        noAction.textContent = 'La validación fue superada exitosamente. El flujo continúa normalmente hacia el siguiente paso.';
+      } else if (isBifurcation) {
+        badgeEl.textContent = '🔀 Bifurcación Condicional';
+        badgeEl.style.color = '#00f0ff';
+        badgeEl.style.borderColor = 'rgba(0, 240, 255, 0.4)';
+        yesLabel.textContent = 'SÍ (RAMA CONDICIONAL):';
+        yesLabel.style.color = '#10b981';
+        noLabel.textContent = 'NO (POR DEFECTO):';
+        noLabel.style.color = 'var(--color-primary)';
+        noAction.textContent = 'No se cumple la condición previa. El flujo continúa por el tronco por defecto.';
+      } else {
+        badgeEl.textContent = '⚖️ Punto de Decisión';
+        badgeEl.style.color = '#f59e0b';
+        badgeEl.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+        yesLabel.textContent = 'SÍ (RAMA ALTERNATIVA):';
+        yesLabel.style.color = '#10b981';
+        noLabel.textContent = 'NO (CONTINÚA):';
+        noLabel.style.color = 'var(--color-primary)';
+        noAction.textContent = 'Continúa el flujo hacia la siguiente instrucción.';
+      }
+
+      stepTagEl.textContent = `Paso ${String(node.stepNumber).padStart(2, '0')}`;
+      condEl.textContent = node.label;
+
+      if (node.invokedMethod) {
+        methodWrap.style.display = 'block';
+        methodChip.innerHTML = `<span class="method-chip chip-${node.methodType || 'dao'}">[${(node.methodType || 'DAO').toUpperCase()}] ${node.invokedMethod}</span>`;
+      } else {
+        methodWrap.style.display = 'none';
+      }
+
+      yesAction.textContent = node.yesAction || 'Continúa flujo alternativo / salida.';
+
+      // Ocultar tooltip flotante al abrir el popover
+      hideDiamondTooltip();
+      document.getElementById('decisionPopover').classList.add('open');
+    }
+
+    function closeDecisionPopover(e) {
+      if (e && e.target && e.target.closest && e.target.closest('.decision-popover-card') && !e.target.classList.contains('btn-ghost') && !e.target.classList.contains('btn-secondary')) {
+        return;
+      }
+      document.getElementById('decisionPopover').classList.remove('open');
+    }
+
+    // Helper para escapar HTML seguro
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // Tooltip Flotante Inteligente para Rombos de Decisión
+    function showDiamondTooltip(e, nodeId) {
+      const node = currentFlowNodes.find(n => n.id === nodeId);
+      if (!node) return;
+      const tooltip = document.getElementById('diamondFloatingTooltip');
+      if (!tooltip) return;
+
+      const isError = node.isTerminalExit;
+      const isBifurcation = node.returnsToMain;
+      const color = isError ? '#f43f5e' : (isBifurcation ? '#00f0ff' : '#f59e0b');
+      const icon = isError ? '⚠️' : (isBifurcation ? '🔀' : '⚖️');
+      const title = isError ? 'Validación / Error' : (isBifurcation ? 'Bifurcación Condicional' : 'Punto de Decisión');
+
+      tooltip.innerHTML = `
+        <div style="font-size: 11px; font-weight: 800; color: ${color}; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+          <span>${icon}</span>
+          <span>Paso ${String(node.stepNumber).padStart(2, '0')} • ${title}</span>
+        </div>
+        <div style="font-weight: 700; color: var(--text-main); margin-bottom: 7px; font-size: 12.5px; line-height: 1.45;">
+          ${escapeHtml(node.label)}
+        </div>
+        ${node.invokedMethod ? `
+          <div style="margin-bottom: 7px;">
+            <span class="method-chip chip-${node.methodType || 'dao'}" style="font-size: 10px; padding: 2px 7px;">[${(node.methodType || 'DAO').toUpperCase()}] ${escapeHtml(node.invokedMethod)}</span>
+          </div>
+        ` : ''}
+        <div style="font-size: 11px; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 7px; display: flex; flex-direction: column; gap: 4px;">
+          <div><strong style="color: ${isError ? '#f43f5e' : '#10b981'};">SÍ:</strong> ${escapeHtml(node.yesAction || 'Continúa')}</div>
+          <div><strong style="color: ${isError ? '#10b981' : 'var(--color-primary)'};">NO:</strong> ${isError ? 'Válido / Continúa al siguiente paso' : 'Continúa por defecto'}</div>
+        </div>
+        <div style="margin-top: 8px; font-size: 10px; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; display: flex; align-items: center; gap: 4px;">
+          <span>🔍 Clic para detalle completo</span>
+        </div>
+      `;
+
+      tooltip.style.display = 'block';
+      tooltip.style.visibility = 'hidden';
+      tooltip.classList.add('visible');
+
+      const rect = e.currentTarget.getBoundingClientRect();
+      const tooltipRect = tooltip.getBoundingClientRect();
+
+      // Cálculo vertical inteligente: si arriba hay menos de 90px (ej. Paso 01), posiciona abajo
+      let top;
+      if (rect.top - tooltipRect.height - 12 > 90) {
+        top = rect.top - tooltipRect.height - 12;
+      } else {
+        top = rect.bottom + 12;
+      }
+
+      // Centrado horizontal relativo al rombo
+      let left = rect.left + (rect.width - tooltipRect.width) / 2;
+
+      // Clamping para que nunca se desborde fuera de la ventana ni se corte
+      const minLeft = 16;
+      const maxLeft = window.innerWidth - tooltipRect.width - 16;
+      left = Math.max(minLeft, Math.min(maxLeft, left));
+
+      // Clamping vertical
+      const minTop = 16;
+      const maxTop = window.innerHeight - tooltipRect.height - 16;
+      top = Math.max(minTop, Math.min(maxTop, top));
+
+      tooltip.style.top = `${top}px`;
+      tooltip.style.left = `${left}px`;
+      tooltip.style.visibility = 'visible';
+    }
+
+    function hideDiamondTooltip() {
+      const tooltip = document.getElementById('diamondFloatingTooltip');
+      if (tooltip) {
+        tooltip.classList.remove('visible');
+        tooltip.style.display = 'none';
+      }
+    }
+
+    // Ocultar tooltip al hacer scroll en cualquier contenedor
+    window.addEventListener('scroll', hideDiamondTooltip, true);
 
     // =========================================================================
     // 2. EJEMPLOS PRECUALIFICADOS SEGÚN EL ESTÁNDAR
@@ -1729,6 +2199,7 @@
     // =========================================================================
     function renderDiagram(method) {
       const nodes = generateFlowNodes(method);
+      currentFlowNodes = nodes;
       const modernCanvas = document.getElementById('modernCanvas');
       const timelineViewport = document.getElementById('timelineViewport');
 
@@ -1741,10 +2212,10 @@
               <span class="pulse-dot" style="background: #10b981; box-shadow: 0 0 8px #10b981;"></span>
               <span>${node.label}</span>
             </div>
-            <div class="arrow-connector">
-              <svg width="24" height="34" viewBox="0 0 24 34">
+            <div class="arrow-connector" style="margin: 0; margin-bottom: -4px;">
+              <svg width="24" height="34" viewBox="0 0 24 34" style="display: block;">
                 <line x1="12" y1="0" x2="12" y2="24" stroke="var(--color-primary)" stroke-width="2" stroke-dasharray="3 3" />
-                <polygon points="6,22 12,32 18,22" fill="var(--color-primary)" />
+                <polygon points="6,22 12,34 18,22" fill="var(--color-primary)" />
               </svg>
             </div>
           `;
@@ -1762,37 +2233,55 @@
                 </div>
               ` : ''}
             </div>
-            <div class="arrow-connector">
-              <svg width="24" height="34" viewBox="0 0 24 34">
+            <div class="arrow-connector" style="margin: 0; margin-bottom: -4px;">
+              <svg width="24" height="34" viewBox="0 0 24 34" style="display: block;">
                 <line x1="12" y1="0" x2="12" y2="24" stroke="var(--color-primary)" stroke-width="2" stroke-dasharray="3 3" />
-                <polygon points="6,22 12,32 18,22" fill="var(--color-primary)" />
+                <polygon points="6,22 12,34 18,22" fill="var(--color-primary)" />
               </svg>
             </div>
           `;
         } else if (node.type === 'decision') {
           if (node.returnsToMain) {
-            // Bifurcación condicional que VUELVE al flujo principal
+            // Bifurcación condicional que VUELVE al flujo principal (Rombo Cian)
             modernHtml += `
               <div class="node-decision-row">
-                <div class="node-decision-card bifurcation-card">
-                  <div class="node-step-header">
-                    <span style="font-size: 11px; font-weight: 800; color: #00f0ff; text-transform: uppercase;">🔀 Bifurcación Condicional</span>
-                    <span style="font-size: 10.5px; color: var(--text-muted);">Paso ${String(node.stepNumber).padStart(2, '0')}</span>
-                  </div>
-                  <div class="node-label" style="font-weight: 700;">${node.label}</div>
-                  ${node.invokedMethod ? `
-                    <div>
-                      <span class="method-chip chip-${node.methodType || 'dao'}">[${(node.methodType || 'DAO').toUpperCase()}] ${node.invokedMethod}</span>
+                <div class="node-decision-diamond-wrap diamond-cyan" onclick="openDecisionPopover('${node.id}')" onmouseenter="showDiamondTooltip(event, '${node.id}')" onmouseleave="hideDiamondTooltip()">
+                  <svg class="diamond-svg-bg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <polygon points="50,2 98,50 50,98 2,50" class="diamond-polygon" />
+                  </svg>
+                  <div class="diamond-port diamond-port-top" style="border-color: #00f0ff;"></div>
+                  <div class="diamond-port diamond-port-right" style="border-color: #00f0ff;"></div>
+                  <div class="diamond-port diamond-port-bottom" style="border-color: #00f0ff;"></div>
+
+                  <div class="diamond-inner">
+                    <div class="diamond-badge-header">
+                      <span style="color: #00f0ff;">🔀</span>
+                      <span style="color: #00f0ff;">Bifurcación • Paso ${String(node.stepNumber).padStart(2, '0')}</span>
                     </div>
-                  ` : ''}
+                    <div class="diamond-label">${node.label}</div>
+                    ${node.invokedMethod ? `
+                      <div>
+                        <span class="method-chip chip-${node.methodType || 'dao'}" style="font-size: 10px; padding: 2px 6px;">[${(node.methodType || 'DAO').toUpperCase()}] ${node.invokedMethod}</span>
+                      </div>
+                    ` : ''}
+                    <span class="diamond-hint">🔍 Clic para detalle</span>
+                  </div>
                 </div>
 
                 ${node.yesAction ? `
                   <div class="branch-yes-group">
-                    <span style="font-size: 11px; font-weight: 800; color: #10b981; background: rgba(16, 185, 129, 0.12); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.3);">SÍ</span>
-                    <svg width="24" height="16">
-                      <line x1="0" y1="8" x2="16" y2="8" stroke="#10b981" stroke-width="2" />
-                      <polygon points="14,4 22,8 14,12" fill="#10b981" />
+                    <!-- Conexión continua desde el vértice derecho del rombo -->
+                    <svg width="28" height="16" style="display: block; flex-shrink: 0;">
+                      <line x1="0" y1="8" x2="28" y2="8" stroke="#10b981" stroke-width="2" stroke-dasharray="3 3" />
+                    </svg>
+                    <div class="path-badge-yes" style="background: rgba(16, 185, 129, 0.14); color: #10b981; border: 1.5px solid rgba(16, 185, 129, 0.5);">
+                      <span>SÍ</span>
+                      <span style="font-size: 9.5px; opacity: 0.85;">RAMA</span>
+                    </div>
+                    <!-- Flecha hacia la tarjeta -->
+                    <svg width="34" height="16" style="display: block; flex-shrink: 0;">
+                      <line x1="0" y1="8" x2="22" y2="8" stroke="#10b981" stroke-width="2" stroke-dasharray="3 3" />
+                      <polygon points="20,4 32,8 20,12" fill="#10b981" />
                     </svg>
                     <div class="branch-yes-card branch-return-card">
                       <div style="font-size: 12px; font-weight: 600; color: var(--text-main);">${node.yesAction}</div>
@@ -1808,15 +2297,15 @@
               </div>
 
               <!-- Conector de convergencia / retorno al tronco principal -->
-              <div class="rejoin-connector-container">
+              <div class="rejoin-connector-container" style="margin-top: -4px;">
                 <div class="rejoin-svg-wrapper">
                   <svg width="340" height="42" viewBox="0 0 340 42" fill="none">
-                    <!-- Tronco directo (NO / por defecto) -->
-                    <path d="M 85 0 L 85 20 Q 85 32 165 32 L 168 32" stroke="var(--color-primary)" stroke-width="2" stroke-dasharray="3 3"/>
-                    <!-- Rama de retorno desde la bifurcación (SÍ) -->
-                    <path d="M 265 0 L 265 20 Q 265 32 175 32 L 172 32" stroke="#10b981" stroke-width="2" stroke-dasharray="3 3"/>
+                    <!-- Tronco directo central que baja desde el vértice inferior del rombo -->
+                    <line x1="170" y1="0" x2="170" y2="28" stroke="var(--color-primary)" stroke-width="2" stroke-dasharray="3 3"/>
+                    <!-- Rama de retorno desde la bifurcación derecha (SÍ) que entra al centro -->
+                    <path d="M 310 0 L 310 16 Q 310 28 178 28" stroke="#10b981" stroke-width="2" stroke-dasharray="3 3"/>
                     <!-- Flecha central unificada hacia abajo -->
-                    <line x1="170" y1="28" x2="170" y2="38" stroke="var(--color-primary)" stroke-width="2"/>
+                    <line x1="170" y1="26" x2="170" y2="38" stroke="var(--color-primary)" stroke-width="2"/>
                     <polygon points="165,34 170,40 175,34" fill="var(--color-primary)"/>
                   </svg>
                 </div>
@@ -1827,28 +2316,46 @@
               </div>
             `;
           } else if (node.isTerminalExit) {
-            // Salida terminal de error (interrumpe el flujo)
+            // Salida terminal de error (interrumpe el flujo) - Rombo Rojo
             modernHtml += `
               <div class="node-decision-row">
-                <div class="node-decision-card terminal-eval-card">
-                  <div class="node-step-header">
-                    <span style="font-size: 11px; font-weight: 800; color: #f43f5e; text-transform: uppercase;">⚠️ Validación / Error</span>
-                    <span style="font-size: 10.5px; color: var(--text-muted);">Paso ${String(node.stepNumber).padStart(2, '0')}</span>
-                  </div>
-                  <div class="node-label" style="font-weight: 700;">${node.label}</div>
-                  ${node.invokedMethod ? `
-                    <div>
-                      <span class="method-chip chip-${node.methodType || 'dao'}">[${(node.methodType || 'DAO').toUpperCase()}] ${node.invokedMethod}</span>
+                <div class="node-decision-diamond-wrap diamond-danger" onclick="openDecisionPopover('${node.id}')" onmouseenter="showDiamondTooltip(event, '${node.id}')" onmouseleave="hideDiamondTooltip()">
+                  <svg class="diamond-svg-bg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <polygon points="50,2 98,50 50,98 2,50" class="diamond-polygon" />
+                  </svg>
+                  <div class="diamond-port diamond-port-top" style="border-color: #f43f5e;"></div>
+                  <div class="diamond-port diamond-port-right" style="border-color: #f43f5e;"></div>
+                  <div class="diamond-port diamond-port-bottom" style="border-color: #f43f5e;"></div>
+
+                  <div class="diamond-inner">
+                    <div class="diamond-badge-header">
+                      <span style="color: #f43f5e;">⚠️</span>
+                      <span style="color: #f43f5e;">Punto de Decisión • Paso ${String(node.stepNumber).padStart(2, '0')}</span>
                     </div>
-                  ` : ''}
+                    <div class="diamond-label">${node.label}</div>
+                    ${node.invokedMethod ? `
+                      <div>
+                        <span class="method-chip chip-${node.methodType || 'dao'}" style="font-size: 10px; padding: 2px 6px;">[${(node.methodType || 'DAO').toUpperCase()}] ${node.invokedMethod}</span>
+                      </div>
+                    ` : ''}
+                    <span class="diamond-hint">🔍 Clic para detalle</span>
+                  </div>
                 </div>
 
                 ${node.yesAction ? `
                   <div class="branch-yes-group">
-                    <span style="font-size: 11px; font-weight: 800; color: #f43f5e; background: rgba(244, 63, 94, 0.12); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(244, 63, 94, 0.3);">FALLO</span>
-                    <svg width="24" height="16">
-                      <line x1="0" y1="8" x2="16" y2="8" stroke="#f43f5e" stroke-width="2" />
-                      <polygon points="14,4 22,8 14,12" fill="#f43f5e" />
+                    <!-- Conexión continua desde el vértice derecho del rombo -->
+                    <svg width="28" height="16" style="display: block; flex-shrink: 0;">
+                      <line x1="0" y1="8" x2="28" y2="8" stroke="#f43f5e" stroke-width="2" stroke-dasharray="3 3" />
+                    </svg>
+                    <div class="path-badge-yes" style="background: rgba(244, 63, 94, 0.14); color: #f43f5e; border: 1.5px solid #f43f5e;">
+                      <span>SÍ</span>
+                      <span style="font-size: 9.5px; opacity: 0.9;">(FALLO)</span>
+                    </div>
+                    <!-- Flecha hacia la tarjeta -->
+                    <svg width="34" height="16" style="display: block; flex-shrink: 0;">
+                      <line x1="0" y1="8" x2="22" y2="8" stroke="#f43f5e" stroke-width="2" stroke-dasharray="3 3" />
+                      <polygon points="20,4 32,8 20,12" fill="#f43f5e" />
                     </svg>
                     <div class="branch-yes-card branch-exit-card">
                       <div style="font-size: 12px; font-weight: 600; color: #fda4af;">${node.yesAction}</div>
@@ -1859,39 +2366,63 @@
                 ` : ''}
               </div>
 
-              <div style="display: flex; flex-direction: column; align-items: center; margin: 4px 0;">
-                <span style="font-size: 10.5px; font-weight: 800; color: var(--color-success); background: var(--bg-surface); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border-subtle); margin-bottom: -2px; z-index: 3;">VÁLIDO / CONTINÚA</span>
-                <div class="arrow-connector">
-                  <svg width="24" height="34" viewBox="0 0 24 34">
-                    <line x1="12" y1="0" x2="12" y2="24" stroke="var(--color-primary)" stroke-width="2" stroke-dasharray="3 3" />
-                    <polygon points="6,22 12,32 18,22" fill="var(--color-primary)" />
-                  </svg>
+              <!-- Conexión continua del Camino NO hacia abajo -->
+              <div class="connector-no-col" style="margin: 0;">
+                <!-- Línea continua desde el puerto inferior del rombo al badge NO -->
+                <svg width="24" height="24" viewBox="0 0 24 24" style="display: block; margin-top: -4px; margin-bottom: -2px;">
+                  <line x1="12" y1="0" x2="12" y2="24" stroke="#10b981" stroke-width="2" stroke-dasharray="3 3" />
+                </svg>
+                <div class="path-badge-no" style="background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1.5px solid rgba(16, 185, 129, 0.4);">
+                  <span>NO</span>
+                  <span style="font-size: 9.5px; opacity: 0.95;">(VÁLIDO / CONTINÚA)</span>
                 </div>
+                <!-- Flecha hacia el siguiente paso -->
+                <svg width="24" height="34" viewBox="0 0 24 34" style="display: block; margin-top: -2px; margin-bottom: -4px;">
+                  <line x1="12" y1="0" x2="12" y2="24" stroke="var(--color-primary)" stroke-width="2" stroke-dasharray="3 3" />
+                  <polygon points="6,22 12,34 18,22" fill="var(--color-primary)" />
+                </svg>
               </div>
             `;
           } else {
-            // Decisión estándar
+            // Decisión estándar - Rombo Ámbar
             modernHtml += `
               <div class="node-decision-row">
-                <div class="node-decision-card">
-                  <div class="node-step-header">
-                    <span style="font-size: 11px; font-weight: 800; color: #f59e0b; text-transform: uppercase;">⚠️ Validación Condicional</span>
-                    <span style="font-size: 10.5px; color: var(--text-muted);">Paso ${String(node.stepNumber).padStart(2, '0')}</span>
-                  </div>
-                  <div class="node-label" style="font-weight: 700;">${node.label}</div>
-                  ${node.invokedMethod ? `
-                    <div>
-                      <span class="method-chip chip-${node.methodType || 'dao'}">[${(node.methodType || 'DAO').toUpperCase()}] ${node.invokedMethod}</span>
+                <div class="node-decision-diamond-wrap diamond-warning" onclick="openDecisionPopover('${node.id}')" onmouseenter="showDiamondTooltip(event, '${node.id}')" onmouseleave="hideDiamondTooltip()">
+                  <svg class="diamond-svg-bg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <polygon points="50,2 98,50 50,98 2,50" class="diamond-polygon" />
+                  </svg>
+                  <div class="diamond-port diamond-port-top" style="border-color: #f59e0b;"></div>
+                  <div class="diamond-port diamond-port-right" style="border-color: #f59e0b;"></div>
+                  <div class="diamond-port diamond-port-bottom" style="border-color: #f59e0b;"></div>
+
+                  <div class="diamond-inner">
+                    <div class="diamond-badge-header">
+                      <span style="color: #f59e0b;">⚖️</span>
+                      <span style="color: #f59e0b;">Punto de Decisión • Paso ${String(node.stepNumber).padStart(2, '0')}</span>
                     </div>
-                  ` : ''}
+                    <div class="diamond-label">${node.label}</div>
+                    ${node.invokedMethod ? `
+                      <div>
+                        <span class="method-chip chip-${node.methodType || 'dao'}" style="font-size: 10px; padding: 2px 6px;">[${(node.methodType || 'DAO').toUpperCase()}] ${node.invokedMethod}</span>
+                      </div>
+                    ` : ''}
+                    <span class="diamond-hint">🔍 Clic para detalle</span>
+                  </div>
                 </div>
 
                 ${node.yesAction ? `
                   <div class="branch-yes-group">
-                    <span style="font-size: 11px; font-weight: 800; color: #10b981; background: rgba(16, 185, 129, 0.12); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.3);">SÍ</span>
-                    <svg width="24" height="16">
-                      <line x1="0" y1="8" x2="16" y2="8" stroke="#10b981" stroke-width="2" />
-                      <polygon points="14,4 22,8 14,12" fill="#10b981" />
+                    <!-- Conexión continua desde el vértice derecho del rombo -->
+                    <svg width="28" height="16" style="display: block; flex-shrink: 0;">
+                      <line x1="0" y1="8" x2="28" y2="8" stroke="#10b981" stroke-width="2" stroke-dasharray="3 3" />
+                    </svg>
+                    <div class="path-badge-yes" style="background: rgba(16, 185, 129, 0.14); color: #10b981; border: 1.5px solid rgba(16, 185, 129, 0.4);">
+                      <span>SÍ</span>
+                    </div>
+                    <!-- Flecha hacia la tarjeta -->
+                    <svg width="34" height="16" style="display: block; flex-shrink: 0;">
+                      <line x1="0" y1="8" x2="22" y2="8" stroke="#10b981" stroke-width="2" stroke-dasharray="3 3" />
+                      <polygon points="20,4 32,8 20,12" fill="#10b981" />
                     </svg>
                     <div class="branch-yes-card">
                       <div style="font-size: 12px; font-weight: 600; color: var(--text-main);">${node.yesAction}</div>
@@ -1901,14 +2432,21 @@
                 ` : ''}
               </div>
 
-              <div style="display: flex; flex-direction: column; align-items: center; margin: 4px 0;">
-                <span style="font-size: 11px; font-weight: 800; color: var(--text-muted); background: var(--bg-surface); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border-subtle); margin-bottom: -2px; z-index: 3;">NO</span>
-                <div class="arrow-connector">
-                  <svg width="24" height="34" viewBox="0 0 24 34">
-                    <line x1="12" y1="0" x2="12" y2="24" stroke="var(--color-primary)" stroke-width="2" stroke-dasharray="3 3" />
-                    <polygon points="6,22 12,32 18,22" fill="var(--color-primary)" />
-                  </svg>
+              <!-- Conexión continua del Camino NO hacia abajo -->
+              <div class="connector-no-col" style="margin: 0;">
+                <!-- Línea continua desde el puerto inferior del rombo al badge NO -->
+                <svg width="24" height="24" viewBox="0 0 24 24" style="display: block; margin-top: -4px; margin-bottom: -2px;">
+                  <line x1="12" y1="0" x2="12" y2="24" stroke="var(--text-muted)" stroke-width="2" stroke-dasharray="3 3" />
+                </svg>
+                <div class="path-badge-no" style="background: var(--bg-surface); color: var(--text-muted); border: 1px solid var(--border-subtle);">
+                  <span>NO</span>
+                  <span style="font-size: 9.5px; opacity: 0.85;">(CONTINÚA)</span>
                 </div>
+                <!-- Flecha hacia el siguiente paso -->
+                <svg width="24" height="34" viewBox="0 0 24 34" style="display: block; margin-top: -2px; margin-bottom: -4px;">
+                  <line x1="12" y1="0" x2="12" y2="24" stroke="var(--color-primary)" stroke-width="2" stroke-dasharray="3 3" />
+                  <polygon points="6,22 12,34 18,22" fill="var(--color-primary)" />
+                </svg>
               </div>
             `;
           }
@@ -2284,7 +2822,10 @@
 
     // Cerrar modal con tecla Escape o clic fuera
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeModal();
+      if (e.key === 'Escape') {
+        closeDecisionPopover();
+        closeModal();
+      }
     });
 
     document.getElementById('detailModal').addEventListener('click', (e) => {
