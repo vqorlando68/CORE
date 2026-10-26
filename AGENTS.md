@@ -4,10 +4,13 @@ Este repositorio define el Core Transversal multi-inquilino para la construcció
 
 ---
 
-## 1. Skill Activa Obligatoria
-* **Skill:** `oracle-plsql-architecture`
-* **Ubicación en el proyecto:** [.agents/skills/oracle-plsql-architecture/SKILL.md](file:///c:/Repositorios/CORE/.agents/skills/oracle-plsql-architecture/SKILL.md)
-* **Carácter:** Vinculante e innegociable para cualquier desarrollo, modificación, revisión o propuesta de código PL/SQL.
+## 1. Skills Activos Obligatorios
+* **Arquitectura PL/SQL:** `oracle-plsql-architecture`
+  * **Ubicación:** [.agents/skills/oracle-plsql-architecture/SKILL.md](file:///c:/Repositorios/CORE/.agents/skills/oracle-plsql-architecture/SKILL.md)
+  * **Carácter:** Vinculante e innegociable para cualquier desarrollo, modificación, revisión o propuesta de código PL/SQL.
+* **Documentación Funcional de Flujo:** `oracle-plsql-documentation`
+  * **Ubicación:** [.agents/skills/oracle-plsql-documentation/SKILL.md](file:///c:/Repositorios/CORE/.agents/skills/oracle-plsql-documentation/SKILL.md)
+  * **Carácter:** Obligatorio para generar y actualizar el archivo de flujo `<nombre_paquete>.md` en `Documentacion/` y catálogo en `core_documentacion_metodo` tras crear o modificar orquestadores `pkgln_`.
 
 ---
 
